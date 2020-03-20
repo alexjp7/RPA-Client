@@ -63,5 +63,8 @@ crashlytics-build.properties
 
 Packages
 Assets/Plugins
-Assets/Resources/Textures/fantasy_ui/
+Assets/Resources/Textures/
+Assets/Resources/fonts/
+Assets/Nature_pixel_art_assets/
+Assets/Simple Fantasy GUI/
 RPA

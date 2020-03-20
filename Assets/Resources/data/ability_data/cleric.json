@@ -1,0 +1,39 @@
+{
+    "class_id":3,
+    "starter_ability_icons":"Textures/class_icons/warriorStarterSkills",
+    "starting_abilities": [
+      {
+        "id": 9,
+        "name": "Holy Ray",
+        "icon_path": "warriorStarterSkills_0",
+        "tooltip": "Focus the power of the sun into a @ ray of energy dealing $ damage to your target",
+        "tooltip_vars":[["searing","scorching","divine"]],
+        "types": [[0]],
+        "damage":[[6,9],[15,22],[30,45]],
+        "cooldown":1,
+        "status":null
+      },
+      {
+        "id": 10,
+        "name": "Prayer of Retribution",
+        "icon_path": "warriorStarterSkills_1",
+        "tooltip": "Erect @ barrier onto yourself or ally that reflects $% of the the next instance of damage taken.",
+        "tooltip_vars":[["a concentrated" ," a powerful","an ominipotent"]],
+        "potency":[30,50,70],
+        "types": [[6]],
+        "cooldown":3,
+        "status":0
+      },
+      {
+        "id": 11,
+        "name": "Healing Touch",
+        "icon_path": "warriorStarterSkills_2",
+        "tooltip": "Reach out to yourself or an ally and @ them with a healing touch recovering $ health to your target ",
+        "tooltip_vars":[["bolster","infuse","revitalize"]],
+        "health":[[8,12],[15,20],[23,31]],
+        "types": [[3]],
+        "cooldown":5
+      }
+    ]
+  }
+  

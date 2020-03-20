@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
+﻿using System;
 using UnityEngine;
-
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -11,69 +8,55 @@ public class MainMenu : MonoBehaviour
 {
     public GameObject newGamePanel;
     public GameObject joinGamePanel;
+    public GameObject notificationPanel;
     public Text name1;
     public Text name2;
     public Text gameIdField;
+    public Text notificationMessage;
 
-
-    public void newGameClicked()
+    /****************Button Event Listeners*******************/
+    public void enterNewGame()
     {
         if (!name1.text.Equals(""))
         {
-            Game.start(name1.text, Game.NEW_GAME, -1);
-            SceneManager.LoadScene(1);
+            if (Game.start(name1.text, Game.NEW_GAME, -1) )
+            {
+                SceneManager.LoadScene(1);
+            }
+            else
+            {
+                notificationMessage.text = Game.gameMessage;
+                togglePanel(newGamePanel);
+                togglePanel(notificationPanel);
+            }
         }
     }
     
-    public void joinGameClicked()
+    public void enterJoinGame()
     {
-        if (!name2.text.Equals("") && !gameIdField.Equals(""))
+        if (!name2.text.Equals("") && !gameIdField.Equals("") )
         {
-            Game.start(name2.text,Game.JOINED_GAME ,Int32.Parse(gameIdField.text));
-            SceneManager.LoadScene(1);
+            if(Game.start(name2.text, Game.JOINED_GAME, Int32.Parse(gameIdField.text)))
+            {
+                SceneManager.LoadScene(1);
+            }
+            else
+            {
+                notificationMessage.text = Game.gameMessage;
+                togglePanel(joinGamePanel);
+                togglePanel(notificationPanel);
+            }
         }
     }
-
-    public void openNewGamePanel()
+   
+    public void togglePanel(GameObject panel)
     {
-        if(newGamePanel != null)
-        {
-            newGamePanel.SetActive(true);
-        }
+        if (panel != null)
+            panel.SetActive(!panel.activeSelf);
     }
 
-    public void openJoinGamePanel()
+    public void exitClicked()
     {
-        if(joinGamePanel != null)
-        {
-            joinGamePanel.SetActive(true);
-        }
+        Application.Quit();
     }
-    
-    public void closeNewGamePanel()
-    {
-        newGamePanel.SetActive(false);
-    }
-
-    public void closeJoinGamePanel()
-    {
-        joinGamePanel.SetActive(false);
-    }
-
-
-
-    void Awake()
-    {
-
-    }
-    private void Update()
-    {
-
-    }
-    
-    private void Start()
-    {
-    }
-
-
 }

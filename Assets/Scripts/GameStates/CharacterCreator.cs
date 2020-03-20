@@ -4,10 +4,10 @@ using UnityEngine.UI;
 
 using Assets.Scripts.RPA_Client;
 using Assets.Scripts.RPA_Player;
-using Assets.Scripts.RPA_Message;
 using SimpleJSON;
-using Assets.Scripts.Client;
+using Assets.Scripts.RPA_Message;
 using System.IO;
+using Assets.Scripts.Player_Classes;
 
 public class CharacterCreator : MonoBehaviour
 {
@@ -19,6 +19,7 @@ public class CharacterCreator : MonoBehaviour
     public Text playerCountText;
     public Text readyText;
 
+    public Button readyButton;
     public Button startButton;
 
     //Party textures/text
@@ -28,10 +29,9 @@ public class CharacterCreator : MonoBehaviour
 
     //Statically loaded data
     private Texture2D[] classIcons;
-    private const string CLASS_DATA_FILE = "assets/resources/data/classes.json";
+    private const string CLASS_DATA_FILE = "assets/resources/data/meta_data.json";
     private string[] classDescriptions;
     private string[] classNames;
-
 
     /******************INITIALIZERS***************/
     void Awake()
@@ -44,12 +44,12 @@ public class CharacterCreator : MonoBehaviour
     //Parses json file for class data and populates icon textures
     private void initClassData()
     {
-        string jsonClassData = File.ReadAllText(CLASS_DATA_FILE);
+        string classJSON = File.ReadAllText(CLASS_DATA_FILE);
 
-        JSONNode json = JSON.Parse(jsonClassData);
-        JSONArray gameClasses = json["classes"].AsArray;
+        JSONNode json = JSON.Parse(classJSON);
+        JSONArray classes = json["classes"].AsArray;
 
-        int classCount = gameClasses.Count;
+        int classCount = classes.Count;
         classIcons = new Texture2D[classCount];
         classDescriptions = new string[classCount];
         classNames = new string[classCount];
@@ -58,17 +58,21 @@ public class CharacterCreator : MonoBehaviour
         {
             partyClasses[i].enabled = false;
             readyChecks[i].enabled = false;
-            classNames[i] = gameClasses[i]["name"].Value;
-            classDescriptions[i] = gameClasses[i]["description"].Value;
-            classIcons[i] = Resources.Load(gameClasses[i]["path"].Value) as Texture2D;
+            classNames[i] = classes[i]["name"].Value;
+            classDescriptions[i] = classes[i]["description"].Value;
+            classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
+
+            AdventuringClass.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
         }
     }
+
     //Sets the client side players data
     private void initPlayerUI()
     {
+        readyButton.interactable = false;
         playerNameField.text = Game.players[0].name;
         gameIdText.text = Game.getGameId().ToString();
-        playerCountText.text = (Game.currentConnections() + 1).ToString();
+        playerCountText.text = (Game.connectedPlayers).ToString();
     }
 
     //Redraw players name and icons on party menu
@@ -80,9 +84,7 @@ public class CharacterCreator : MonoBehaviour
             partyMembers[i].text = p.name;
             if (p.adventuringClass == -1) partyClasses[i].enabled = false;
             else selectClass(p.adventuringClass, i);
-            ;
             renderReadyState(i);
-
         }
     }
     //Update game state upon server communications
@@ -93,10 +95,9 @@ public class CharacterCreator : MonoBehaviour
             processServerInstructions(Client.read());
 
         foreach (Player p in Game.players)
-            if (p.ready) readyCount++;
+            if (p.ready)readyCount++;
 
-        Game.readyCount = readyCount;
-        startButton.interactable = Game.readyCount == Game.currentConnections() + 1;
+        startButton.interactable = readyCount == Game.connectedPlayers;
     }
 
     private void processServerInstructions(string instructions)
@@ -104,25 +105,29 @@ public class CharacterCreator : MonoBehaviour
         if (instructions[0] == 'a') { return; }
 
         CharacterCreationMessage message = new CharacterCreationMessage(instructions);
-        Player player = Game.players[message.playerIndex];
+        Player player = message.instructionType == 0 || message.instructionType == 1 ? null: Game.players[message.playerIndex];
 
-        switch (message.instructionType)
+        switch ((CreationInstruction)message.instructionType)
         {
-            case (int)CreationInstruction.CONNECTION:
-                playerCountText.text = (Game.currentConnections() + 1).ToString();
-                partyMembers[Game.currentConnections()].text = player.name;
+            case CreationInstruction.CONNECTION:
+                Game.addPlayer(message.playerName, message.client_id);
+                playerCountText.text = (Game.connectedPlayers).ToString();
+                partyMembers[Game.connectedPlayers - 1].text = message.playerName;
                 break;
 
-            case (int)CreationInstruction.DISCONNECTION:
-                playerCountText.text = (Game.currentConnections() + 1).ToString();
+            case CreationInstruction.DISCONNECTION:
+                Game.removePlayer(message.client_id);
+                playerCountText.text = (Game.connectedPlayers).ToString();
                 drawPlayerList();
                 break;
 
-            case (int)CreationInstruction.CLASS_CHANGE:
+            case CreationInstruction.CLASS_CHANGE:
+                player.adventuringClass = message.adventuringClass;
                 selectClass(player.adventuringClass, message.playerIndex);
                 break;
 
-            case (int)CreationInstruction.READY_UP:
+            case CreationInstruction.READY_UP:
+                player.ready = message.playerReadyStatus;
                 renderReadyState(message.playerIndex);
                 break;
 
@@ -131,16 +136,15 @@ public class CharacterCreator : MonoBehaviour
         }
     }
 
-
     public void mainMenuClicked()
     {
         Client.dissconnect();
     }
-    //This is about scruffy, refactor this
+
     public void readyClicked()
     {
         Game.players[0].ready = !Game.players[0].ready;
-        if (!Game.players[0].ready) readyText.text = "Cancel Ready";
+        if (Game.players[0].ready) readyText.text = "Cancel Ready";
         else readyText.text = "Ready Up!";
         renderReadyState(0);
         CharacterCreationMessage readyChange = new CharacterCreationMessage((int)CreationInstruction.READY_UP);
@@ -152,18 +156,16 @@ public class CharacterCreator : MonoBehaviour
         readyChecks[player].enabled = Game.players[player].ready;
     }
 
-
     public void classClicked(int classChosen)
     {
-        //Check for valid class selections, and return to stop uncessary processing
         if (classChosen == Game.players[0].adventuringClass) { return; }
         if (!selectClass(classChosen, 0)) { return; }
+        if (!readyButton.interactable) readyButton.interactable = true;
 
         classDescription.text = classDescriptions[classChosen];
         classChoice.text = classNames[classChosen];
         CharacterCreationMessage classChange = new CharacterCreationMessage((int)CreationInstruction.CLASS_CHANGE);
         Client.send(classChange.getMessage());
-
     }
 
     private bool selectClass(int classChosen, int playerIndex)
@@ -173,5 +175,21 @@ public class CharacterCreator : MonoBehaviour
         partyClasses[playerIndex].enabled = true;
         Game.players[playerIndex].adventuringClass = classChosen;
         return true;
+    }
+    
+    public void startClicked()
+    {
+        //Remove player objects that aren't being utilised
+        int connectedPlayers = Game.connectedPlayers;
+
+        if (connectedPlayers != Game.PARTY_LIMIT)
+            Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
+
+        AdventuringClass.setClassSprites(Game.players);
+        foreach (Player player in Game.players)
+        {
+            player.assetData.icon = classIcons[player.adventuringClass];
+            player.applyClass();
+        }
     }
 }

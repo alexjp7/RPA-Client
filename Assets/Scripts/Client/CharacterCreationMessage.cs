@@ -1,8 +1,16 @@
-﻿using System;
-using SimpleJSON;
-using Assets.Scripts.RPA_Player;
+﻿/*---------------------------------------------------------------
+                    CHARACTER-CREATION-MESSAGE
+ ---------------------------------------------------------------*/
+/***************************************************************
+*  This message object is used as a serializable model in client
+   to server communication of the Character/party creation state.
+*   CharacterCreationMessage inherits from the Message class which provides
+    the base functionality for serialisation and deserialisation,
+    with any additional fields provided by the sub-class.
+**************************************************************/
 
-namespace Assets.Scripts.Client
+using SimpleJSON;
+namespace Assets.Scripts.RPA_Message
 {
     public enum CreationInstruction: int
     {   //Connection and disconenction only on deserialization
@@ -12,12 +20,19 @@ namespace Assets.Scripts.Client
         READY_UP = 3
     }
 
-    class CharacterCreationMessage : RPA_Message.Message
+    class CharacterCreationMessage : Message
     {
-
         public int instructionType;
         public int playerIndex;
+        public string playerName;
+        public int adventuringClass;
+        public bool playerReadyStatus;
 
+        /***************************************************************
+        * On Message consturction, based on the paramater/s used in construciton
+          the object will be constructed to be used for seriazation or
+          deserialization.
+        **************************************************************/
         public CharacterCreationMessage(int instructionType) : base()
         {
             this.state_id = (int)States.CHARACTER_CREATION;
@@ -29,7 +44,43 @@ namespace Assets.Scripts.Client
         {
             this.deserialize(jsonString);
         }
+        
+        /***************************************************************
+        *  Returns the JSON string of the event of a client side
+           Adventering-class change.
+        **************************************************************/
+        private string serializeClassChange()
+        {
+            JSONObject json = new JSONObject();
+            json.Add("state_id", this.state_id);
+            json.Add("game_id", this.game_id);
+            json.Add("client_id", this.actor.id);
+            json.Add("instructionType", this.instructionType);
+            json.Add("adventuringClass", this.actor.adventuringClass);
+            return json.ToString();
+        }
 
+        /***************************************************************
+        *  Returns the JSON string of the event of a client side
+           event of clicking the 'ready up' button.
+        **************************************************************/
+        private string serializeReadyUp()
+        {
+            JSONObject json = new JSONObject();
+            json.Add("state_id", this.state_id);
+            json.Add("game_id", this.game_id);
+            json.Add("client_id", this.actor.id);
+            json.Add("instructionType", this.instructionType);
+            json.Add("ready", this.actor.ready);
+            return json.ToString();
+
+        }
+
+        /***************************************************************
+        * Transform game data into a JSON string which is sent by the 
+          Client's TCPClient instance which is then communicated to 
+          the server
+        **************************************************************/
         protected override void serialize()
         {
             string message = "";
@@ -50,61 +101,22 @@ namespace Assets.Scripts.Client
             this.message = message;
         }
 
-        private string serializeClassChange()
-        {
-            JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
-            json.Add("client_id", this.actor.id);
-            json.Add("instructionType", this.instructionType);
-            json.Add("adventuring_class", this.actor.adventuringClass);
-            return json.ToString();
-        }
 
-        private string serializeReadyUp()
-        {
-            JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
-            json.Add("client_id", this.actor.id);
-            json.Add("instructionType", this.instructionType);
-            json.Add("ready", this.actor.ready);
-            return json.ToString();
-
-        }
-
+        /***************************************************************
+        * Trabsforms an incoming JSON string from the server into
+          useable game data.
+        **************************************************************/
         protected override void deserialize(string jsonString)
         {
             base.deserialize(jsonString);
 
             JSONNode json = JSON.Parse(jsonString);
             this.client_id = json["client_id"].AsInt;
-
-            Player player = Game.getPlayerById(this.client_id);
+            this.instructionType = json["instructionType"].AsInt;
             this.playerIndex = Game.getPlayerIndex(client_id);
-
-            switch (this.state_id)
-            {
-                case (int)CreationInstruction.CLASS_CHANGE:
-                    player.adventuringClass = json["adventuring_class"].AsInt;
-                    break;
-
-                case (int)CreationInstruction.READY_UP:
-                    player.ready = json["ready"].AsBool;
-                    break;
-
-                case (int)CreationInstruction.CONNECTION:
-                    Game.addPlayer(json["name"].Value, json["id"].AsInt);
-                    break;
-
-                case (int)CreationInstruction.DISCONNECTION:
-                    Game.removePlayer(json["id"].AsInt);
-                    break;
-
-                default:
-                    //Do some error checking
-                    break;
-            }
+            this.adventuringClass  = json["adventuringClass"].AsInt;
+            this.playerName = json["name"].Value;
+            this.playerReadyStatus= json["ready"].AsBool;
         }
 
     }

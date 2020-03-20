@@ -1,0 +1,40 @@
+{
+    "class_id":1,
+    "starter_ability_icons":"Textures/class_icons/wizardStarterSkills",
+    "starting_abilities": [
+      {
+        "id": 3,
+        "name": "Arcane Pulse",
+        "icon_path": "wizardStarterSkills_0",
+        "tooltip": "Fire @ pulse of arcane energy dealing $ damage",
+        "tooltip_vars":[["an innate","a foccused","a masterful"]],
+        "damage":[[5,8],[12,20],[25,40]],
+        "cooldown":1,
+        "types": [[0]],
+        "status":null
+      },
+      {
+        "id": 4,
+        "name": "Wind Surge",
+        "icon_path": "wizardStarterSkills_1",
+        "tooltip": "Channel @ wind dealing to $ damage all enemies  and applying * to all targets",
+        "tooltip_vars":[["a considerable gust of" ,"an unatural gust of","a gale force strength"]],
+        "damage":[[2,4],[9,14],[20,25]],
+        "types": [[1,9]],
+        "cooldown":3,
+        "status":0
+      },
+      {
+        "id": 5,
+        "name": "Time Distortion",
+        "icon_path": "wizardStarterSkills_2",
+        "tooltip": "Peer into @ vision of the future reducing the cooldown of # by 2 turns",
+        "tooltip_vars":[["a cloudy","a surreal ","a vivd"],
+                       ["your abilities","either yours OR a party memnber's abilities","all party member's abilities"]],
+        "potency":[2],
+        "cooldown":3,
+        "types": [[5],[6],[7]],
+        "status":0
+      }
+    ]
+}

@@ -12,22 +12,28 @@ using Assets.Scripts.Util;
 
 public class Game : MonoBehaviour
 {
+    //Game Constants
     public static readonly bool NEW_GAME = true;
     public static readonly bool JOINED_GAME = false;
-
-    private static int gameId;
-    public static List<Player> players;
-    private static int connectedPlayers;
-    public static bool isNewGame;
     public static readonly int PARTY_LIMIT = 4;
-    public static int readyCount = 0;
+    //Game Properties
+    public static int gameId { get; set;}
+    public static List<Player> players { get; set;}
+    public static int connectedPlayers { get; set;} //SET PUBLIC ONLY FOR TESTING PURPOSES
+    public static string gameMessage { set; get;}
+    //error/state flags
+    private static bool isNewGame;
+    private static bool isStarted;
 
     /*******************Game/Client Initialization*******************/
-    public static void start(string playerName, bool _isNewGame, int _gameId)
+    public static bool start(string playerName, bool _isNewGame, int _gameId)
     {
+        isStarted = false;
         isNewGame = _isNewGame;
         gameId = _gameId;
         init(playerName);
+
+        return isStarted;
     }
 
     //initialises client connection to server, and  player array.
@@ -38,14 +44,23 @@ public class Game : MonoBehaviour
         //Consturct 4 empty players on game start 
         for (int i = 0; i < PARTY_LIMIT; i++)
             players.Add(new Player());
+
+        Game.players[0].isClientPlayer = true; // flag  the player at start of player list as the client side player
         //Send connection message to server with player name/gameId
         ConnectionMessage connectionMessage = new ConnectionMessage(playerName, (int) ConnectionMessage.ConnectionMessageType.OUTBOUND);
         Client.connect();
-        Client.send(connectionMessage.getMessage());
 
         //Wait for return message of game creation/joining
-        Task<int> recieveGameId = waitForGameData(playerName);
-        gameId = await recieveGameId;
+        if(Client.isConnected())
+        {
+            Client.send(connectionMessage.getMessage());
+            Task<int> recieveGameId = waitForGameData(playerName);
+            gameId = await recieveGameId;
+            //An invalid Game Id was provided
+            if (gameId == -1) gameMessage = "Game is either full OR doesn't exist yet";  
+            else isStarted = true;
+        }
+        else gameMessage = "Server Connection failed! Check server status";
     }
 
     private static Task<int> waitForGameData(string playerName)
@@ -56,10 +71,18 @@ public class Game : MonoBehaviour
         //Wait for server to respond with game Id
         while(!hasGameId)
         {
-            if(Client.ready())
+            if (Client.ready())
             {
                 serverMessage = Client.read();
-                if (serverMessage != "a")
+                //Continually Check if client connection has been lost while attempting to join game 
+                //A dissconect here indicates an invalid Game ID was provided
+                if (serverMessage == "d")
+                {
+                    Debug.Log("Server message = " + serverMessage);
+                    break;
+                }
+
+                else if (serverMessage != "a")
                 {   //Deserializes server message and updates player list if existing players in game
                     ConnectionMessage message = new ConnectionMessage(serverMessage, (int)ConnectionMessage.ConnectionMessageType.INBOUND);
                     result = message.game_id;
@@ -91,7 +114,6 @@ public class Game : MonoBehaviour
         players[connectedPlayers].id = id;
         players[connectedPlayers].adventuringClass = adventuringClass;
         players[connectedPlayers].ready = ready;
-
         connectedPlayers++;
     }
 
@@ -119,16 +141,17 @@ public class Game : MonoBehaviour
     //Maintains contiguous array 
     private static void resize(int index)
     {
-        if(connectedPlayers > 2 && index != connectedPlayers -1)
+        if(connectedPlayers > 2 && index != connectedPlayers -  1)
         {
-            Player temp = players[connectedPlayers -1]; 
-            players[connectedPlayers - 1] = players[index]; 
+            Player temp = players[connectedPlayers - 1]; 
+            players[connectedPlayers -1] = players[index]; 
             players[index] = temp; 
         }
-        players[currentConnections()].name = "";
-        players[currentConnections()].id = -1;
-        players[currentConnections()].adventuringClass =-1;
-        players[currentConnections()].ready = false;
+
+        players[connectedPlayers - 1].name = "";
+        players[connectedPlayers - 1].id = -1;
+        players[connectedPlayers - 1].adventuringClass =-1;
+        players[connectedPlayers - 1].ready = false;
     }
 
     public static Player getPlayerById(int playerId)
@@ -139,15 +162,5 @@ public class Game : MonoBehaviour
                 return p;
         }
         return null;
-    }
-
-    public static int currentConnections()
-    {
-        return connectedPlayers-1;
-    }
-
-    private void Update()
-    {
-
     }
 }
