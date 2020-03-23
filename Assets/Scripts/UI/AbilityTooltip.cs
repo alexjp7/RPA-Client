@@ -57,7 +57,7 @@ namespace Assets.Scripts.Util
         private string constructTypeString(int[] ids)
         {
             string result = "";
-            string[] typeStrings = AbilityFactory.getAbilityType(ids);
+            string[] typeStrings = AbilityFactory.getAbilityTypeLabel(ids);
             for(int i = 0; i < typeStrings.Length; i++)
             {
                 result += typeStrings[i] + " ";

@@ -43,13 +43,14 @@ namespace Assets.Scripts.RPA_Client
             catch(SocketException) {}
         }
         /***************************************************************
-        * Returns the connection status, whether it the client is
-          connected or not to the remote address.
+        @return - true: The connection is open.
+                - false: The connection is closed.
         **************************************************************/
         public static bool isConnected()
         {
             return client.Connected;
         }
+
         /***************************************************************
         * Closes the connection and stream reader, terminating
           connection to the remote address.
@@ -61,8 +62,8 @@ namespace Assets.Scripts.RPA_Client
         }
 
         /***************************************************************
-        * returns the string of a JSON serialized object when trasnfering
-          game data OR the character 'a' as an "isAlive" check.
+        @return - the string of a JSON serialized object when trasnfering
+        game data OR the character 'a' as an "isAlive" check.
         **************************************************************/
         public static string read()
         {
@@ -74,6 +75,7 @@ namespace Assets.Scripts.RPA_Client
           sends it to the server.
         * The message is suffixed with a newline '\n' character, in order
           to distinguish the end of a message when read by the server.
+
         @param - message: the JSON serialized data created from an 
         appropraite Message object.
         **************************************************************/
@@ -85,7 +87,8 @@ namespace Assets.Scripts.RPA_Client
         }
 
         /***************************************************************
-        * flags that there is new data available from the server.
+        @return - true: The Streamreader has data available to read.
+                - false: There is no new data to read.
         **************************************************************/
         public static bool ready()
         {

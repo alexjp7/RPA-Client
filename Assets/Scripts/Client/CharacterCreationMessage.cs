@@ -46,8 +46,8 @@ namespace Assets.Scripts.RPA_Message
         }
         
         /***************************************************************
-        *  Returns the JSON string of the event of a client side
-           Adventering-class change.
+        @return - The JSON string of the event of a client side
+        Adventering-class change.
         **************************************************************/
         private string serializeClassChange()
         {
@@ -61,8 +61,8 @@ namespace Assets.Scripts.RPA_Message
         }
 
         /***************************************************************
-        *  Returns the JSON string of the event of a client side
-           event of clicking the 'ready up' button.
+        @return - the JSON string of the event of a client side
+        event of clicking the 'ready up' button.
         **************************************************************/
         private string serializeReadyUp()
         {
@@ -103,7 +103,7 @@ namespace Assets.Scripts.RPA_Message
 
 
         /***************************************************************
-        * Trabsforms an incoming JSON string from the server into
+        * Transforms an incoming JSON string from the server into
           useable game data.
         **************************************************************/
         protected override void deserialize(string jsonString)

@@ -113,9 +113,9 @@ public class BattleState : MonoBehaviour
         Game.players = new List<Player>();
         //@Test Data
         Game.players.Add(new Player(6, "Alexjp", 3, true));
-        //Game.players.Add(new Player(8, "Frictionburn", 0, true));
-        //Game.players.Add(new Player(11, "Kozza", 2, true));
-        //Game.players.Add(new Player(4, "Yomamma", 3, true));
+        Game.players.Add(new Player(8, "Frictionburn", 0, true));
+        Game.players.Add(new Player(11, "Kozza", 2, true));
+        Game.players.Add(new Player(4, "Yomamma", 3, true));
 
         Game.connectedPlayers = Game.players.Count;
 
@@ -339,13 +339,12 @@ public class BattleState : MonoBehaviour
     }
 
     /***************************************************************
-    * A helper function that returns the combatant data
-     for the player/monster that is having its next turn.
-    
     @param - isPlayerTurn : flags whether to get the next
     turn from the player(true) or monster-party(false).
     @param  - isNext : flags whether the next(true) or previous (false)
     combatant is to be returned.
+    @return - The combatant data
+    for the player/monster that is having its next turn.
     **************************************************************/
     private Combatable getCombatant(bool isPlayerTurn, bool isNext)
     {
@@ -658,6 +657,8 @@ public class BattleState : MonoBehaviour
       @param - spriteIndex: a value between 0-players.count() OR
       0-monsterParty.count() which represents the sprite that was 
       hovered over. 
+      @return - true: The mouse has hovered over an enemy.
+              - false: The mouse has hovered over an ally.
     **************************************************************/
     private bool hasHoveredOveryEnemy(int spriteIndex)
     {

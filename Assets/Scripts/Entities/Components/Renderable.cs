@@ -1,6 +1,12 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-
+﻿/*---------------------------------------------------------------
+                       RENDERABLE
+ ---------------------------------------------------------------*/
+/***************************************************************
+ *  The Renderable type contains fields relating to any icons
+    or sprite related data needed to render the relevant
+    visual component to the player's UI.
+**************************************************************/
+using UnityEngine;
 
 namespace Assets.Scripts.RPA_Entity_Components
 {

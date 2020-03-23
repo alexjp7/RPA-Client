@@ -6,9 +6,6 @@
     the TCP communication on the client side.
 *   Objects that inherit the class will be provided with 
     overite methods for serialization and deserialziation.
-*   The message string field of this base class allows for
-    protected set/public get operations to retrieve a 
-    serialized object.
 **************************************************************/
 using System;
 using SimpleJSON;
@@ -49,6 +46,13 @@ namespace Assets.Scripts.RPA_Message
             this.client_id = actor == null ? -1 : actor.id;
         }
 
+        /***************************************************************
+    *   The message string field of this base class allows for
+        protected set/public get operations to retrieve a 
+        serialized object.
+
+        @return - JSON string of a game-state's message object.
+        **************************************************************/
         public string getMessage()
         {
             return this.message;
