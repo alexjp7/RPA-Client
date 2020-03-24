@@ -4,6 +4,7 @@
 /***************************************************************
 * The Client class provides static functions which allow for a
   single instanced TCP connection to a remote server.
+
 * The Client class also includes functionality for sending and
   recieving data to/from the server, aswell as a boolean
   function for returning whether there is data available
@@ -73,6 +74,7 @@ namespace Assets.Scripts.RPA_Client
         /***************************************************************
         * formats the serialized string data into a byte array and 
           sends it to the server.
+        
         * The message is suffixed with a newline '\n' character, in order
           to distinguish the end of a message when read by the server.
 

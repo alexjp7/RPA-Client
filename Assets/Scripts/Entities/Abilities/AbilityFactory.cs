@@ -28,11 +28,13 @@
           "status":null
         }]
  * The above shows the fields which are used to create abilities.
+ 
  * The ability data files can be found in the Assets/Resources/data 
    folder. These are currently placeholder data files as the 
    intention is to develop a persistent data solution without
    having plain-text readable data files. JSON is an easier
    to work with development 'hack'. 
+
  * In the future, these files could be binary serialized into BSON
    to allow for minimal changes to the implementation, and
    remaing on a JSON format.
@@ -48,8 +50,10 @@ namespace Assets.Scripts.Player.Abilities
     /***************************************************************
     * Abilities can be categorised into 3 archetypes/metatypes
       which generally describe their intended use. 
+    
     * Abilties can have multiple sub-types, however their Metatype
       is the first listed type in the types array.
+    
     * The logic to determine the Metatype can be seen in the 
       getMetaType() function.
     **************************************************************/
@@ -64,6 +68,7 @@ namespace Assets.Scripts.Player.Abilities
     /***************************************************************
     * AbilityTypes indicate a more specialised description of a 
       what the ability is intended to do.
+    
     * The primary type (first type listed) falls into the above
       MetaTypes. 
       
@@ -149,6 +154,7 @@ namespace Assets.Scripts.Player.Abilities
         representing the strength of the ability that is being loaded.
         skillLevel is used to index into potency and tooltip arrays
         to interpolate and set varying skill-tier's fields.
+
         @return - An ability constructed by the JSON input.
         **************************************************************/
         public static Ability constructAbility(JSONNode jSONNode, in Sprite iconTexture, int skillLevel)
@@ -176,6 +182,7 @@ namespace Assets.Scripts.Player.Abilities
         @param - skillLevel: an integer between 0-2, used to index into
         the typeIds JSON array and retrieve the ability types
         that are relevant to the skill level parameter.
+
         @return - a list of an ability's type.
         **************************************************************/
         private static int[] getAbilityTypes(in JSONArray abilityTypeJson, int skillLevel)
@@ -202,7 +209,8 @@ namespace Assets.Scripts.Player.Abilities
         indicating the primary use for that ability (Healing,Damage,Effect).
         @out-param - potencyProperty: sets the key to use in further 
         processing of the JSON object of an ability.
-        @return - The etatype of an ability  
+
+        @return - The metatype of an ability  
         **************************************************************/
         public static MetaTypes getMetaType(int primaryType, out string potencyProperty)
         {
@@ -235,6 +243,7 @@ namespace Assets.Scripts.Player.Abilities
 
         @param - primaryType: The first type listed in the types array,
         indicating the primary use for that ability (Healing,Damage,Effect).
+
         @return - The Metatype of an ability.  
         **************************************************************/
         public static MetaTypes getMetaType(int primaryType)
@@ -254,6 +263,7 @@ namespace Assets.Scripts.Player.Abilities
         /***************************************************************
         * Helper method for constructing the tooltip string for an 
           ability. 
+
         * The tooltip of an ability has a description block and various
           'interpolation tokens'. This format supports for variable 
           tooltip descriptions that reflect the skill progression system

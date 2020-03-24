@@ -4,6 +4,7 @@
 /***************************************************************
 *  The  Message class provides the base functionality/fields for
     the TCP communication on the client side.
+
 *   Objects that inherit the class will be provided with 
     overite methods for serialization and deserialziation.
 **************************************************************/
@@ -47,9 +48,9 @@ namespace Assets.Scripts.RPA_Message
         }
 
         /***************************************************************
-    *   The message string field of this base class allows for
-        protected set/public get operations to retrieve a 
-        serialized object.
+        * The message string field of this base class allows for
+          protected set/public get operations to retrieve a 
+          serialized object.
 
         @return - JSON string of a game-state's message object.
         **************************************************************/

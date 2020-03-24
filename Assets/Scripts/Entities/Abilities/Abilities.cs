@@ -18,6 +18,7 @@ namespace Assets.Scripts.Player.Abilities
     * ToolTipTokens represent the placeholder special characters 
       which are used to delimit and interpolate ability data
       into the tooltip description for an ability.
+    
      * These values are present in the reading of the JSON file
        that contains the data for each ability, and is utilised
        during the AdventuringClass.loadAbilities() procedure.
@@ -31,8 +32,10 @@ namespace Assets.Scripts.Player.Abilities
     /***************************************************************
     * The AbilityStrength struct provides a generic type to represent
       the potency of an ability that have a varied effect potency.
+    
     * For abilities that do NOT have a range in potency, the minimun
       value contains the effect strenght
+
       e.g. percentage based ability strenghts.
     **************************************************************/
     public struct AbilityStrength

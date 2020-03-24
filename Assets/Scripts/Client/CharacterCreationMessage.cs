@@ -4,6 +4,7 @@
 /***************************************************************
 *  This message object is used as a serializable model in client
    to server communication of the Character/party creation state.
+
 *   CharacterCreationMessage inherits from the Message class which provides
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.

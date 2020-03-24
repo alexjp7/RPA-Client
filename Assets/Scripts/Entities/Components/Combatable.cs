@@ -26,8 +26,10 @@ namespace Assets.Scripts.Entities.Components
 
         /***************************************************************
          * Provides the base logic for dealing damage.
+         
          * Applies damage through a min/max bounded randomly generated
           value.
+
         @param - minDamage: The lower bound of the damage being applied
         that is used to calculate the actual amount dealt.
         @param - maxDamage: The upper bound of the damage being applied
@@ -85,8 +87,12 @@ namespace Assets.Scripts.Entities.Components
         public bool isAlive() { return healthProperties.currentHealth > 0;}
 
         /***************************************************************
-         * Helper function used to determine the fill amount of a player
+        * Helper function used to determine the fill amount of a player
            or monsters HP bar.
+        
+        * This function call delegates the processing of the current entities 
+          health percentage to the Damageable component.
+       
         @return  - The health value as a decimal value (0-1).
         **************************************************************/
         public float getHealthPercent() { return healthProperties.getHealthPercentage(); }

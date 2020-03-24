@@ -163,7 +163,8 @@ public class BattleState : MonoBehaviour
                        GAME STATE INIATIALISATIONS
      ---------------------------------------------------------------*/
     /***************************************************************
-    * Generates the monster party via the monster factory class 
+    * Generates the monster party via the monster factory class.
+   
     * Addtionally, this function sets the UI components relevant to
       the monsters loaded from the factory.
     **************************************************************/
@@ -171,7 +172,7 @@ public class BattleState : MonoBehaviour
     {
         int monsterPartySize = 2;
         MonsterFactory mFactory = new MonsterFactory();
-        monsterParty = mFactory.initMonsterParty(monsterPartySize);
+        monsterParty = mFactory.createMonsterParty(monsterPartySize);
 
         for (int i = 0; i < monsterPartySize; i++)
         {
@@ -185,9 +186,11 @@ public class BattleState : MonoBehaviour
 
     /***************************************************************
     * Creates the initial combat order for the players and monsters.
+    
     * The combat order is determined through randomising the order 
       of both  Game.players and the monster party generated in 
       initMonsterParty().
+    
     * The targets dictionary is initialised in this function
       which is used to map the index of a sprite along with the
       data relating to its health, abilities and active conditions.
@@ -206,8 +209,10 @@ public class BattleState : MonoBehaviour
 
     /***************************************************************
     * Populates the client side player's personal and party UI.
+    
     * Assigns the components responsible for  players/party sprites, 
       HP bar/values and name plates.
+   
     * initPlayerUI() calls a load function to retrieve the ability
       icon textures from disk.
     **************************************************************/
@@ -305,10 +310,13 @@ public class BattleState : MonoBehaviour
 
     /***************************************************************
     * takeTurn() is responsible for determining the next turn in combat. 
+    
     * This function checks for client side player's turn and toggles 
       the active/inactive state of the player ability bar.
+    
     * The combatant with an active turn has their green turn
       chevron indicator enabled.
+    
     * This function utilises the Combatable component of player
       and mosnter types, which serves as the base type which
       both inherit from.
@@ -343,8 +351,9 @@ public class BattleState : MonoBehaviour
     turn from the player(true) or monster-party(false).
     @param  - isNext : flags whether the next(true) or previous (false)
     combatant is to be returned.
-    @return - The combatant data
-    for the player/monster that is having its next turn.
+
+    @return - The combatant data for the player/monster that is 
+    having its next turn.
     **************************************************************/
     private Combatable getCombatant(bool isPlayerTurn, bool isNext)
     {
@@ -394,6 +403,7 @@ public class BattleState : MonoBehaviour
 
     /***************************************************************
     * Called when a monster has its turn.
+    
     * The logic relating to a monster's turn priority is refernced
       throgh the member functions of that monster.
 
@@ -440,6 +450,7 @@ public class BattleState : MonoBehaviour
     /***************************************************************
     * On mouse hover over ability icons, the tooltip for that ability
       is displayed.
+
     * if an ability is locked or not loaded, the called function 
       will throw an ArgumentOutOfRangeException which indicates
       that a standard tooltip should be displayed.
@@ -472,6 +483,7 @@ public class BattleState : MonoBehaviour
 
     /***************************************************************
     * Event handler for click action in ability icon.
+    
     * Determines the ability type of the ability that was clicked
       and provides appropriate operations for populating the targets
       dictionary or otherwise displaying targeting information
@@ -481,9 +493,11 @@ public class BattleState : MonoBehaviour
       ------------------------
     * Self-Target: doesn't not provide a variable target selection
       and enfornces the target to be the caster.
+    
     * Single-Target: allows for discretionary targeting of a single
       Combatant. Target highlighting is difered to mouse hover event
       after selecting these types of abilities.
+
     * Multi-Target: highlights multiple targets and populates the 
       target selection dictionary with either all of the monster
       or player party depending on the meta-type (effect, damage, heal).
@@ -571,6 +585,7 @@ public class BattleState : MonoBehaviour
     /***************************************************************
     * Event handler for defered targeting types (single-target 
       abiltiies).
+    
     * Includes the logic for ensuring the ability type's targeting
       type has the desired effect on displaying/highlighting
       the target selection.
@@ -651,12 +666,14 @@ public class BattleState : MonoBehaviour
     /***************************************************************
     * Helper function which determines whether the mouse has hovered
       over an enemy or player sprite.
+    
     * the outcome of this function is determine if the index
       passed in is within the bounds of the party or monster size.
 
       @param - spriteIndex: a value between 0-players.count() OR
       0-monsterParty.count() which represents the sprite that was 
       hovered over. 
+
       @return - true: The mouse has hovered over an enemy.
               - false: The mouse has hovered over an ally.
     **************************************************************/
@@ -671,6 +688,7 @@ public class BattleState : MonoBehaviour
     /***************************************************************
     * Event handler for when a sprite is clicked after selecting
       a valid target with valid ability.
+
     * Applies the abilities effects to the target. 
      
       @param - spriteIndex: a value between 0-players.count() OR
@@ -756,6 +774,7 @@ public class BattleState : MonoBehaviour
     /***************************************************************
     * Performs a damaging action on a target; updates new hp value
       to the HP bar fill-amount and text value.
+    
     * Additionaly, if the damage applied to a target causes their hp
       to fall below 0, the GameObject that contains the targets UI
       components will disabled, causing it to "dissapear" of the

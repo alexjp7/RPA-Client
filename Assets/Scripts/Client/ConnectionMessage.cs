@@ -5,6 +5,7 @@
 *  This message object is used as a serializable model in client
    to server communication of game connection and data used to relay
    the gameId, connection status and any existing players.
+
 *   ConnectionMessage inherits from the Message class which provides
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
