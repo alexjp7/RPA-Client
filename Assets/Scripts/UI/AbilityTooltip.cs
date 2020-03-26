@@ -1,7 +1,7 @@
 ﻿
-using Assets.Scripts.Player.Abilities;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Entities.Abilities;
 
 namespace Assets.Scripts.Util
 {

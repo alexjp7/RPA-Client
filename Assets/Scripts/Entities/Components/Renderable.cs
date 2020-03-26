@@ -6,9 +6,10 @@
     or sprite related data needed to render the relevant
     visual component to the player's UI.
 **************************************************************/
+
 using UnityEngine;
 
-namespace Assets.Scripts.RPA_Entity_Components
+namespace Assets.Scripts.Entities.Components
 {
     public class Renderable
     {

@@ -20,13 +20,14 @@
     - Utility: resurrection, wound recovery (post combat),
       divine guidance(higher chance to crit)
 **************************************************************/
-using Assets.Scripts.RPA_Entity_Components;
+using Assets.Scripts.Entities.Components;
 
-namespace Assets.Scripts.Player_Classes
+
+namespace Assets.Scripts.Entities.Players
 {
     class Cleric : AdventuringClass
     {
-        public static Renderable assetData { get; set; }
+        public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }
 
         public Cleric(string name) : base(name)

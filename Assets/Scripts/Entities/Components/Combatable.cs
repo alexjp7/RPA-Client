@@ -10,9 +10,9 @@
     of both player and monster types.
 **************************************************************/
 
-using Assets.Scripts.Player.Abilities;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Assets.Scripts.Entities.Abilities;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -20,9 +20,15 @@ namespace Assets.Scripts.Entities.Components
     public abstract class Combatable 
     {
         public int combatOrder { get; set; }
+        public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
         public  string name  {get; protected set;}
+
+        public Combatable()
+        {
+            assetData = new Renderable();
+        }
 
         /***************************************************************
          * Provides the base logic for dealing damage.
@@ -91,7 +97,7 @@ namespace Assets.Scripts.Entities.Components
            or monsters HP bar.
         
         * This function call delegates the processing of the current entities 
-          health percentage to the Damageable component.
+          health percentage to a Damageable component.
        
         @return  - The health value as a decimal value (0-1).
         **************************************************************/

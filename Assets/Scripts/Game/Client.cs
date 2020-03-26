@@ -2,8 +2,8 @@
                            CLIENT
  ---------------------------------------------------------------*/
 /***************************************************************
-* The Client class provides static functions which allow for a
-  single instanced TCP connection to a remote server.
+* The Client class maintains a singleton instance of functions which allow 
+  for a single instanced TCP connection to a remote server.
 
 * The Client class also includes functionality for sending and
   recieving data to/from the server, aswell as a boolean
@@ -14,25 +14,31 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
-namespace Assets.Scripts.RPA_Client
+namespace Assets.Scripts.RPA_Game
 {
-    class Client 
+    public sealed class Client 
     {
-        private static TcpClient client;
-        private static NetworkStream stream;
-        private static StreamReader reader;
+        //Singleton instance
+        public static Client INSTANCE { private set { INSTANCE = new Client(); }  get { return INSTANCE; } }
+
+        private  TcpClient client;
+        private  NetworkStream stream;
+        private  StreamReader reader;
 
         //Server IP 
         //private const string IP = "142.93.58.123";
         private const string IP = "localhost";
         private const int PORT = 10001;
 
+        private Client() { }
+
+            
         /***************************************************************
         * Attempts to connect to the remote address and instanciates
           a streamreader object used for reading packets sent from the
           server.
         **************************************************************/
-        public static void connect()  
+        public  void connect()  
         {
             try
             {
@@ -47,7 +53,7 @@ namespace Assets.Scripts.RPA_Client
         @return - true: The connection is open.
                 - false: The connection is closed.
         **************************************************************/
-        public static bool isConnected()
+        public bool isConnected()
         {
             return client.Connected;
         }
@@ -56,7 +62,7 @@ namespace Assets.Scripts.RPA_Client
         * Closes the connection and stream reader, terminating
           connection to the remote address.
         **************************************************************/
-        public static void dissconnect()
+        public void dissconnect()
         {
             stream.Close();
             client.Close();
@@ -66,7 +72,7 @@ namespace Assets.Scripts.RPA_Client
         @return - the string of a JSON serialized object when trasnfering
         game data OR the character 'a' as an "isAlive" check.
         **************************************************************/
-        public static string read()
+        public string read()
         {
             return reader.ReadLine();
         }
@@ -81,7 +87,7 @@ namespace Assets.Scripts.RPA_Client
         @param - message: the JSON serialized data created from an 
         appropraite Message object.
         **************************************************************/
-        public static void send(string message)
+        public void send(string message)
         {
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message+"\n");
             stream = client.GetStream();
@@ -92,7 +98,7 @@ namespace Assets.Scripts.RPA_Client
         @return - true: The Streamreader has data available to read.
                 - false: There is no new data to read.
         **************************************************************/
-        public static bool ready()
+        public bool ready()
         {
             return stream == null ? false: stream.DataAvailable;
         }

@@ -15,17 +15,18 @@
   polymorphic collections between players/monsters.
 **************************************************************/
 
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Player.Abilities;
-using Assets.Scripts.RPA_Entity_Components;
-using SimpleJSON;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEngine;
 
-namespace Assets.Scripts.Player_Classes
+using UnityEngine;
+using Assets.Scripts.Entities.Components;
+using Assets.Scripts.Entities.Abilities;
+
+using SimpleJSON;
+
+namespace Assets.Scripts.Entities.Players
 {
     public enum PlayerClasses
     {
@@ -143,19 +144,19 @@ namespace Assets.Scripts.Player_Classes
             switch ((PlayerClasses)classId)
             {
                 case PlayerClasses.WARRIOR:
-                    classSprite = Warrior.assetData.model;
+                    classSprite = Warrior.staticAssets.model;
                     break;
 
                 case PlayerClasses.WIZARD:
-                    classSprite = Wizard.assetData.model;
+                    classSprite = Wizard.staticAssets.model;
                     break;
 
                 case PlayerClasses.ROGUE:
-                    classSprite = Rogue.assetData.model;
+                    classSprite = Rogue.staticAssets.model;
                     break;
 
                 case PlayerClasses.CLERIC:
-                    classSprite = Cleric.assetData.model;
+                    classSprite = Cleric.staticAssets.model;
                     break;
             }
             return classSprite;
@@ -170,7 +171,7 @@ namespace Assets.Scripts.Player_Classes
         @param - players: the list of players in the game, used
         to iterate over and generate a unique class Id set.
         **************************************************************/
-        public static void setClassSprites(in List<RPA_Player.Player> players)
+        public static void setClassSprites(in List<Player> players)
         {
             Sprite[] playerTextures = Resources.LoadAll<Sprite>("Textures/class_icons/playerClasses");
             HashSet<int> classSet = new HashSet<int>();
@@ -183,26 +184,26 @@ namespace Assets.Scripts.Player_Classes
                 switch ((PlayerClasses)playerClass)
                 {
                     case PlayerClasses.WARRIOR:
-                        Warrior.assetData = new Renderable();
-                        Warrior.assetData.model = sprite;
+                        Warrior.staticAssets = new Renderable();
+                        Warrior.staticAssets.model = sprite;
                         abilityPath = Warrior.abilityPath;
                         break;
 
                     case PlayerClasses.WIZARD:
-                        Wizard.assetData = new Renderable();
-                        Wizard.assetData.model = sprite;
+                        Wizard.staticAssets = new Renderable();
+                        Wizard.staticAssets.model = sprite;
                         abilityPath = Wizard.abilityPath;
                         break;
 
                     case PlayerClasses.ROGUE:
-                        Rogue.assetData = new Renderable();
-                        Rogue.assetData.model = sprite;
+                        Rogue.staticAssets = new Renderable();
+                        Rogue.staticAssets.model = sprite;
                         abilityPath = Rogue.abilityPath;
                         break;
 
                     case PlayerClasses.CLERIC:
-                        Cleric.assetData = new Renderable();
-                        Cleric.assetData.model = sprite;
+                        Cleric.staticAssets = new Renderable();
+                        Cleric.staticAssets.model = sprite;
                         abilityPath = Cleric.abilityPath;
                         break;
                     default:

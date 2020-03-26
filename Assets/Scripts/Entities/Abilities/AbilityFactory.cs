@@ -39,12 +39,14 @@
    to allow for minimal changes to the implementation, and
    remaing on a JSON format.
 **************************************************************/
+
 using System;
-using Assets.Scripts.RPA_Entity_Components;
-using SimpleJSON;
 using UnityEngine;
 
-namespace Assets.Scripts.Player.Abilities
+using Assets.Scripts.Entities.Components;
+using SimpleJSON;
+
+namespace Assets.Scripts.Entities.Abilities
 {
 
     /***************************************************************
@@ -244,7 +246,8 @@ namespace Assets.Scripts.Player.Abilities
         @param - primaryType: The first type listed in the types array,
         indicating the primary use for that ability (Healing,Damage,Effect).
 
-        @return - The Metatype of an ability.  
+        @return - The Metatype, i.e. whether the ability is
+        classified as an Attack,Heal or Effect ability.  
         **************************************************************/
         public static MetaTypes getMetaType(int primaryType)
         {

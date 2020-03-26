@@ -15,11 +15,12 @@
   sub-type factory, or include private sub-type construction
   logic.
 **************************************************************/
+
 using System;
 using System.Collections.Generic;
-using Assets.Scripts.Entities.Monsters;
 
-namespace Assets.Scripts.Monsters
+
+namespace Assets.Scripts.Entities.Monsters
 {
     public class MonsterFactory
     {

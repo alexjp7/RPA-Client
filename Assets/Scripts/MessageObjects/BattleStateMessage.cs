@@ -11,7 +11,7 @@
 **************************************************************/
 using System;
 
-namespace Assets.Scripts.RPA_Message
+namespace Assets.Scripts.RPA_Messages
 {
     public class BattleStateMessage : Message
     {

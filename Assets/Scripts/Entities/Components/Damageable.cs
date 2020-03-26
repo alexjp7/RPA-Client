@@ -9,9 +9,10 @@
    inherently be able to have operations completed on max
    and current health points, including damageing and healing.
 **************************************************************/
-using Assets.Scripts.Player_Classes;
-using System;
-using Assets.Scripts.Monsters;
+
+using Assets.Scripts.RPA_Game;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.Entities.Monsters;
 
 namespace Assets.Scripts.Entities.Components
 {

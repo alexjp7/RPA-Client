@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Assets.Scripts.RPA_Game;
 
 
 public class MainMenu : MonoBehaviour

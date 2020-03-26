@@ -10,28 +10,28 @@
   while defering combat changes to the related monster and 
   party instances. 
 **************************************************************/
-#region Imports
+
+#region IMPORTS
+using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.RPA_Player;
 using UnityEngine.UI;
-using SimpleJSON;
-using System.IO;
-using Assets.Scripts.Player_Classes;
-using System;
-using Assets.Scripts.Util;
-using System.Linq;
-using Assets.Scripts.Monsters;
-using Assets.Scripts.Player.Abilities;
-using Assets.Scripts.Entities.Components;
-using System.Threading;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
-#endregion
+using System.Linq;
+using Assets.Scripts.Util;
+using Assets.Scripts.RPA_Game;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.Entities.Monsters;
+using Assets.Scripts.Entities.Components;
+using Assets.Scripts.Entities.Abilities;
+using SimpleJSON;
+#endregion IMPORTS
 
 public class BattleState : MonoBehaviour
 {
-    #region Party Member UI
+    #region PARTY-MEMBER UI
     //Party textures/text
     [SerializeField]
     public GameObject[] playerPanels;
@@ -49,9 +49,9 @@ public class BattleState : MonoBehaviour
     public Button[] skillButtons;
     [SerializeField]
     public GameObject[] turnChevrons;
-    #endregion
+    #endregion PARTY-MEMBER UI
 
-    #region Monster UI
+    #region MONSTER-UI
     //Monster textures/text
     [SerializeField]
     public GameObject[] monsterPanels;
@@ -65,13 +65,12 @@ public class BattleState : MonoBehaviour
     public Text[] textHpValues;
     [SerializeField]
     public Text[] textMaxHealths;
-    #endregion
+    #endregion MONSTER-UI
 
     private Text currentPlayerName;
     private List<Monster> monsterParty;
 
     private Dictionary<int, Combatable> targets;
-
 
     private static int turnCount = 0;
     private int selectedSkill = -1;
@@ -86,20 +85,12 @@ public class BattleState : MonoBehaviour
     private bool isStandardTooltip = false;
     private bool isBattleInProgress = true;
 
-
     Player clientSidePlayer;
     AdventuringClass clientPlayerClass;
 
-    //@TEST
-    //Statically loaded data
-    private Texture2D[] classIcons;
-    private const string CLASS_DATA_FILE = "assets/resources/data/meta_data.json";
-
     private void Awake()
     {
-        initTestData();  //@Test
-        initClassData(); //@Test
-        initPlayerData();//@Test
+        runTest(); //Development/Debug Only!
 
         initMonsterParty();
         initCombatOrder();
@@ -107,8 +98,22 @@ public class BattleState : MonoBehaviour
         initSpriteCallbacks();
         takeTurn();
     }
-    #region Development/Test Functions
-    private void initTestData()
+
+    #region DEVELOPMENT/TEST FUNCTIONS
+    //################################################################
+    /*---------------------------------------------------------------
+                            TEST-DATA/PROCEDURES
+     ---------------------------------------------------------------*/
+    //Test Data
+    private Texture2D[] classIcons;
+    private void runTest()
+
+    {
+        createTestPlayers();  
+        initClassData();
+    }
+
+    private void createTestPlayers()
     {
         Game.players = new List<Player>();
         //@Test Data
@@ -129,6 +134,7 @@ public class BattleState : MonoBehaviour
     //@Test Function - will be set to player.assetData in by character creation state
     private void initClassData()
     {
+        const string CLASS_DATA_FILE  =  "assets/resources/data/meta_data.json";
         string classJSON = File.ReadAllText(CLASS_DATA_FILE);
 
         JSONNode json = JSON.Parse(classJSON);
@@ -145,19 +151,8 @@ public class BattleState : MonoBehaviour
 
         AdventuringClass.setClassSprites(Game.players);
     }
-
-    //@Test fucnction - would of been done in character creation 
-    private void initPlayerData()
-    {
-        for (int i = 0; i < Game.players.Count; i++)
-        {
-            Player player = Game.players[i];
-            player.assetData.icon = classIcons[player.adventuringClass];
-        }
-    }
-
-    #endregion
-
+    //################################################################
+    #endregion DEVELOPMENT/TEST FUNCTIONS
 
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS

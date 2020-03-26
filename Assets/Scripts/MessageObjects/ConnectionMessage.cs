@@ -10,11 +10,12 @@
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
 **************************************************************/
-using Assets.Scripts.RPA_Player;
+
+using Assets.Scripts.RPA_Game;
 using SimpleJSON;
 
 
-namespace Assets.Scripts.RPA_Message
+namespace Assets.Scripts.RPA_Messages
 {
     class ConnectionMessage : Message
     {

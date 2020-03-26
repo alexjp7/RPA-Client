@@ -5,14 +5,10 @@
 *  The ability class is the runtime model that represents
    the properties that pertain to an ability in RPA.
 **************************************************************/
-using Assets.Scripts.RPA_Entity_Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Assets.Scripts.Player.Abilities
+using Assets.Scripts.Entities.Components;
+
+namespace Assets.Scripts.Entities.Abilities
 {
     /***************************************************************
     * ToolTipTokens represent the placeholder special characters 

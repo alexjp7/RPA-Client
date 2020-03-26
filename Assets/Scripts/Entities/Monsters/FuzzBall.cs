@@ -12,9 +12,9 @@
  * The FuzzBall monster is currently serving as a placeholder
    enemy for developing key features/systems of the monter party.
   **************************************************************/
-using Assets.Scripts.Monsters;
-using Assets.Scripts.Player.Abilities;
+
 using System;
+using Assets.Scripts.Entities.Abilities;
 
 namespace Assets.Scripts.Entities.Monsters
 {

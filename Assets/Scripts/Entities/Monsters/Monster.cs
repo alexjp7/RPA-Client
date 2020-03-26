@@ -14,17 +14,16 @@
   reached
 **************************************************************/
 
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Player.Abilities;
-using Assets.Scripts.RPA_Entity_Components;
 using System.Collections.Generic;
 using Assets.Scripts.Util;
+using Assets.Scripts.Entities.Components;
+using Assets.Scripts.Entities.Abilities;
 
-namespace Assets.Scripts.Monsters
+namespace Assets.Scripts.Entities.Monsters
 {
     /***************************************************************
     * The intention of the MonsterTypes enum is to provide generic
-      identification of monsters archetypes. 
+      and readable identification of monsters types and their sub-types. 
     
     * These types when implemented will ideally each house 
       similar logic/handling of targeting, attack patterns and 
@@ -32,7 +31,7 @@ namespace Assets.Scripts.Monsters
 
         e.g. A Superior FuzzBall and Elite FuzzBall would be both
              be identified as a FuzzBall type, and will both have
-             a FuzzBall superclass, and when the MonsterFactory
+             a FuzzBall superclass. When the MonsterFactory
              initializes the monster party, it will be able to popualte
              various party types composed of various subtypes of 
              FuzzBalls.
@@ -50,8 +49,6 @@ namespace Assets.Scripts.Monsters
     public abstract class Monster : Combatable
     {
         public MonsterTypes monsterId { get; protected set; }
-        public Renderable assetData;
-        
         public static float BASE_HP; //Read from file ?
 
         /***************************************************************

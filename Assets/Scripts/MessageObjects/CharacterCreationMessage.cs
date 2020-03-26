@@ -10,8 +10,10 @@
     with any additional fields provided by the sub-class.
 **************************************************************/
 
+using Assets.Scripts.RPA_Game;
 using SimpleJSON;
-namespace Assets.Scripts.RPA_Message
+
+namespace Assets.Scripts.RPA_Messages
 {
     public enum CreationInstruction: int
     {   //Connection and disconenction only on deserialization

@@ -10,10 +10,11 @@
 **************************************************************/
 using System;
 using SimpleJSON;
-using Assets.Scripts.RPA_Player;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.RPA_Game;
 
 
-namespace Assets.Scripts.RPA_Message
+namespace Assets.Scripts.RPA_Messages
 {
     public abstract class Message
     {
@@ -22,7 +23,7 @@ namespace Assets.Scripts.RPA_Message
         public int game_id;
         public int client_id;
         public string message;
-        protected RPA_Player.Player actor;
+        protected Player actor;
 
         /***************************************************************
         * The States enum is used to indicate what game state is currently

@@ -19,13 +19,14 @@
     - Utility: restraining/incapacitating enemies, thievery, 
       preparations
 **************************************************************/
-using Assets.Scripts.RPA_Entity_Components;
 
-namespace Assets.Scripts.Player_Classes
+using Assets.Scripts.Entities.Components;
+
+namespace Assets.Scripts.Entities.Players
 {
-    class Rogue: AdventuringClass
+    class Rogue : AdventuringClass
     {
-        public static Renderable assetData { get; set; }
+        public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }
 
         public Rogue(string name) : base(name)

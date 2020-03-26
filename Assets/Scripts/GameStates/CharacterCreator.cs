@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-
-using Assets.Scripts.RPA_Client;
-using Assets.Scripts.RPA_Player;
-using SimpleJSON;
-using Assets.Scripts.RPA_Message;
 using System.IO;
-using Assets.Scripts.Player_Classes;
+
+using Assets.Scripts.RPA_Messages;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.RPA_Game;
+
+using SimpleJSON;
 
 public class CharacterCreator : MonoBehaviour
 {
@@ -91,8 +91,8 @@ public class CharacterCreator : MonoBehaviour
     private void Update()
     {
         int readyCount = 0;
-        if (Client.ready())
-            processServerInstructions(Client.read());
+        if (Game.gameClient.ready())
+            processServerInstructions(Game.gameClient.read());
 
         foreach (Player p in Game.players)
             if (p.ready)readyCount++;
@@ -138,7 +138,7 @@ public class CharacterCreator : MonoBehaviour
 
     public void mainMenuClicked()
     {
-        Client.dissconnect();
+        Game.gameClient.dissconnect();
     }
 
     public void readyClicked()
@@ -148,7 +148,7 @@ public class CharacterCreator : MonoBehaviour
         else readyText.text = "Ready Up!";
         renderReadyState(0);
         CharacterCreationMessage readyChange = new CharacterCreationMessage((int)CreationInstruction.READY_UP);
-        Client.send(readyChange.getMessage());
+        Game.gameClient.send(readyChange.getMessage());
     }
 
     private void renderReadyState(int player)
@@ -165,7 +165,7 @@ public class CharacterCreator : MonoBehaviour
         classDescription.text = classDescriptions[classChosen];
         classChoice.text = classNames[classChosen];
         CharacterCreationMessage classChange = new CharacterCreationMessage((int)CreationInstruction.CLASS_CHANGE);
-        Client.send(classChange.getMessage());
+        Game.gameClient.send(classChange.getMessage());
     }
 
     private bool selectClass(int classChosen, int playerIndex)
@@ -188,7 +188,6 @@ public class CharacterCreator : MonoBehaviour
         AdventuringClass.setClassSprites(Game.players);
         foreach (Player player in Game.players)
         {
-            player.assetData.icon = classIcons[player.adventuringClass];
             player.applyClass();
         }
     }

@@ -24,13 +24,13 @@
       illusions, sigils(toggles?)
 **************************************************************/
 
-using Assets.Scripts.RPA_Entity_Components;
+using Assets.Scripts.Entities.Components;
 
-namespace Assets.Scripts.Player_Classes
+namespace Assets.Scripts.Entities.Players
 {
-    class Wizard:AdventuringClass
+    class Wizard : AdventuringClass
     {
-        public static Renderable assetData { get; set; }
+        public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }
             
         public Wizard(string name) : base(name)
