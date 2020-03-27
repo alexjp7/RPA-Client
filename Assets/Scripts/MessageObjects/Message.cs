@@ -42,7 +42,7 @@ namespace Assets.Scripts.RPA_Messages
         public Message()
         {
             actor = Game.players[0] == null ? null : Game.players[0] ;
-            this.game_id = Game.getGameId();
+            this.game_id = Game.gameId;
             this.state_id = -1;
             this.message = "";
             this.client_id = actor == null ? -1 : actor.id;

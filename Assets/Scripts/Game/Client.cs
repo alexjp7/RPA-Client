@@ -2,14 +2,16 @@
                            CLIENT
  ---------------------------------------------------------------*/
 /***************************************************************
-* The Client class maintains a singleton instance of functions which allow 
-  for a single instanced TCP connection to a remote server.
+* The Client class maintains a singleton instance of functions
+  which allow for a single instanced TCP connection to a remote 
+  server.
 
 * The Client class also includes functionality for sending and
   recieving data to/from the server, aswell as a boolean
   function for returning whether there is data available
   to be read.
 **************************************************************/
+
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -19,7 +21,7 @@ namespace Assets.Scripts.RPA_Game
     public sealed class Client 
     {
         //Singleton instance
-        public static Client INSTANCE { private set { INSTANCE = new Client(); }  get { return INSTANCE; } }
+        public static Client INSTANCE;
 
         private  TcpClient client;
         private  NetworkStream stream;
@@ -32,7 +34,11 @@ namespace Assets.Scripts.RPA_Game
 
         private Client() { }
 
-            
+        public static Client getInstance()
+        {
+            return INSTANCE == null ? new Client() : INSTANCE;
+        }
+
         /***************************************************************
         * Attempts to connect to the remote address and instanciates
           a streamreader object used for reading packets sent from the
@@ -102,6 +108,5 @@ namespace Assets.Scripts.RPA_Game
         {
             return stream == null ? false: stream.DataAvailable;
         }
-
     }
 }

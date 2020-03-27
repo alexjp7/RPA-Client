@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using System.Linq;
 using Assets.Scripts.Util;
 using Assets.Scripts.RPA_Game;
@@ -88,6 +87,13 @@ public class BattleState : MonoBehaviour
     Player clientSidePlayer;
     AdventuringClass clientPlayerClass;
 
+
+    /*---------------------------------------------------------------
+                       GAME STATE INIATIALISATIONS
+     ---------------------------------------------------------------*/
+    /***************************************************************
+    * Called on Scene initialization
+    **************************************************************/
     private void Awake()
     {
         runTest(); //Development/Debug Only!
@@ -113,6 +119,9 @@ public class BattleState : MonoBehaviour
         initClassData();
     }
 
+    /***************************************************************
+    *  Creates a list of players for testing/debuggin purposes.
+    **************************************************************/
     private void createTestPlayers()
     {
         Game.players = new List<Player>();
@@ -131,7 +140,9 @@ public class BattleState : MonoBehaviour
         Game.players[0].isClientPlayer = true;
     }
 
-    //@Test Function - will be set to player.assetData in by character creation state
+    /***************************************************************
+    *  Parses json file for class data and populates icon textures
+    **************************************************************/
     private void initClassData()
     {
         const string CLASS_DATA_FILE  =  "assets/resources/data/meta_data.json";
@@ -154,9 +165,6 @@ public class BattleState : MonoBehaviour
     //################################################################
     #endregion DEVELOPMENT/TEST FUNCTIONS
 
-    /*---------------------------------------------------------------
-                       GAME STATE INIATIALISATIONS
-     ---------------------------------------------------------------*/
     /***************************************************************
     * Generates the monster party via the monster factory class.
    
@@ -325,7 +333,6 @@ public class BattleState : MonoBehaviour
       provides a abstract type to allow for generic handling
       of both player and monster types.
     **************************************************************/
-
     public void takeTurn()
     {
         bool isPlayerTurn = turnCount % 2 == 0;
@@ -439,7 +446,7 @@ public class BattleState : MonoBehaviour
 
 
     /*---------------------------------------------------------------
-                     CALLBACKS/EVENT HANDLERS
+                        CLIENT EVENT HANDLERS
      ---------------------------------------------------------------*/
      //ABILITY HANDLERS
     /***************************************************************

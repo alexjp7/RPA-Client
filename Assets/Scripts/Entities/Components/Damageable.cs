@@ -90,7 +90,6 @@ namespace Assets.Scripts.Entities.Components
             this.currentHealth = this.maxHealth;
         }
 
-
         /***************************************************************
         @return  - The health value as a decimal value (0-1).
         **************************************************************/

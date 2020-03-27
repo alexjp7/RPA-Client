@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Assets.Scripts.Util
 {
     class Random
@@ -18,7 +14,6 @@ namespace Assets.Scripts.Util
         {
             return rand.Next(limit);
         }
-
 
         public static double getDouble(double limit)
         {

@@ -2,8 +2,8 @@
                         ABILITY
  ---------------------------------------------------------------*/
 /***************************************************************
-*  The ability class is the runtime model that represents
-   the properties that pertain to an ability in RPA.
+*  The ability class is the model that represents player and 
+   monster combative abilities.
 **************************************************************/
 
 using Assets.Scripts.Entities.Components;
