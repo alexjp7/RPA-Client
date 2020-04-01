@@ -32,43 +32,28 @@ public class BattleState : MonoBehaviour
 {
     #region PARTY-MEMBER UI
     //Party textures/text
-    [SerializeField]
-    public GameObject[] playerPanels;
-    [SerializeField]
-    public SpriteRenderer[] playerSpirtes;
-    [SerializeField]
-    public Text[] partyMembers;
-    [SerializeField]
-    public Text[] maxHealthValues;
-    [SerializeField]
-    public Text[] currentHealthValues;
-    [SerializeField]
-    public Image[] partyHpBar;
-    [SerializeField]
-    public Button[] skillButtons;
-    [SerializeField]
-    public GameObject[] turnChevrons;
+    [SerializeField] private GameObject[] playerPanels;
+    [SerializeField] private SpriteRenderer[] playerSpirtes;
+    [SerializeField] private Text[] partyMembers;
+    [SerializeField] private Text[] maxHealthValues;
+    [SerializeField] private Text[] currentHealthValues;
+    //Ability UI
+    [SerializeField] private Image[] partyHpBar;
+    [SerializeField] private Button[] skillButtons;
     #endregion PARTY-MEMBER UI
 
     #region MONSTER-UI
     //Monster textures/text
-    [SerializeField]
-    public GameObject[] monsterPanels;
-    [SerializeField]
-    public Text[] monsterNames;
-    [SerializeField]
-    public SpriteRenderer[] monsterSprites;
-    [SerializeField]
-    public Image[] monsterHpBars;
-    [SerializeField]
-    public Text[] textHpValues;
-    [SerializeField]
-    public Text[] textMaxHealths;
+    [SerializeField] private GameObject[] monsterPanels;
+    [SerializeField] private Text[] monsterNames;
+    [SerializeField] private SpriteRenderer[] monsterSprites;
+    [SerializeField] private Image[] monsterHpBars;
+    [SerializeField] private Text[] textHpValues;
+    [SerializeField] private Text[] textMaxHealths;
     #endregion MONSTER-UI
 
     private Text currentPlayerName;
     private List<Monster> monsterParty;
-
     private Dictionary<int, Combatable> targets;
 
     private static int turnCount = 0;
@@ -83,6 +68,7 @@ public class BattleState : MonoBehaviour
     private bool isEnemyTargetable = false;
     private bool isStandardTooltip = false;
     private bool isBattleInProgress = true;
+    private bool hasNextCombatant = true;
 
 
     Player clientSidePlayer;
@@ -128,7 +114,7 @@ public class BattleState : MonoBehaviour
         Game.players = new List<Player>();
         //@Test Data
         Game.players.Add(new Player(6, "Alexjp", 1, true));
-        //Game.players.Add(new Player(8, "Frictionburn", 0, true));
+        Game.players.Add(new Player(8, "Frictionburn", 0, true));
         //Game.players.Add(new Player(11, "Kozza", 2, true));
         //Game.players.Add(new Player(4, "Yomamma", 3, true));
 
@@ -203,11 +189,10 @@ public class BattleState : MonoBehaviour
     {
         targets = new Dictionary<int, Combatable>();
         System.Random r = new System.Random();
-        int order = 0;
         Game.players = Game.players.OrderBy(player => r.Next()).ToList();
-
+        int order = 0;
         Game.players.ForEach(player => player.playerClass.combatOrder = order++);
-        order = Game.PARTY_LIMIT;
+        order = 0;
         monsterParty.ForEach(monster => monster.combatOrder = order++);
     }
 
@@ -320,93 +305,61 @@ public class BattleState : MonoBehaviour
     
     * The combatant with an active turn has their green turn
       chevron indicator enabled.
-    
-    * This function utilises the Combatable component of player
-      and mosnter types, which serves as the base type which
-      both inherit from.
-      
-      THE COMBATABLE TYPE
-      -------------------
-      Combatables have fields relating to combat
-      including; turn order, health properties (Damageable), abilities
-      and the base logic for applying damage, healing and status 
-      effects to these types of objects. The combatable base
-      provides a abstract type to allow for generic handling
-      of both player and monster types.
+     
     **************************************************************/
     public void takeTurn()
     {
-        turnCount++;
-        bool isPlayerTurn = turnCount % 2 == 1;
-        Combatable nextCombatant = getCombatant(isPlayerTurn, true);
-        Combatable previousCombatant = getCombatant(isPlayerTurn, false);
+        if (!hasNextCombatant) return;
+        bool isPlayerTurn = ++turnCount % 2 == 1;
+        int nextCombatant = getCombatant(isPlayerTurn);
 
-        togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant.combatOrder].id == clientSidePlayer.id);
-        if (turnCount > 1) turnChevrons[previousCombatant.combatOrder].SetActive(false);
-        turnChevrons[nextCombatant.combatOrder].SetActive(true);
-        currentPlayerName.text = nextCombatant.name;
+        togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant].id == clientSidePlayer.id);
 
-        if (!isPlayerTurn) takeMonsterTurn(in nextCombatant);
+        Debug.Log(playerPanels[0].transform.position.x + "  " + playerPanels[0].transform.position.y);
+
+        TurnChevron.setPosition(isPlayerTurn ? playerPanels[nextCombatant].transform.position
+                                             : monsterPanels[nextCombatant].transform.position);
+
+        currentPlayerName.text = isPlayerTurn ? Game.players[nextCombatant].name : monsterParty[nextCombatant].name;
+        if (!isPlayerTurn) takeMonsterTurn();
     }
 
     /***************************************************************
     @param - isPlayerTurn : flags whether to get the next
     turn from the player(true) or monster-party(false).
-    @param  - isNext : flags whether the next(true) or previous (false)
-    combatant is to be returned.
 
-    @return - The combatant data for the player/monster that is 
-    having its next turn.
+    @return - The index of the next combatant
     **************************************************************/
-    private Combatable getCombatant(bool isPlayerTurn, bool isNext)
+    private int getCombatant(bool isPlayerTurn)
     {
-        Combatable combatant;
-        if (isNext)
+        int nextComtatant = 0;
+        int deathCounter = 0;
+
+        if (isPlayerTurn)
         {
-            int nextComtatant;
-            if (isPlayerTurn)
-            {
-                nextComtatant = currentPlayer % Game.players.Count;
-                if (!Game.players[nextComtatant].playerClass.isAlive()) //Skip over dead players
-                {
-                    nextComtatant = ++currentPlayer % Game.players.Count;
-                }
+            nextComtatant = currentPlayer % Game.players.Count;
 
-                combatant = Game.players[nextComtatant].playerClass;
-                currentPlayer++;
-            }
-            else
+            while (!Game.players[nextComtatant].playerClass.isAlive()) //Skip over dead players
             {
-                nextComtatant = currentMonster % monsterParty.Count;
-                if (!monsterParty[nextComtatant].isAlive()) //Skip over dead monsters
-                {
-                    nextComtatant = ++currentMonster % monsterParty.Count;
-                }
-
-                combatant = monsterParty[nextComtatant];
-                currentMonster++;
+                nextComtatant = ++currentPlayer % Game.players.Count;
+                if(++deathCounter == Game.players.Count) break;
             }
+            currentPlayer++;
         }
         else
-        {   //Get previous combatant
-            if (turnCount > 1)
+        {
+            nextComtatant = currentMonster % monsterParty.Count;
+            while (!monsterParty[nextComtatant].isAlive()) //Skip over dead monsters
             {
-                int previousCombatant;
-                if (isPlayerTurn)
-                {
-                    previousCombatant = (currentMonster - 1) % monsterParty.Count;
-                    combatant = monsterParty[previousCombatant];
-                }
-                else
-                {
-                    previousCombatant = (currentPlayer - 1) % Game.players.Count;
-                    combatant = Game.players[previousCombatant].playerClass;
-                }
+                nextComtatant = ++currentMonster % monsterParty.Count;
+
+                if (++deathCounter ==  monsterParty.Count) break;
             }
-            else combatant = null;
+            currentMonster++;
         }
-        return combatant;
+        return nextComtatant;
     }
+
 
     /***************************************************************
     * Called when a monster has its turn.
@@ -417,15 +370,31 @@ public class BattleState : MonoBehaviour
     @param - nextCombatant: the combat properties relating to the
     monster whos turn it currently is.
     **************************************************************/
-    private void takeMonsterTurn(in Combatable nextCombatant)
+    private void takeMonsterTurn()
     {
         targets.Clear();
+        System.Random r = new System.Random();
 
-        int target = 0;
-        //targets.Add(target, Game.players[target].playerClass);
-        //attackTarget(target, 12, 16, false);
-        takeTurn();
-
+        int[] potentialTargets = Enumerable.Range(0, Game.players.Count).OrderBy(player => r.Next()).ToArray();
+        int target = -1;
+        for(int i = 0; i < potentialTargets.Length; i++)
+        {
+            if(Game.players[potentialTargets[i]].playerClass.isAlive())
+            {
+                target = potentialTargets[i];
+                break;
+            }
+        }
+     
+        if(target == -1)
+        {
+            hasNextCombatant = false;
+        }
+        else
+        {
+            targets.Add(target, Game.players[target].playerClass);
+            attackTarget(target, 4, 5, false);
+        }
     }
 
     /***************************************************************
@@ -522,20 +491,7 @@ public class BattleState : MonoBehaviour
       and provides appropriate operations for populating the targets
       dictionary or otherwise displaying targeting information
       through setting the tint of targeteable sprites.
-
-      ABILITY TARGETING TYPES:
-      ------------------------
-    * Self-Target: doesn't not provide a variable target selection
-      and enfornces the target to be the caster.
-    
-    * Single-Target: allows for discretionary targeting of a single
-      Combatant. Target highlighting is difered to mouse hover event
-      after selecting these types of abilities.
-
-    * Multi-Target: highlights multiple targets and populates the 
-      target selection dictionary with either all of the monster
-      or player party depending on the meta-type (effect, damage, heal).
-
+          
     @param - skillIndex: a value between 0-4 indicating which
     ability from the ability bar has been clicked.
     **************************************************************/
@@ -548,66 +504,36 @@ public class BattleState : MonoBehaviour
         switch ((AbilityTypes)ability.typeIds[0])
         {
             //Self Target
-            case AbilityTypes.SELF_HEAL:
-                isTargetable = false;
-                targets.Add(0, clientPlayerClass);
-                playerSpirtes[0].color = Color.green;
-                break;
-
-            case AbilityTypes.SELF_BUFF:
+            case AbilityTypes.SELF_HEAL: case AbilityTypes.SELF_BUFF:
                 isTargetable = false;
                 targets.Add(0, clientPlayerClass);
                 playerSpirtes[0].color = Color.green;
                 break;
 
             //Single Target - note: Defers targeting
-            case AbilityTypes.SINGLE_DAMAGE:
+            case AbilityTypes.SINGLE_DAMAGE: case AbilityTypes.SINGLE_DEBUFF:
                 isTargetable = true;
                 isEnemyTargetable = true;
                 break;
 
-            case AbilityTypes.SINGLE_DEBUFF:
-                isTargetable = true;
-                isEnemyTargetable = true;
-                break;
-
-            case AbilityTypes.SINGLE_BUFF:
-                isTargetable = true;
-                isEnemyTargetable = false;
-                break;
-
-            case AbilityTypes.SINGLE_HEAL:
+            case AbilityTypes.SINGLE_BUFF: case AbilityTypes.SINGLE_HEAL:
                 isTargetable = true;
                 isEnemyTargetable = false;
                 break;
 
             //Multi Target 
-            case AbilityTypes.MULTI_DAMAGE:
+            case AbilityTypes.MULTI_DAMAGE: case AbilityTypes.MULTI_DEBUFF:
                 isTargetable = false;
                 hasValidTarget = true;
                 Array.ForEach(monsterSprites, monster => monster.color = Color.red);
                 for (int i = 0; i < monsterParty.Count; i++) targets.Add(i, monsterParty[i]);
 
                 break;
-            case AbilityTypes.MULTI_HEAL:
+            case AbilityTypes.MULTI_HEAL: case AbilityTypes.MULTI_BUFF:
                 isTargetable = false;
                 hasValidTarget = true;
                 Array.ForEach(playerSpirtes, player => player.color = Color.green);
                 for (int i = 0; i < Game.players.Count; i++) targets.Add(i, Game.players[i].playerClass);
-                break;
-            case AbilityTypes.MULTI_BUFF:
-                isTargetable = false;
-                hasValidTarget = true;
-                for (int i = 0; i < Game.players.Count; i++) targets.Add(i, Game.players[i].playerClass);
-                Array.ForEach(playerSpirtes, player => player.color = Color.green);
-
-                break;
-            case AbilityTypes.MULTI_DEBUFF:
-                isTargetable = false;
-                hasValidTarget = true;
-                Array.ForEach(monsterSprites, monster => monster.color = Color.red);
-                for (int i = 0; i < monsterParty.Count; i++) targets.Add(i, monsterParty[i]);
-
                 break;
         }
     }
@@ -621,8 +547,6 @@ public class BattleState : MonoBehaviour
         isTargetable = false;
     }
 
-
-
     //SPRITE HANDLERS
     /***************************************************************
     * Event handler for defered targeting types (single-target 
@@ -631,12 +555,6 @@ public class BattleState : MonoBehaviour
     * Includes the logic for ensuring the ability type's targeting
       type has the desired effect on displaying/highlighting
       the target selection.
-
-      e.g. A single-damage ability was clicked which enables it 
-          to be targetable to monsters, the intended effect
-          would to allow for mouse over events to highlight
-          the monsters active in the battle, additionally mousing 
-          over an ally/player should NOT highlight that sprite.
     
     @param - spriteIndex: a value between 0-players.count() OR
     0-monsterParty.count() which represents the sprite that was 
@@ -669,6 +587,7 @@ public class BattleState : MonoBehaviour
             }
         }
     }
+
     /***************************************************************
     * Provides the opposite functionality to onSpriteEnter(),
       while having selected a defered targeting type the mouse exit
@@ -754,7 +673,7 @@ public class BattleState : MonoBehaviour
 
                     if (metaType == MetaTypes.DAMAGE)
                     {
-                        attackTarget(combatant.Key, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max, true);
+                        attackTarget(combatant.Key, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max * 2, true);
                     }
                     else if (metaType == MetaTypes.EFFECT)
                     {
@@ -790,8 +709,6 @@ public class BattleState : MonoBehaviour
         resetTargets();
         takeTurn(); 
     }
-
-
 
     /***************************************************************
     * Performs a healing action on a target; updates new hp value
@@ -847,13 +764,45 @@ public class BattleState : MonoBehaviour
 
         DamagePopup.create(spritePanel.transform.position, damageDealt);
 
-        if (!target.isAlive()) spritePanel.SetActive(false);
+        if (!target.isAlive())
+        {
+            spritePanel.SetActive(false);
+            checkBattleState();
+        }
         else
         {
             hpBar.fillAmount = target.getHealthPercent();
             hpValue.text = ((int)target.getCurrentHp()).ToString();
         }
+    }
 
+    private void checkBattleState()
+    {
+        bool isInProgress = false;
+
+        foreach(Player player in Game.players)
+        {
+            if (player.playerClass.isAlive())
+            {
+                isInProgress = true;
+                break;
+            }
+        }
+
+        if(isInProgress)
+        {
+            isInProgress = false;
+            foreach (Monster monster in monsterParty)
+            {
+                if (monster.isAlive())
+                {
+                    isInProgress = true;
+                    break;
+                }
+            }
+        }
+
+        hasNextCombatant = isInProgress;
 
     }
 

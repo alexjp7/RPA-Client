@@ -18,4 +18,5 @@ public class GameAssets : MonoBehaviour
     }
 
     public Transform damagePopupPrefab;
+    public Transform turnChevron;
 }

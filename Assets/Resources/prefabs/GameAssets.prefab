@@ -45,4 +45,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damagePopupPrefab: {fileID: 2841765125602886754, guid: 8909f9e2a2a0cfa4888e676fa36183ce,
     type: 3}
-  uiPanel: {fileID: 0}
+  turnChevron: {fileID: 3604465751754792280, guid: b65d7cc975af7fb47a28d4da3ae78b75,
+    type: 3}
