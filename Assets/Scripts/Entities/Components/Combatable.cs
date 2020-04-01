@@ -44,11 +44,12 @@ namespace Assets.Scripts.Entities.Components
         @return  - whether the damage applied resulted in the 
         combatable's HP dropping below 0 (i.e. is defeated).
         **************************************************************/
-        public virtual bool applyDamage(int minDamage, int maxDamage)
+        public virtual int applyDamage(int minDamage, int maxDamage)
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
             healthProperties.currentHealth -= damageDealt;
-            return damageDealt >= (healthProperties.currentHealth + damageDealt);
+            
+            return (int) damageDealt;
         }
 
         /***************************************************************
@@ -74,6 +75,21 @@ namespace Assets.Scripts.Entities.Components
         {
             throw new NotImplementedException("Function: applyDebuf() in object: Combatable");
         }
+
+        /***************************************************************
+         * Updates cooldown counters for each ability.
+        @param - effectiveTurnCount: the amount turns taken
+        by a combatable.
+        **************************************************************/
+        public virtual void updateAbilityCooldowns(int turnCount)
+        {
+            foreach(Ability ability in abilities)
+            {
+                ability.updateCooldown(turnCount);
+            }
+        }
+
+
 
         /***************************************************************
         @return  - The value of the Combatables MAX health.

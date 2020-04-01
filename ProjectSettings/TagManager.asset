@@ -13,7 +13,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - popups
   - 
   - 
   - 
@@ -46,4 +46,7 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 679915617
+    locked: 0
+  - name: Popups
+    uniqueID: 3070427111
     locked: 0

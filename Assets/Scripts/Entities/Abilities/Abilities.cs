@@ -50,12 +50,19 @@ namespace Assets.Scripts.Entities.Abilities
         public static readonly string[] toolTipVarTokens = { "@", "#" };
         public Renderable assetData { get; set; }
 
+        //Read in values
         public AbilityStrength abilityStrength { get; set; }
         public int id { get; set; }
         public string tooltip { get; set; }
         public string name { get; set; }
         public int cooldown{ get; set; }
         public int[] typeIds;
+
+        //Cooldown trackers
+        public bool isOnCooldown { get; private set; }
+        public int lastTurnUsed { get; set; }
+        public int cooldownTracker { get; private set;}
+
         
         public Ability() { }
 
@@ -68,7 +75,38 @@ namespace Assets.Scripts.Entities.Abilities
             this.cooldown = cooldown;
             this.abilityStrength = abilityStrength;
             this.assetData = assetData;
+            this.isOnCooldown = false;
+            this.lastTurnUsed = -1;
+            this.cooldownTracker = cooldown + 1;
         }
+
+        /***************************************************************
+        * Checks if the amount of turns since last use has exceeded
+          the cooldown to flag if the ability is ready for use.
+        @param - turnCount: the amount turns taken since
+        an abilites use.
+        *********************************** ***************************/
+        public void updateCooldown(int turnCount)
+        {
+            isOnCooldown = false;
+
+            if (lastTurnUsed == -1) return;
+            if (cooldown > 1)
+            {
+                cooldownTracker --;
+                if ((cooldown + 1) - cooldownTracker == cooldown + 1)
+                {
+                    cooldownTracker = cooldown  + 1;
+                }
+                else
+                {
+                    isOnCooldown = true;
+                }
+            }
+        }
+
+
+
 
         public override string ToString()
         {
