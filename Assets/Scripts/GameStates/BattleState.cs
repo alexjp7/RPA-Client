@@ -26,34 +26,21 @@ using Assets.Scripts.Entities.Monsters;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
 using SimpleJSON;
+using Assets.Scripts.UI;
 #endregion IMPORTS
 
 public class BattleState : MonoBehaviour
 {
-    #region PARTY-MEMBER UI
-    //Party textures/text
-    [SerializeField] private GameObject[] playerPanels;
-    [SerializeField] private SpriteRenderer[] playerSpirtes;
-    [SerializeField] private Text[] partyMembers;
-    [SerializeField] private Text[] maxHealthValues;
-    [SerializeField] private Text[] currentHealthValues;
-    //Ability UI
-    [SerializeField] private Image[] partyHpBar;
     [SerializeField] private Button[] skillButtons;
-    #endregion PARTY-MEMBER UI
+    [SerializeField] private GameObject player_horizontalLayout;
+    [SerializeField] private GameObject monster_horizontalLayout;
 
-    #region MONSTER-UI
-    //Monster textures/text
-    [SerializeField] private GameObject[] monsterPanels;
-    [SerializeField] private Text[] monsterNames;
-    [SerializeField] private SpriteRenderer[] monsterSprites;
-    [SerializeField] private Image[] monsterHpBars;
-    [SerializeField] private Text[] textHpValues;
-    [SerializeField] private Text[] textMaxHealths;
-    #endregion MONSTER-UI
+    private List<Monster> monsterParty;
+    private List<CombatSprite> playerSprites;
+    private List<CombatSprite> monsterSprites;
+
 
     private Text currentPlayerName;
-    private List<Monster> monsterParty;
     private Dictionary<int, Combatable> targets;
 
     private static int turnCount = 0;
@@ -84,7 +71,6 @@ public class BattleState : MonoBehaviour
     private void Awake()
     {
         runTest(); //Development/Debug Only!
-
         initMonsterParty();
         initCombatOrder();
         initPlayerUI();
@@ -104,6 +90,22 @@ public class BattleState : MonoBehaviour
     {
         createTestPlayers();  
         initClassData();
+        //testNewAssetLoading();
+    }
+
+    private void testNewAssetLoading()
+    {
+        foreach (Player player in Game.players)
+        {
+            CombatSprite sprite = CombatSprite.create(Vector2.zero, player.playerClass);
+            sprite.transform.SetParent(player_horizontalLayout.transform);
+        }
+
+        foreach (Monster monster in monsterParty)
+        {
+            CombatSprite sprite = CombatSprite.create(Vector2.zero, monster);
+            sprite.transform.SetParent(monster_horizontalLayout.transform);
+        }
     }
 
     /***************************************************************
@@ -116,14 +118,14 @@ public class BattleState : MonoBehaviour
         Game.players.Add(new Player(6, "Alexjp", 1, true));
         Game.players.Add(new Player(8, "Frictionburn", 0, true));
         //Game.players.Add(new Player(11, "Kozza", 2, true));
-        //Game.players.Add(new Player(4, "Yomamma", 3, true));
+        //Game.players.Add(new Player(4, "Wizzledonker", 3, true));
+        //Game.players.Add(new Player(4, "Dieselfuel", 1, true));
+        //Game.players.Add(new Player(4, "Redd", 0, true));
+        //Game.players.Add(new Player(4, "MORBAT", 2, true));
 
         Game.connectedPlayers = Game.players.Count;
 
         foreach (Player player in Game.players) player.applyClass();
-        //Test for healing
-        //Game.players[0].playerClass.healthProperties.currentHealth -= 30;
-        //Test for client side player
         Game.players[0].isClientPlayer = true;
     }
 
@@ -146,8 +148,6 @@ public class BattleState : MonoBehaviour
             classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
             AdventuringClass.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
         }
-
-        AdventuringClass.setClassSprites(Game.players);
     }
     //################################################################
     #endregion DEVELOPMENT/TEST FUNCTIONS
@@ -164,13 +164,10 @@ public class BattleState : MonoBehaviour
         MonsterFactory mFactory = new MonsterFactory();
         monsterParty = mFactory.createMonsterParty(monsterPartySize);
 
-        for (int i = 0; i < monsterPartySize; i++)
+        foreach (Monster monster in monsterParty)
         {
-            monsterPanels[i].SetActive(true);
-            monsterNames[i].text = monsterParty[i].name;
-            monsterHpBars[i].fillAmount = monsterParty[i].getHealthPercent();
-            textHpValues[i].text = monsterParty[i].healthProperties.currentHealth.ToString();
-            textMaxHealths[i].text = "/" + monsterParty[i].healthProperties.maxHealth.ToString();
+            CombatSprite sprite = CombatSprite.create(Vector2.zero, monster);
+            sprite.transform.SetParent(monster_horizontalLayout.transform);
         }
     }
 
@@ -207,21 +204,16 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initPlayerUI()
     {
+        playerSprites = new List<CombatSprite>();
         clientSidePlayer = Game.players.Find(player => player.isClientPlayer);
         clientPlayerClass = clientSidePlayer.playerClass;
         currentPlayerName = GameObject.Find("text_player_turn").GetComponent<Text>();
 
-        for (int i = 0; i < Game.players.Count; i++)
+        foreach (Player player in Game.players)
         {
-            Player player = Game.players[i];
-            //Party names and spirte
-            playerSpirtes[i].sprite = AdventuringClass.getClassSprite(player.adventuringClass);
-            partyMembers[i].text = Game.players[i].name;
-            //Setting HP values
-            partyHpBar[i].fillAmount = player.playerClass.getHealthPercent();
-            currentHealthValues[i].text = " " + ((int)player.playerClass.getCurrentHp()).ToString();
-            maxHealthValues[i].text = "/" + ((int)player.playerClass.getMaxHp()).ToString();
-            playerPanels[i].SetActive(true);
+            CombatSprite sprite = CombatSprite.create(Vector2.zero, player.playerClass);
+            sprite.transform.SetParent(player_horizontalLayout.transform);
+            playerSprites.Add(sprite);
         }
 
         //Load client side players abilities
@@ -270,9 +262,9 @@ public class BattleState : MonoBehaviour
             mouseExitEvent.callback.AddListener(evt => onSpriteExit(j));
             mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(j));
 
-            playerPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
-            playerPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            playerPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+            playerSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
+            playerSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
+            playerSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
         }
 
         //Initialize Party Monster Sprite Events
@@ -291,9 +283,9 @@ public class BattleState : MonoBehaviour
             mouseExitEvent.callback.AddListener(evt => onSpriteExit(j));
             mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(j));
 
-            monsterPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
-            monsterPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            monsterPanels[i].GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+            monsterSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
+            monsterSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
+            monsterSprites[i].GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
         }
     }
 
@@ -315,13 +307,11 @@ public class BattleState : MonoBehaviour
 
         togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant].id == clientSidePlayer.id);
 
-        Debug.Log(playerPanels[0].transform.position.x + "  " + playerPanels[0].transform.position.y);
-
-        TurnChevron.setPosition(isPlayerTurn ? playerPanels[nextCombatant].transform.position
-                                             : monsterPanels[nextCombatant].transform.position);
+        TurnChevron.setPosition(isPlayerTurn ? playerSprites[nextCombatant].transform.position
+                                             : monsterSprites[nextCombatant].transform.position);
 
         currentPlayerName.text = isPlayerTurn ? Game.players[nextCombatant].name : monsterParty[nextCombatant].name;
-        if (!isPlayerTurn) takeMonsterTurn();
+        //if (!isPlayerTurn) takeMonsterTurn();
     }
 
     /***************************************************************
@@ -507,7 +497,8 @@ public class BattleState : MonoBehaviour
             case AbilityTypes.SELF_HEAL: case AbilityTypes.SELF_BUFF:
                 isTargetable = false;
                 targets.Add(0, clientPlayerClass);
-                playerSpirtes[0].color = Color.green;
+                int clientIndex = Game.getPlayerIndex(clientSidePlayer.id);
+                playerSprites[clientIndex].sprite.color = Color.green;
                 break;
 
             //Single Target - note: Defers targeting
@@ -525,14 +516,14 @@ public class BattleState : MonoBehaviour
             case AbilityTypes.MULTI_DAMAGE: case AbilityTypes.MULTI_DEBUFF:
                 isTargetable = false;
                 hasValidTarget = true;
-                Array.ForEach(monsterSprites, monster => monster.color = Color.red);
+                monsterSprites.ForEach(monster => monster.sprite.color = Color.red);
                 for (int i = 0; i < monsterParty.Count; i++) targets.Add(i, monsterParty[i]);
 
                 break;
             case AbilityTypes.MULTI_HEAL: case AbilityTypes.MULTI_BUFF:
                 isTargetable = false;
                 hasValidTarget = true;
-                Array.ForEach(playerSpirtes, player => player.color = Color.green);
+                playerSprites.ForEach(player => player.sprite.color = Color.green);
                 for (int i = 0; i < Game.players.Count; i++) targets.Add(i, Game.players[i].playerClass);
                 break;
         }
@@ -541,8 +532,8 @@ public class BattleState : MonoBehaviour
     private void resetTargets()
     {
         targets.Clear();
-        Array.ForEach(playerSpirtes, player => player.color = Color.white);
-        Array.ForEach(monsterSprites, monster => monster.color = Color.white);
+        playerSprites.ForEach(player => player.sprite.color = Color.white);
+        monsterSprites.ForEach(monster => monster.sprite.color = Color.white);
         hasValidTarget = false;
         isTargetable = false;
     }
@@ -571,7 +562,7 @@ public class BattleState : MonoBehaviour
         {
             if (!isEnemyTargetable)
             {
-                playerSpirtes[spriteIndex].color = Color.green;
+                playerSprites[spriteIndex].sprite.color = Color.green;
                 hasValidTarget = true;
                 targets.Add(spriteIndex, Game.players[spriteIndex].playerClass);
             }
@@ -581,7 +572,7 @@ public class BattleState : MonoBehaviour
             if (isEnemyTargetable)
             {
                 int monsterSpriteIndex = spriteIndex - (Game.players.Count);
-                monsterSprites[monsterSpriteIndex].color = Color.red;
+                monsterSprites[monsterSpriteIndex].sprite.color = Color.red;
                 hasValidTarget = true;
                 targets.Add(monsterSpriteIndex, monsterParty[monsterSpriteIndex]);
             }
@@ -608,7 +599,7 @@ public class BattleState : MonoBehaviour
         {
             if (!isEnemyTargetable)
             {
-                playerSpirtes[spriteIndex].color = Color.white;
+                playerSprites[spriteIndex].sprite.color = Color.white;
                 hasValidTarget = false;
             }
         }
@@ -617,7 +608,7 @@ public class BattleState : MonoBehaviour
             if (isEnemyTargetable)
             {
                 int monsterSpriteIndex = spriteIndex - (Game.players.Count);
-                monsterSprites[monsterSpriteIndex].color = Color.white;
+                monsterSprites[monsterSpriteIndex].sprite.color = Color.white;
                 hasValidTarget = false;
                 targets.Add(monsterSpriteIndex, monsterParty[monsterSpriteIndex]);
             }
@@ -726,8 +717,8 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     public void healTarget(int spriteIndex, int minHealing, int maxHealing, bool isMonster)
     {
-        Image hpBar = isMonster ? monsterHpBars[spriteIndex] : partyHpBar[spriteIndex];
-        Text hpValue = isMonster ? textHpValues[spriteIndex] : currentHealthValues[spriteIndex];
+        Image hpBar = isMonster ? monsterSprites[spriteIndex].healthBar : playerSprites[spriteIndex].healthBar;
+        Text hpValue = isMonster ? monsterSprites[spriteIndex].currentHealthValue : playerSprites[spriteIndex].currentHealthValue;
         Combatable target = targets[spriteIndex];
 
         target.applyHealing((int)minHealing, (int)maxHealing);
@@ -756,9 +747,9 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     public void attackTarget(int spriteIndex, int minDamage, int maxDamage, bool isMonster)
     {
-        Image hpBar = isMonster ? monsterHpBars[spriteIndex] : partyHpBar[spriteIndex];
-        Text hpValue = isMonster ? textHpValues[spriteIndex] : currentHealthValues[spriteIndex];
-        GameObject spritePanel = isMonster ? monsterPanels[spriteIndex] : playerPanels[spriteIndex];
+        Image hpBar = isMonster ? monsterSprites[spriteIndex].healthBar : playerSprites[spriteIndex].healthBar;
+        Text hpValue = isMonster ? monsterSprites[spriteIndex].currentHealthValue: playerSprites[spriteIndex].currentHealthValue;
+        Transform spritePanel = isMonster ? monsterSprites[spriteIndex].transform : playerSprites[spriteIndex].transform;
         Combatable target = targets[spriteIndex];
         int damageDealt = target.applyDamage(minDamage, maxDamage);
 
@@ -766,7 +757,7 @@ public class BattleState : MonoBehaviour
 
         if (!target.isAlive())
         {
-            spritePanel.SetActive(false);
+            Destroy(spritePanel.gameObject);
             checkBattleState();
         }
         else

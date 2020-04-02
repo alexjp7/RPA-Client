@@ -13,12 +13,16 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
     //Generic implementation of ability effect applications
     public abstract class Combatable 
     {
+        private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
+        protected string assetPath { get; set; }
+
         public int combatOrder { get; set; }
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
@@ -27,7 +31,13 @@ namespace Assets.Scripts.Entities.Components
 
         public Combatable()
         {
+            assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();
+        }
+
+        protected void setSpritePath(string spriteName)
+        {
+            assetData.spritePath = assetPath + spriteName;
         }
 
         /***************************************************************
@@ -88,8 +98,6 @@ namespace Assets.Scripts.Entities.Components
                 ability.updateCooldown(turnCount);
             }
         }
-
-
 
         /***************************************************************
         @return  - The value of the Combatables MAX health.

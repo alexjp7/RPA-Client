@@ -165,7 +165,7 @@ namespace Assets.Scripts.Entities.Abilities
             int[] types = getAbilityTypes(jSONNode["types"].AsArray, skillLevel);
             string tooltip = construcTooltip(jSONNode, skillLevel, types[0], ref abilityStrength);
             Renderable assetData = new Renderable();
-            assetData.model = iconTexture;
+            //assetData.icon = iconTexture;
 
             return new Ability(jSONNode["id"].AsInt, 
                                 types,jSONNode["name"].Value, 

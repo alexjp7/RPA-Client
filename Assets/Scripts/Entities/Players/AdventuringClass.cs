@@ -46,6 +46,7 @@ namespace Assets.Scripts.Entities.Players
         **************************************************************/
         public AdventuringClass(string name)
         {
+            this.assetPath += "player_textures/";
             this.abilities = new List<Ability>();
             base.name = name;
         }
@@ -65,7 +66,9 @@ namespace Assets.Scripts.Entities.Players
         protected void setId(PlayerClasses classId)
         {
             this.classId = classId;
-            this.healthProperties = new Damageable(classId);
+            healthProperties = new Damageable(classId);
+            setSpritePath(classId.ToString());
+            assetData.spriteName = classId.ToString();
         }
 
         /***************************************************************
@@ -173,6 +176,7 @@ namespace Assets.Scripts.Entities.Players
         **************************************************************/
         public static void setClassSprites(in List<Player> players)
         {
+            /*
             Sprite[] playerTextures = Resources.LoadAll<Sprite>("Textures/class_icons/playerClasses");
             HashSet<int> classSet = new HashSet<int>();
             players.ForEach(player => classSet.Add(player.adventuringClass));
@@ -210,7 +214,9 @@ namespace Assets.Scripts.Entities.Players
                         throw new NotImplementedException("Class Doesn't Exist");
                 }
             }
+            */
         }
+
 
         /***************************************************************
         @param - classId: The sub-class's adventuring class type

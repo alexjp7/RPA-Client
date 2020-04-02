@@ -24,11 +24,8 @@ namespace Assets.Scripts.Entities.Monsters
 {
     public class MonsterFactory
     {
-        public static readonly int MONSTER_PARTY_LIMIT = 4;
         public List<Monster> createMonsterParty(int amount)
         {
-            amount = Math.Min(amount, MONSTER_PARTY_LIMIT);
-
             int randomMonsterIndex = Util.Random.getInt(Enum.GetNames(typeof(MonsterTypes)).Length);
             List<Monster> monsterParty = new List<Monster>();
             for (int i = 0; i < amount; i++)

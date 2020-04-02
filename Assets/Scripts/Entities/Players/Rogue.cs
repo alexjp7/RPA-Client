@@ -32,6 +32,7 @@ namespace Assets.Scripts.Entities.Players
         public Rogue(string name) : base(name)
         {
             this.setId(PlayerClasses.ROGUE);
+
         }
     }
 }

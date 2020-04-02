@@ -47,3 +47,5 @@ MonoBehaviour:
     type: 3}
   turnChevron: {fileID: 3604465751754792280, guid: b65d7cc975af7fb47a28d4da3ae78b75,
     type: 3}
+  combatSpritePrefab: {fileID: 7741480382821625824, guid: eb0e6f4974a10854bb7fbb08dd29aff1,
+    type: 3}

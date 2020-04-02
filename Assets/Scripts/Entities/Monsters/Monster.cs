@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Util;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Monsters
 {
@@ -63,8 +64,10 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         public Monster()
         {
+            this.assetPath += "monster_textures/";
             this.name = getNamePrefix();
             this.abilities = new List<Ability>();
+
         }
 
         /***************************************************************
@@ -82,6 +85,8 @@ namespace Assets.Scripts.Entities.Monsters
         {
             this.monsterId = monsterId;
             this.healthProperties = new Damageable(monsterId);
+            this.setSpritePath(monsterId.ToString());
+            assetData.spriteName = monsterId.ToString();
         }
 
         /***************************************************************
@@ -103,7 +108,7 @@ namespace Assets.Scripts.Entities.Monsters
                                      "Clueless",
                                      "Silly"};
 
-            return namePrefixes[Random.getInt(namePrefixes.Length)];
+            return namePrefixes[Util.Random.getInt(namePrefixes.Length)];
         }
 
         /***************************************************************

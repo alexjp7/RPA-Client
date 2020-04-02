@@ -13,6 +13,7 @@
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.Entities.Monsters;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -86,7 +87,6 @@ namespace Assets.Scripts.Entities.Components
                     this.maxHealth =  20 + (20 * (Game.connectedPlayers - 1));
                     break;
             }
-
             this.currentHealth = this.maxHealth;
         }
 
