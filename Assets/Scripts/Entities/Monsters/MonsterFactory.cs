@@ -19,11 +19,16 @@
 using System;
 using System.Collections.Generic;
 
-
 namespace Assets.Scripts.Entities.Monsters
 {
     public class MonsterFactory
     {
+        /***************************************************************
+        * Instantiates a list of monsters.
+        @param - amount: the amount of monsters desired to be made.
+        
+        @return - The list of monster objects used in the battle state.
+        **************************************************************/
         public List<Monster> createMonsterParty(int amount)
         {
             int randomMonsterIndex = Util.Random.getInt(Enum.GetNames(typeof(MonsterTypes)).Length);
@@ -33,9 +38,13 @@ namespace Assets.Scripts.Entities.Monsters
                 Monster monster = getMonster();
                 if(monster != null) monsterParty.Add(monster);
             }
+
             return monsterParty;
         }
 
+        /***************************************************************
+        @return - a single random mosnter from the 
+        **************************************************************/
         private Monster getMonster()
         {
             Monster randomMonster = null;
@@ -47,12 +56,7 @@ namespace Assets.Scripts.Entities.Monsters
                     break;
             }
 
-
             return randomMonster;
         }
-
-
-
-
     }
 }

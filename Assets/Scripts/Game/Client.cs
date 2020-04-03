@@ -23,9 +23,9 @@ namespace Assets.Scripts.RPA_Game
         //Singleton instance
         public static Client INSTANCE;
 
-        private  TcpClient client;
-        private  NetworkStream stream;
-        private  StreamReader reader;
+        private TcpClient client;
+        private NetworkStream stream;
+        private StreamReader reader;
 
         //Server IP 
         //private const string IP = "142.93.58.123";

@@ -15,10 +15,8 @@
 **************************************************************/
 
 using System.Collections.Generic;
-using Assets.Scripts.Util;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
-using UnityEngine;
 
 namespace Assets.Scripts.Entities.Monsters
 {
@@ -64,10 +62,10 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         public Monster()
         {
-            this.assetPath += "monster_textures/";
-            this.name = getNamePrefix();
-            this.abilities = new List<Ability>();
-
+            assetPath += "monster_textures/";
+            name = getNamePrefix();
+            abilities = new List<Ability>();
+            type = CombatantType.MONSTER;
         }
 
         /***************************************************************

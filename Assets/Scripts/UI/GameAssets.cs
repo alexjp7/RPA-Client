@@ -1,4 +1,11 @@
-﻿using UnityEngine;
+﻿/*---------------------------------------------------------------
+                       GAME-ASSETS
+ ---------------------------------------------------------------*/
+/***************************************************************
+ *  Scriptable object for storing references to prefabs in
+    the project
+**************************************************************/
+using UnityEngine;
 
 public class GameAssets : MonoBehaviour
 {
@@ -20,4 +27,5 @@ public class GameAssets : MonoBehaviour
     public Transform damagePopupPrefab;
     public Transform turnChevron;
     public Transform combatSpritePrefab;
+    public Transform abilityButtonPrefab;
 }

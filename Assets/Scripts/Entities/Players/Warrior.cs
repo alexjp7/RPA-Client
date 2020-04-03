@@ -26,7 +26,7 @@ using Assets.Scripts.Entities.Components;
 
 namespace Assets.Scripts.Entities.Players
 {
-    public class Warrior : AdventuringClass
+    public class Warrior : Adventurer
     {
         public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }

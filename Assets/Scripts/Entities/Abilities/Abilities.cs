@@ -10,6 +10,7 @@ using Assets.Scripts.Entities.Components;
 
 namespace Assets.Scripts.Entities.Abilities
 {
+
     /***************************************************************
     * ToolTipTokens represent the placeholder special characters 
       which are used to delimit and interpolate ability data
@@ -17,7 +18,7 @@ namespace Assets.Scripts.Entities.Abilities
     
      * These values are present in the reading of the JSON file
        that contains the data for each ability, and is utilised
-       during the AdventuringClass.loadAbilities() procedure.
+       during the Adventurer.loadAbilities() procedure.
     **************************************************************/
     enum ToolTipTokens
     {
@@ -45,12 +46,13 @@ namespace Assets.Scripts.Entities.Abilities
 
     public class Ability
     {
-
-        public static readonly int LEVEL_TIER_LIMIT= 3;
+        public static readonly string BASE_ABILITY_PATH = "textures/icon_textures/ability_icons/";
+        public static readonly int LEVEL_TIER_LIMIT = 3;
         public static readonly string[] toolTipVarTokens = { "@", "#" };
         public Renderable assetData { get; set; }
 
         //Read in values
+        public string iconPath { get; set; }
         public AbilityStrength abilityStrength { get; set; }
         public int id { get; set; }
         public string tooltip { get; set; }
@@ -104,9 +106,6 @@ namespace Assets.Scripts.Entities.Abilities
                 }
             }
         }
-
-
-
 
         public override string ToString()
         {

@@ -1,7 +1,5 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class DamagePopup : MonoBehaviour
 {
@@ -23,7 +21,6 @@ public class DamagePopup : MonoBehaviour
             return damagePopup;
         }
    
-
     private void Awake()
     {
         damageText = transform.GetComponent<Text>();
@@ -55,6 +52,4 @@ public class DamagePopup : MonoBehaviour
         }
 
     }
-
-
 }

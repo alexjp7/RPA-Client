@@ -81,7 +81,7 @@ public class CharacterCreator : MonoBehaviour
             classDescriptions[i] = classes[i]["description"].Value;
             classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
 
-            AdventuringClass.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
+            Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
         }
     }
 
@@ -261,7 +261,7 @@ public class CharacterCreator : MonoBehaviour
     /***************************************************************
     * Event handler for start button; removes unused player objects
       and applies the class chosen (int) to the player's
-      AdventuringClass component.
+      Adventurer component.
     **************************************************************/
     public void startClicked()
     {
@@ -270,7 +270,7 @@ public class CharacterCreator : MonoBehaviour
         if (connectedPlayers != Game.PARTY_LIMIT)
             Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
 
-        AdventuringClass.setClassSprites(Game.players);
+        Adventurer.setClassSprites(Game.players);
         foreach (Player player in Game.players)
         {
             player.applyClass();

@@ -24,7 +24,7 @@ using Assets.Scripts.Entities.Components;
 
 namespace Assets.Scripts.Entities.Players
 {
-    class Rogue : AdventuringClass
+    class Rogue : Adventurer
     {
         public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }

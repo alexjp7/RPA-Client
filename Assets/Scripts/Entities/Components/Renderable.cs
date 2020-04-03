@@ -16,20 +16,19 @@ namespace Assets.Scripts.Entities.Components
     {
         public string spriteName { get; set; }
         public string spritePath { get; set; }
-        public string iconPath { get; set;}
 
-
-        public Texture2D icon { get; set; }
-
-        //if Model is not set, load it.
-        public Sprite model
+        private Sprite _sprite;
+        public Sprite sprite
         {
             get
             {
-                return AssetLoader.getAsset(spriteName, spritePath);
+                return _sprite == null ? _sprite = AssetLoader.getSprite(spriteName, spritePath) : _sprite;
+            }
+            private set
+            {
+                sprite = value;
             }
         }
-
 
     }
 

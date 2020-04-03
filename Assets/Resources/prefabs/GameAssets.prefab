@@ -49,3 +49,5 @@ MonoBehaviour:
     type: 3}
   combatSpritePrefab: {fileID: 7741480382821625824, guid: eb0e6f4974a10854bb7fbb08dd29aff1,
     type: 3}
+  abilityButtonPrefab: {fileID: 1468149617617779782, guid: 333d5975a14bab948a862e55980a2404,
+    type: 3}

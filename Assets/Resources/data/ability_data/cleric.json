@@ -1,6 +1,5 @@
 {
-    "class_id":3,
-    "starter_ability_icons":"textures/icon_textures/ability_icons/warriorStarterSkills",
+    "entity":"cleric",
     "starting_abilities": [
       {
         "id": 9,

@@ -159,18 +159,21 @@ namespace Assets.Scripts.Entities.Abilities
 
         @return - An ability constructed by the JSON input.
         **************************************************************/
-        public static Ability constructAbility(JSONNode jSONNode, in Sprite iconTexture, int skillLevel)
+        public static Ability constructAbility(JSONNode jsonNode, string entityName, int skillLevel)
         {
             AbilityStrength abilityStrength = new AbilityStrength();
-            int[] types = getAbilityTypes(jSONNode["types"].AsArray, skillLevel);
-            string tooltip = construcTooltip(jSONNode, skillLevel, types[0], ref abilityStrength);
+            int[] types = getAbilityTypes(jsonNode["types"].AsArray, skillLevel);
+            string tooltip = construcTooltip(jsonNode, skillLevel, types[0], ref abilityStrength);
             Renderable assetData = new Renderable();
-            //assetData.icon = iconTexture;
+            string abilityName = jsonNode["name"].Value;
 
-            return new Ability(jSONNode["id"].AsInt, 
-                                types,jSONNode["name"].Value, 
-                                tooltip, 
-                                jSONNode["cooldown"], 
+            assetData.spriteName = abilityName;
+            assetData.spritePath = Ability.BASE_ABILITY_PATH + entityName + (abilityName.ToLower());
+
+            return new Ability(jsonNode["id"].AsInt, 
+                                types, abilityName, 
+                                tooltip,
+                                jsonNode["cooldown"], 
                                 abilityStrength,
                                 assetData);
         }

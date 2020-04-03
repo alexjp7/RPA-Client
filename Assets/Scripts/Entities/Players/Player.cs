@@ -10,18 +10,18 @@
 * Player objects represent the top level object in the dynamic
   player instance hierachy:
     A Player has an: 
-        - AdventuringClass instance, which is a sub-class
+        - Adventurer instance, which is a sub-class
           of Combatable.
 
         - Combatables are the top-level object which both
-          monsters and AdventuringClass types inherit from.
+          monsters and Adventurer types inherit from.
 
         - Comtabales have a Damageable and Renderable
           components which include health point managers
           and asset allocation/assignment, while also providing
           a top-level implementation for combat handlers.
 
-        - An AdventuringClass has sub-classes which inherit
+        - An Adventurer has sub-classes which inherit
           it; Warrior, Wizard, Rogue and Cleric, these represnet
           the playable archetypes which are selectable within
           character creation and include distinct abilities and
@@ -43,11 +43,11 @@ namespace Assets.Scripts.Entities.Players
         public bool ready { get; set; }
         public bool isClientPlayer { set; get;} //flag for marking the client side player
         
-        public AdventuringClass playerClass { get; set; }
+        public Adventurer playerClass { get; set; }
 
         /***************************************************************
         * Used to indicate class in character creation screen, allowing 
-          for the instantiation for the AdventuringClass Object to be
+          for the instantiation for the Adventurer Object to be
           done after Character Creation is done.
         **************************************************************/
         public int adventuringClass;
@@ -98,7 +98,7 @@ namespace Assets.Scripts.Entities.Players
         * Instantiates the Adventuring class object based on the selected 
           class during character creation.
 
-        * This function seperates the bulk of the AdventuringClass
+        * This function seperates the bulk of the Adventurer
           instantiation until after the character creation state is over
           to defer uncessary processing when changing classes during
           character creaiotn.

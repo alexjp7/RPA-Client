@@ -1,13 +1,13 @@
 ﻿/*---------------------------------------------------------------
-                ADVENTURING-CLASS (Abstract Model)
+                ADVENTURING-CLASS
  ---------------------------------------------------------------*/
 /***************************************************************
- * This class provides an abstract layer ontop of the more concrete
+* This class provides an abstract layer ontop of the more concrete
    class types (Warrior,Wizard,Rogue and Cleric), and allows for
    generic handling of common components and logic for the player
    classes to adhere too.
 
-* The AdventuringClass defines and implements static asset
+* The Adventurer defines and implements static asset
   loading functions used for loading sprite and ability data.
 
 * To allow for generic handling of player and monster types,
@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 using UnityEngine;
 using Assets.Scripts.Entities.Components;
@@ -36,19 +35,22 @@ namespace Assets.Scripts.Entities.Players
         CLERIC = 3
     }
 
-    public abstract class AdventuringClass : Combatable
+    public class Adventurer : Combatable
     {
         public static readonly int ABILITY_LIMIT = 5;
+        public static readonly string PLAYER_SPRITE_PATH = "player_textures/";
+
         public PlayerClasses classId { get; protected set; }
 
         /***************************************************************
         @param - name: sets the Combatable base object's name field.
         **************************************************************/
-        public AdventuringClass(string name)
+        public Adventurer(string _name)
         {
-            this.assetPath += "player_textures/";
-            this.abilities = new List<Ability>();
-            base.name = name;
+            assetPath += PLAYER_SPRITE_PATH;
+            name = _name;
+            type = CombatantType.PLAYER;
+            abilities = new List<Ability>();
         }
 
         /***************************************************************
@@ -82,19 +84,17 @@ namespace Assets.Scripts.Entities.Players
         public void loadAbilities(string path, bool isInitialLoad)
         {
             if (path == "") return;
-            if (this.classId == PlayerClasses.ROGUE) throw new NotImplementedException("Abilities Don't Exist For " + this.classId + " in AdventuringClass.loadAbilities()"); 
+            if (this.classId == PlayerClasses.ROGUE) throw new NotImplementedException("Abilities Don't Exist For " + this.classId + " in Adventurer.loadAbilities()"); 
 
             int skillLevel = 0;
-            string abilityJson = File.ReadAllText(path);
-            JSONNode json = JSON.Parse(abilityJson);
-            JSONArray abilities = isInitialLoad ? json["starting_abilities"].AsArray : json["abilities"].AsArray;
-            Sprite[] iconTextures = Resources.LoadAll<Sprite>(json["starter_ability_icons"]);
-
+            string abilityText = File.ReadAllText(path);
+            JSONNode json = JSON.Parse(abilityText);
+            JSONArray abilityJson = isInitialLoad ? json["starting_abilities"].AsArray : json["abilities"].AsArray;
+            string entityName = json["entity"];
             //Construct abilities
-            for (int i = 0; i < abilities.Count; i++)
+            for (int i = 0; i < abilityJson.Count; i++)
             {
-                Sprite abilityTexture = iconTextures.Where(texture => texture.name == abilities[i]["icon_path"].Value).First<Sprite>();
-                this.abilities.Add(AbilityFactory.constructAbility(abilities[i], abilityTexture, skillLevel));
+                abilities.Add(AbilityFactory.constructAbility(abilityJson[i], entityName + "/" , skillLevel));
             }
         }
 
@@ -109,7 +109,7 @@ namespace Assets.Scripts.Entities.Players
         @param - classId: The sub-class's adventuring class type
         (Warrior, Wizard, Rogue or Cleric). 
         @param - path: the directory path read from the meta.json
-        file that is the relative location from the /Resources
+        file that is the relative location from the  Resources
         folder.
         **************************************************************/
         public static void setDataPaths(int classId, string path)
@@ -147,19 +147,19 @@ namespace Assets.Scripts.Entities.Players
             switch ((PlayerClasses)classId)
             {
                 case PlayerClasses.WARRIOR:
-                    classSprite = Warrior.staticAssets.model;
+                    classSprite = Warrior.staticAssets.sprite;
                     break;
 
                 case PlayerClasses.WIZARD:
-                    classSprite = Wizard.staticAssets.model;
+                    classSprite = Wizard.staticAssets.sprite;
                     break;
 
                 case PlayerClasses.ROGUE:
-                    classSprite = Rogue.staticAssets.model;
+                    classSprite = Rogue.staticAssets.sprite;
                     break;
 
                 case PlayerClasses.CLERIC:
-                    classSprite = Cleric.staticAssets.model;
+                    classSprite = Cleric.staticAssets.sprite;
                     break;
             }
             return classSprite;
@@ -250,7 +250,5 @@ namespace Assets.Scripts.Entities.Players
             }
             return result;
         }
-
-
     }
 }

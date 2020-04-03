@@ -13,12 +13,18 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
-using UnityEngine;
+using Assets.Scripts.UI;
 
 namespace Assets.Scripts.Entities.Components
 {
+    public enum CombatantType
+    {
+        PLAYER,
+        MONSTER
+    }
+
     //Generic implementation of ability effect applications
-    public abstract class Combatable 
+    public abstract class Combatable
     {
         private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
         protected string assetPath { get; set; }
@@ -27,7 +33,10 @@ namespace Assets.Scripts.Entities.Components
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
-        public  string name  {get; protected set;}
+        public string name { get; protected set;}
+        public CombatantType type { get; protected set;}
+
+        public CombatSprite combatSprite { get; set;}
 
         public Combatable()
         {

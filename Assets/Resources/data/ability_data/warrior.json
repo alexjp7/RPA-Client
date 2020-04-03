@@ -1,6 +1,5 @@
 {
-  "class_id":0,
-  "starter_ability_icons":"textures/icon_textures/ability_icons/warriorStarterSkills",
+  "entity":"warrior",
   "starting_abilities": [
     {
       "id": 0,

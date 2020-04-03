@@ -11,7 +11,6 @@ using UnityEngine.UI;
 
 public class Tooltip : MonoBehaviour
 {
-
     public static Tooltip instance;
 
     [SerializeField]

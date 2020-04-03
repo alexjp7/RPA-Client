@@ -1,6 +1,5 @@
 {
-    "class_id":1,
-    "starter_ability_icons":"textures/icon_textures/ability_icons/wizardStarterSkills",
+    "entity":"wizard",
     "starting_abilities": [
       {
         "id": 3,
