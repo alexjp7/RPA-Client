@@ -94,58 +94,6 @@ namespace Assets.Scripts.Entities.Abilities
     class AbilityFactory
     {
         /***************************************************************
-        * Helper method to return the string of the ability type 
-          for a tooltip description. Abilities can have multiple types
-          and for each of those, the string label is returned to display
-          to the user. Called in AbilityToolTip.showTooltip()
-
-        @param - typeIds: an array of ability types 
-        @return - a list of an ability's type labels 
-        **************************************************************/
-        public static string[] getAbilityTypeLabel(int[] typeIds)
-        {
-            string[] result = new string[2];
-
-            for(int i = 0; i < typeIds.Length; i++)
-            {
-                switch ((AbilityTypes)typeIds[i])
-                {
-                    case AbilityTypes.SINGLE_DAMAGE:
-                        result[i] = "Single-Damage";
-                        break;
-                    case AbilityTypes.MULTI_DAMAGE:
-                        result[i] = "Multi-Damage";
-                        break;
-                    case AbilityTypes.SELF_HEAL:
-                        result[i] = "Self-Heal";
-                        break;
-                    case AbilityTypes.SINGLE_HEAL:
-                        result[i] = "Single-Heal";
-                        break;
-                    case AbilityTypes.MULTI_HEAL:
-                        result[i] = "Multi-Heal";
-                        break;
-                    case AbilityTypes.SELF_BUFF:
-                        result[i] = "Self-Buff";
-                        break;
-                    case AbilityTypes.SINGLE_BUFF:
-                        result[i] = "Single-Buff";
-                        break;
-                    case AbilityTypes.MULTI_BUFF:
-                        result[i] = "Mutli-Buff";
-                        break;
-                    case AbilityTypes.SINGLE_DEBUFF:
-                        result[i] = "Single-Debuff";
-                        break;
-                    case AbilityTypes.MULTI_DEBUFF:
-                        result[i] = "Multi-Debuff";
-                        break;
-                }
-            }
-            return result;
-        }
-
-        /***************************************************************
         * Constructs an ability; setting its name,id,potency,tooltip,
           and sprite fields.
 
@@ -162,9 +110,11 @@ namespace Assets.Scripts.Entities.Abilities
         public static Ability constructAbility(JSONNode jsonNode, string entityName, int skillLevel)
         {
             AbilityStrength abilityStrength = new AbilityStrength();
-            int[] types = getAbilityTypes(jsonNode["types"].AsArray, skillLevel);
-            string tooltip = construcTooltip(jsonNode, skillLevel, types[0], ref abilityStrength);
             Renderable assetData = new Renderable();
+
+            int statusEffect = -1;
+            int[] types = getAbilityTypes(jsonNode["types"].AsArray, skillLevel);
+            string tooltip = construcTooltip(jsonNode, skillLevel, types[0], ref abilityStrength, ref statusEffect);
             string abilityName = jsonNode["name"].Value;
 
             assetData.spriteName = abilityName;
@@ -173,7 +123,8 @@ namespace Assets.Scripts.Entities.Abilities
             return new Ability(jsonNode["id"].AsInt, 
                                 types, abilityName, 
                                 tooltip,
-                                jsonNode["cooldown"], 
+                                jsonNode["cooldown"],
+                                statusEffect,
                                 abilityStrength,
                                 assetData);
         }
@@ -203,6 +154,89 @@ namespace Assets.Scripts.Entities.Abilities
 
             return results;
         }
+
+        /***************************************************************
+        * Helper method for constructing the tooltip string for an 
+          ability. 
+
+        * The tooltip of an ability has a description block and various
+          'interpolation tokens'. This format supports for variable 
+          tooltip descriptions that reflect the skill progression system
+          of uprading an ability reflecting a more verbose ability
+          description.
+
+            e.g. base_tooltip = "Deliver a @ strike to an enemy dealing $ damage ",
+                 tooltip_variables =   ["forceful","brutal","devestating"] 
+                 damage : [ [5,8], [12,20], [25,40]], //Min-max damage for each tier
+                 skillLevel = 0
+
+                 The @ character will be replaced with tooltip_variables[0] = "forceful".
+                 The # Character is used to replace the 2nd tooltip token (not used in this example) 
+                 The $ character will be replaced with damage[0][0] = 5 as the minimun,
+                 and damage[0][1] = 8 as the maxiumun damage.
+
+                Creating the final tooltip string as:
+                    "Deliver a forceful strike to an enemy dealing 5-8 damage ".
+        
+        @param - abilityJson: an element of the JSON abilities array.
+        @param - skillLevel: an integer between 0-2, used to index into
+        the typeIds JSON array and ability potency (damage/healing amount)
+        that are relevant to the skill level parameter.
+        @param - primaryType: The first type listed in the types array,
+        indicating the primary use for that ability (Healing,Damage,Effect).
+        @ref-param - abilityStrength: a struct that contains the abilities
+        min-max effect (healing/damage ranges). abilityStrength
+        is passed in as a reference to allow it to be set by the tooltip
+        consruciton logic.
+
+         @return - The completed tooltip description with interpolated
+         damage and description values.
+        **************************************************************/
+        private static string construcTooltip(in JSONNode abilityJson, int skillLevel, int primaryType, ref AbilityStrength abilityStrength, ref int statusEffect)
+        {
+            //Determine ability type and meta type, determine what property is used for each skill type 
+            string potencyProperty = "";
+            MetaTypes metaType = getMetaType(primaryType, out potencyProperty);
+
+            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+            {
+                throw new ArgumentException("Malformed JSON included in ability id: " + abilityJson["id"] + " - " + abilityJson["name"]);
+            }
+
+            //Construct Tooltip and set damage values for ability
+            string tooltip = abilityJson["tooltip"].Value;
+            string abilityPotency = "";
+            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            {
+                int abilityMin = abilityJson[potencyProperty][skillLevel][0].AsInt;
+                int abilityMax = abilityJson[potencyProperty][skillLevel][1].AsInt;
+
+                abilityPotency = abilityMin + "-" + abilityMax;
+                abilityStrength.min = abilityMin;
+                abilityStrength.max = abilityMax;
+
+            }
+            else if (metaType == MetaTypes.EFFECT)
+            {
+                int potency = abilityJson[potencyProperty][skillLevel].AsInt;
+                abilityPotency = potency.ToString();
+                abilityStrength.min = -1;
+                abilityStrength.max = potency;
+                statusEffect = abilityJson["status"];
+            }
+
+            //Interpolate damage
+            tooltip = tooltip.Replace("$", abilityPotency);
+            JSONArray toolTipVars = abilityJson["tooltip_vars"].AsArray;
+            //Interpolate Description var-args
+            for (int i = 0; i < toolTipVars.Count; i++)
+                tooltip = tooltip.Replace(Ability.toolTipVarTokens[i], toolTipVars[i][skillLevel].Value);
+
+            return tooltip;
+        }
+
+
+
 
         /***************************************************************
         * Helper method called when constructing an ability. used in 
@@ -267,82 +301,56 @@ namespace Assets.Scripts.Entities.Abilities
         }
 
         /***************************************************************
-        * Helper method for constructing the tooltip string for an 
-          ability. 
+        * Helper method to return the string of the ability type 
+          for a tooltip description. Abilities can have multiple types
+          and for each of those, the string label is returned to display
+          to the user. Called in AbilityToolTip.showTooltip()
 
-        * The tooltip of an ability has a description block and various
-          'interpolation tokens'. This format supports for variable 
-          tooltip descriptions that reflect the skill progression system
-          of uprading an ability reflecting a more verbose ability
-          description.
-
-            e.g. base_tooltip = "Deliver a @ strike to an enemy dealing $ damage ",
-                 tooltip_variables =   ["forceful","brutal","devestating"] 
-                 damage : [ [5,8], [12,20], [25,40]], //Min-max damage for each tier
-                 skillLevel = 0
-
-                 The @ character will be replaced with tooltip_variables[0] = "forceful".
-                 The # Character is used to replace the 2nd tooltip token (not used in this example) 
-                 The $ character will be replaced with damage[0][0] = 5 as the minimun,
-                 and damage[0][1] = 8 as the maxiumun damage.
-
-                Creating the final tooltip string as:
-                    "Deliver a forceful strike to an enemy dealing 5-8 damage ".
-        
-        @param - abilityJson: an element of the JSON abilities array.
-        @param - skillLevel: an integer between 0-2, used to index into
-        the typeIds JSON array and ability potency (damage/healing amount)
-        that are relevant to the skill level parameter.
-        @param - primaryType: The first type listed in the types array,
-        indicating the primary use for that ability (Healing,Damage,Effect).
-        @ref-param - abilityStrength: a struct that contains the abilities
-        min-max effect (healing/damage ranges). abilityStrength
-        is passed in as a reference to allow it to be set by the tooltip
-        consruciton logic.
-
-         @return - The completed tooltip description with interpolated
-         damage and description values.
+        @param - typeIds: an array of ability types 
+        @return - a list of an ability's type labels 
         **************************************************************/
-        private static string construcTooltip(in JSONNode abilityJson, int skillLevel, int primaryType, ref AbilityStrength abilityStrength)
+        public static string[] getAbilityTypeLabel(int[] typeIds)
         {
-            //Determine ability type and meta type, determine what property is used for each skill type 
-            string potencyProperty = "";
-            MetaTypes metaType = getMetaType(primaryType, out potencyProperty);
+            string[] result = new string[2];
 
-            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+            for (int i = 0; i < typeIds.Length; i++)
             {
-                throw new ArgumentException("Malformed JSON included in ability id: " + abilityJson["id"] + " - " + abilityJson["name"]);
+                switch ((AbilityTypes)typeIds[i])
+                {
+                    case AbilityTypes.SINGLE_DAMAGE:
+                        result[i] = "Single-Damage";
+                        break;
+                    case AbilityTypes.MULTI_DAMAGE:
+                        result[i] = "Multi-Damage";
+                        break;
+                    case AbilityTypes.SELF_HEAL:
+                        result[i] = "Self-Heal";
+                        break;
+                    case AbilityTypes.SINGLE_HEAL:
+                        result[i] = "Single-Heal";
+                        break;
+                    case AbilityTypes.MULTI_HEAL:
+                        result[i] = "Multi-Heal";
+                        break;
+                    case AbilityTypes.SELF_BUFF:
+                        result[i] = "Self-Buff";
+                        break;
+                    case AbilityTypes.SINGLE_BUFF:
+                        result[i] = "Single-Buff";
+                        break;
+                    case AbilityTypes.MULTI_BUFF:
+                        result[i] = "Mutli-Buff";
+                        break;
+                    case AbilityTypes.SINGLE_DEBUFF:
+                        result[i] = "Single-Debuff";
+                        break;
+                    case AbilityTypes.MULTI_DEBUFF:
+                        result[i] = "Multi-Debuff";
+                        break;
+                }
             }
 
-            //Construct Tooltip and set damage values for ability
-            string tooltip = abilityJson["tooltip"].Value;
-            string abilityPotency = "";
-            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
-            {
-                int abilityMin = abilityJson[potencyProperty][skillLevel][0].AsInt;
-                int abilityMax = abilityJson[potencyProperty][skillLevel][1].AsInt;
-
-                abilityPotency = abilityMin + "-" + abilityMax;
-                abilityStrength.min = abilityMin;
-                abilityStrength.max= abilityMax;
-
-            }
-            else if (metaType == MetaTypes.EFFECT)
-            {
-                int potency = abilityJson[potencyProperty][skillLevel].AsInt;
-                abilityPotency = potency.ToString();
-                abilityStrength.min = potency;
-                abilityStrength.max = -1;
-            }
-
-            //Interpolate damage
-            tooltip = tooltip.Replace("$", abilityPotency);
-            JSONArray toolTipVars = abilityJson["tooltip_vars"].AsArray;
-            //Interpolate Description var-args
-            for (int i = 0; i < toolTipVars.Count; i++)
-                tooltip = tooltip.Replace(Ability.toolTipVarTokens[i], toolTipVars[i][skillLevel].Value);
-
-            return tooltip;
-        }
+            return result;
+        } 
     }
-}
+} 

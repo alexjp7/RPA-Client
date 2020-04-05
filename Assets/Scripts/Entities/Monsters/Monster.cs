@@ -40,15 +40,15 @@ namespace Assets.Scripts.Entities.Monsters
       to enable a more customizable party creation base on the state
       of a running game.
     **************************************************************/
-    public enum MonsterTypes
+    public enum MonsterTypes 
     {
-        FUZZBALL = 0
+        FUZZBALL = 0,
+        GOBLIN_FIGHTER = 1,
     }
 
     public abstract class Monster : Combatable
     {
         public MonsterTypes monsterId { get; protected set; }
-        public static float BASE_HP; //Read from file ?
 
         /***************************************************************
         * During construction, all monsters names and abilities
@@ -79,11 +79,11 @@ namespace Assets.Scripts.Entities.Monsters
 
         @param - monsterId: The sub-classes monster type. 
         **************************************************************/
-        protected void setId(MonsterTypes monsterId)
+        protected void setId(MonsterTypes _monsterId)
         {
-            this.monsterId = monsterId;
-            this.healthProperties = new Damageable(monsterId);
-            this.setSpritePath(monsterId.ToString());
+            monsterId = _monsterId;
+            healthProperties = new Damageable();
+            setSpritePath(monsterId.ToString());
             assetData.spriteName = monsterId.ToString();
         }
 
@@ -109,14 +109,6 @@ namespace Assets.Scripts.Entities.Monsters
             return namePrefixes[Util.Random.getInt(namePrefixes.Length)];
         }
 
-        /***************************************************************
-        * Not Implemented Yet.
-        **************************************************************/
-        public abstract int getTarget();
-        /***************************************************************
-        * Not Implemented Yet.
-        **************************************************************/
-        public abstract Ability selectAbility();
 
     }
 }

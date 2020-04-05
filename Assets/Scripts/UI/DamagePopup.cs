@@ -9,14 +9,13 @@ public class DamagePopup : MonoBehaviour
     private Color textColor;
     private float moveSpeed;
     
-        public static DamagePopup create(Vector3 spritePosition, int damageDealt)
+        public static DamagePopup create(Vector3 spritePosition, string damageDealt, in Color color)
         {
             Vector2 localPoint = spritePosition;
-            localPoint.y += 100;
-
+            localPoint.y += color == Color.green ? 130 : 100;
             Transform damagePopupTransform = Instantiate(GameAssets.instance.damagePopupPrefab, localPoint, Quaternion.identity);
             DamagePopup damagePopup = damagePopupTransform.GetComponent<DamagePopup>();
-            damagePopup.appear(damageDealt);
+            damagePopup.appear(damageDealt, in color);
   
             return damagePopup;
         }
@@ -28,9 +27,10 @@ public class DamagePopup : MonoBehaviour
         dissapearTime = 1f;
     }
 
-    public void appear(int damageDealt)
+    public void appear(string amount, in Color color)
     {
-        damageText.text = damageDealt.ToString();
+        damageText.color = color;
+        damageText.text = amount.ToString();
         textColor = damageText.color;
     }
 

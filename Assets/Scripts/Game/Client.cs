@@ -36,7 +36,11 @@ namespace Assets.Scripts.RPA_Game
 
         public static Client getInstance()
         {
-            return INSTANCE == null ? new Client() : INSTANCE;
+            if(INSTANCE == null)
+            {
+                INSTANCE = new Client();
+            }
+            return INSTANCE;
         }
 
         /***************************************************************

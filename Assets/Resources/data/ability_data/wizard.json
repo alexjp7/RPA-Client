@@ -19,9 +19,9 @@
         "tooltip": "Channel @ wind dealing to $ damage all enemies  and applying * to all targets",
         "tooltip_vars":[["a considerable gust of" ,"an unatural gust of","a gale force strength"]],
         "damage":[[2,4],[9,14],[20,25]],
-        "types": [[1,9]],
-        "cooldown":3,
-        "status":0
+        "cooldown":6,
+        "types": [[1]],
+        "status":null
       },
       {
         "id": 5,
@@ -31,7 +31,7 @@
         "tooltip_vars":[["a cloudy","a surreal ","a vivd"],
                        ["your abilities","either yours OR a party memnber's abilities","all party member's abilities"]],
         "potency":[2],
-        "cooldown":3,
+        "cooldown":5,
         "types": [[5],[6],[7]],
         "status":0
       }

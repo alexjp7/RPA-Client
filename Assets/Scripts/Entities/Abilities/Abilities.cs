@@ -30,7 +30,7 @@ namespace Assets.Scripts.Entities.Abilities
     * The AbilityStrength struct provides a generic type to represent
       the potency of an ability that have a varied effect potency.
     
-    * For abilities that do NOT have a range in potency, the minimun
+    * For abilities that do NOT have a range in potency, the MAX
       value contains the effect strenght
 
       e.g. percentage based ability strenghts.
@@ -46,29 +46,31 @@ namespace Assets.Scripts.Entities.Abilities
 
     public class Ability
     {
-        public static readonly string BASE_ABILITY_PATH = "textures/icon_textures/ability_icons/";
         public static readonly int LEVEL_TIER_LIMIT = 3;
+        public static readonly string BASE_ABILITY_PATH = "textures/icon_textures/ability_icons/";
         public static readonly string[] toolTipVarTokens = { "@", "#" };
-        public Renderable assetData { get; set; }
 
         //Read in values
         public string iconPath { get; set; }
-        public AbilityStrength abilityStrength { get; set; }
         public int id { get; set; }
         public string tooltip { get; set; }
         public string name { get; set; }
-        public int cooldown{ get; set; }
-        public int[] typeIds;
+        public int cooldown { get; set; }
+        public int[] typeIds { get; set; }
+        public int statusEffect; 
+        public Renderable assetData { get; set; }
+        public AbilityStrength abilityStrength { get; set; }
 
         //Cooldown trackers
         public bool isOnCooldown { get; private set; }
-        public int lastTurnUsed { get; set; }
-        public int cooldownTracker { get; private set;}
+        public int lastTurnUsed { get; private set; }
+        public int cooldownTracker { get; set;}
 
         
         public Ability() { }
 
-        public Ability(int id,int[] typeIds ,string name, string tooltip, int cooldown, AbilityStrength abilityStrength, Renderable assetData)
+        public Ability(int id,int[] typeIds ,string name, string tooltip, int cooldown,
+                       int statusEffect, AbilityStrength abilityStrength, Renderable assetData)
         {
             this.id = id;
             this.typeIds = typeIds;
@@ -78,6 +80,7 @@ namespace Assets.Scripts.Entities.Abilities
             this.abilityStrength = abilityStrength;
             this.assetData = assetData;
             this.isOnCooldown = false;
+            this.statusEffect = statusEffect;
             this.lastTurnUsed = -1;
             this.cooldownTracker = cooldown + 1;
         }
@@ -88,7 +91,7 @@ namespace Assets.Scripts.Entities.Abilities
         @param - turnCount: the amount turns taken since
         an abilites use.
         *********************************** ***************************/
-        public void updateCooldown(int turnCount)
+        public void updateCooldown()
         {
             isOnCooldown = false;
 
@@ -96,9 +99,9 @@ namespace Assets.Scripts.Entities.Abilities
             if (cooldown > 1)
             {
                 cooldownTracker --;
-                if ((cooldown + 1) - cooldownTracker == cooldown + 1)
+                if ((cooldown + 1) - cooldownTracker >= cooldown + 1)
                 {
-                    cooldownTracker = cooldown  + 1;
+                    cooldownTracker = cooldown + 1;
                 }
                 else
                 {
@@ -106,7 +109,12 @@ namespace Assets.Scripts.Entities.Abilities
                 }
             }
         }
-
+        
+        public void setLastTurnUsed(int turn)
+        {
+            lastTurnUsed = turn;
+            if(turn != -1) updateCooldown();
+        }
         public override string ToString()
         {
             return "Ability { id:" + id + ", name: " + name + ", tooltip: " + tooltip + ", cooldown: " + cooldown + "," + abilityStrength.toString() + "}";

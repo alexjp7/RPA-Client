@@ -113,8 +113,8 @@ public class BattleState : MonoBehaviour
         //@Test Data
         Game.players.Add(new Player(6, "Alexjp", 1, true));
         Game.players.Add(new Player(8, "Frictionburn", 0, true));
-        //Game.players.Add(new Player(11, "Kozza", 2, true));
-        //Game.players.Add(new Player(4, "Wizzledonker", 3, true));
+        Game.players.Add(new Player(11, "Kozza", 2, true));
+        Game.players.Add(new Player(4, "Wizzledonker", 3, true));
 
         Game.connectedPlayers = Game.players.Count;
 
@@ -153,7 +153,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initMonsterParty()
     {
-        int monsterPartySize = 2;
+        int monsterPartySize = 3;
         MonsterFactory mFactory = new MonsterFactory();
         monsterParty = mFactory.createMonsterParty(monsterPartySize);
 
@@ -211,7 +211,7 @@ public class BattleState : MonoBehaviour
         try
         {
             clientPlayerClass.loadAbilities(Adventurer.getAbilityPath(clientPlayerClass.classId), true);
-            for (int i = 0; i < Adventurer.ABILITY_LIMIT + 1; i++)
+            for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
             {
                 AbilityButton button;
                 if (i < clientPlayerClass.abilities.Count)
@@ -324,13 +324,11 @@ public class BattleState : MonoBehaviour
         int nextCombatant = getCombatant(isPlayerTurn);
 
         togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant].id == clientSidePlayer.id);
-
-
-        TurnChevron.setPosition(isPlayerTurn ? Game.players[nextCombatant].playerClass.combatSprite.transform.position
-                                             : monsterParty[nextCombatant].combatSprite.transform.position);
+        TurnChevron.setPosition(isPlayerTurn ? Game.players[nextCombatant].playerClass.combatSprite.transform
+                                             : monsterParty[nextCombatant].combatSprite.transform);
 
         currentPlayerName.text = isPlayerTurn ? Game.players[nextCombatant].name : monsterParty[nextCombatant].name;
-        //if (!isPlayerTurn) takeMonsterTurn(); //Monster Turn
+        if (!isPlayerTurn) takeMonsterTurn();
     }
 
     /***************************************************************
@@ -374,56 +372,73 @@ public class BattleState : MonoBehaviour
             }
             currentMonster++;
         }
+
         return nextComtatant;
     }
 
     /***************************************************************
-    * Sets the visual properties relating to the active/inactive state
-      of the players turn including updating ability cooldowns.
+    *  Calls for cooldown trackers to be updated
 
-    @param - isPalyerTurn - if true, the ability buttons functionality 
-    will become active aswel as setting the icons completley opaque.
-    If false, the ability icon's functionality will be disabled
-    and setting the buttons to 30% opaque.
+    @param - isPlayerTurn - passed in to setCooldownUI to determine
+    what colors and values to update the coodlown UI with.
     **************************************************************/
     private void togglePlayerTurn(bool isPlayerTurn)
     {
         isClientPlayerTurn = isPlayerTurn;
-        if (isPlayerTurn) clientPlayerClass.updateAbilityCooldowns(turnCount - (Game.players.Count + monsterParty.Count()));
-
+        if (isPlayerTurn) clientPlayerClass.updateAbilityCooldowns();
+        
         for (int i = 0; i < clientPlayerClass.abilities.Count; i++)
         {
-            Button button = abilityButtons[i].button;
-            Color color = button.GetComponent<Image>().color;
-            Text cooldownText = abilityButtons[i].cooldownText;
-            Ability ability = clientPlayerClass.abilities[i];
+            setCooldownUI(i, isPlayerTurn);
+        }
+    }
 
-            if (isPlayerTurn)
+    /***************************************************************
+    * Updates the UI components to reflect the current ability
+      cooldowns in progres
+
+    @param - isPlayerTurn - if true, all non-cooldowned abilities
+    will become visually active - if false the  ability panel
+    will be visually disabled.
+    **************************************************************/
+    private void setCooldownUI(int abilityIndex, bool isPlayerTurn)
+    {
+        Ability ability = clientPlayerClass.abilities[abilityIndex];
+        AbilityButton abilityButton = abilityButtons[abilityIndex];
+        Color color = abilityButton.button.GetComponent<Image>().color;
+        Text cooldownText = abilityButtons[abilityIndex].cooldownText;
+
+        string cooldownValue = "";
+        if(isPlayerTurn)
+        {
+            if (ability.isOnCooldown)
             {
-                if (ability.isOnCooldown)
+                color.a = .3f;
+                if(ability.cooldownTracker > 0)
                 {
-                    color.a = .3f;
-                    cooldownText.text = (ability.cooldownTracker).ToString();
-                }
-                else
-                {
-                    color.a = 1f;
-                    abilityButtons[i].cooldownText.text = "";
-                    ability.lastTurnUsed = -1;
+                    cooldownValue = (ability.cooldownTracker).ToString();
                 }
             }
             else
             {
-                color.a = .3f;
-                if (ability.isOnCooldown)
+                color.a = 1f;
+                abilityButton.cooldownText.text = "";
+                ability.setLastTurnUsed(-1);
+            }
+        }
+        else
+        {
+            color.a = .3f;
+            if (ability.isOnCooldown)
+            {
+                if (ability.cooldownTracker > 1)
                 {
-                    cooldownText.text = (ability.cooldownTracker).ToString();
+                    cooldownValue = (ability.cooldownTracker).ToString();
                 }
             }
-
-            button.GetComponent<Image>().color = color;
         }
-
+        abilityButton.button.GetComponent<Image>().color = color;
+        abilityButton.cooldownText.text = cooldownValue;
     }
 
     /***************************************************************
@@ -458,8 +473,9 @@ public class BattleState : MonoBehaviour
         else
         {
             targets.Add(Game.players[target].playerClass);
-            attackTarget(Game.players[target].playerClass, 4, 5, false);
+            attackTarget(Game.players[target].playerClass, 4, 5);
         }
+        takeTurn();
     }
 
     /*---------------------------------------------------------------
@@ -514,6 +530,7 @@ public class BattleState : MonoBehaviour
     public void onAbilityClicked(int skillIndex)
     {
         if (!isClientPlayerTurn) return;
+        if (clientPlayerClass.abilities[skillIndex].isOnCooldown) return;
 
         resetTargets();
         selectedSkill = skillIndex;
@@ -525,6 +542,7 @@ public class BattleState : MonoBehaviour
             case AbilityTypes.SELF_HEAL:
             case AbilityTypes.SELF_BUFF:
                 isTargetable = false;
+                hasValidTarget = true;
                 targets.Add(clientPlayerClass);
                 int clientIndex = Game.getPlayerIndex(clientSidePlayer.id);
                 Game.players[clientIndex].playerClass.combatSprite.sprite.color = Color.green;
@@ -550,8 +568,8 @@ public class BattleState : MonoBehaviour
                 hasValidTarget = true;
                 monsterParty.ForEach(monster => monster.combatSprite.sprite.color = Color.red);
                 for (int i = 0; i < monsterParty.Count; i++) targets.Add(monsterParty[i]);
-
                 break;
+
             case AbilityTypes.MULTI_HEAL:
             case AbilityTypes.MULTI_BUFF:
                 isTargetable = false;
@@ -661,54 +679,47 @@ public class BattleState : MonoBehaviour
         if (selectedSkill == -1) return;
 
         Ability abilityUsed = clientPlayerClass.abilities[selectedSkill];
-
-        if (combatant.combatSprite.isMonster)
+        foreach (var target in targets)
         {
-            foreach (var target in targets)
+            foreach (var abilityType in abilityUsed.typeIds)
             {
-                foreach (var abilityType in abilityUsed.typeIds)
+                MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
+                if(target.combatSprite.isMonster)
                 {
-                    MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
-
                     if (metaType == MetaTypes.DAMAGE)
                     {
-                        attackTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max, true);
-                    }
-                    else if (metaType == MetaTypes.EFFECT)
-                    {
-
+                        attackTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                     }
                 }
-            }
-        }
-        else
-        {
-            foreach (var target in targets)
-            {
-                foreach (var abilityType in abilityUsed.typeIds)
+                else
                 {
-                    MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
-
                     if (metaType == MetaTypes.HEALING)
                     {
-                        healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max, false);
+                        healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                     }
-                    else if (metaType == MetaTypes.EFFECT)
-                    {
-
-                    }
+                }
+               
+                if (metaType == MetaTypes.EFFECT)
+                {
+                    affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max);
                 }
             }
         }
-        abilityUsed.lastTurnUsed = turnCount;
+
+        //Update cooldown /targets 
+        abilityUsed.setLastTurnUsed(turnCount);
+        setCooldownUI(selectedSkill, turnCount % 2 == 1);
         onSpriteExit(in combatant);
-
-        if (Game.players.Count > 1) clientPlayerClass.abilities[selectedSkill].updateCooldown(turnCount - (Game.players.Count + monsterParty.Count()));
-
         resetTargets();
         takeTurn();
     }
 
+
+    private void affectTarget(Combatable target, int statusEffect, int potency)
+    {
+        target.applyEffect(statusEffect, potency);
+    }   
+                
     /***************************************************************
     * Performs a healing action on a target; updates new hp value
       to the HP bar fill-amount and text value.
@@ -723,11 +734,12 @@ public class BattleState : MonoBehaviour
       @param - isMonster: Used to determine which UI elements to update;
       between party or monster UI components
     **************************************************************/
-    public void healTarget(in Combatable target, int minHealing, int maxHealing, bool isMonster)
+    public void healTarget(in Combatable target, int minHealing, int maxHealing)
     {
-        target.applyHealing((int)minHealing, (int)maxHealing);
+        int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
         target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+        DamagePopup.create(target.combatSprite.transform.position, healingAmount.ToString(), Color.green);
     }
 
     /***************************************************************
@@ -749,13 +761,9 @@ public class BattleState : MonoBehaviour
       @param - isMonster: Used to determine which UI elements to update;
       between party or monster UI components
     **************************************************************/
-    public void attackTarget(in Combatable target, int minDamage, int maxDamage, bool isMonster)
+    public void attackTarget(in Combatable target, int minDamage, int maxDamage)
     {
-
         int damageDealt = target.applyDamage(minDamage, maxDamage);
-
-        DamagePopup.create(target.combatSprite.transform.position, damageDealt);
-
         if (!target.isAlive())
         {
             Destroy(target.combatSprite.gameObject);
@@ -766,6 +774,8 @@ public class BattleState : MonoBehaviour
             target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
             target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
         }
+
+        DamagePopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
     }
 
     private void checkBattleState()
@@ -795,7 +805,5 @@ public class BattleState : MonoBehaviour
         }
 
         hasNextCombatant = isInProgress;
-
     }
-
 }

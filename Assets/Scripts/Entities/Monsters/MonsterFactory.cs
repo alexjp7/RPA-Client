@@ -16,8 +16,10 @@
   logic.
 **************************************************************/
 
+using Assets.Scripts.RPA_Game;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.Entities.Monsters
 {
@@ -54,8 +56,15 @@ namespace Assets.Scripts.Entities.Monsters
                 case MonsterTypes.FUZZBALL:
                     randomMonster = new FuzzBall();
                     break;
+
+                case MonsterTypes.GOBLIN_FIGHTER:
+                    randomMonster = new GoblinFighter();
+                    break;
             }
 
+            //Scale monsters based on party size
+            randomMonster.healthProperties.maxHealth = randomMonster.getMaxHp() + (randomMonster.getMaxHp() * Game.players.Count());
+            randomMonster.healthProperties.currentHealth = randomMonster.healthProperties.maxHealth;
             return randomMonster;
         }
     }

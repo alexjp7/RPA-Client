@@ -42,6 +42,7 @@ namespace Assets.Scripts.UI
 
         /***************************************************************
         * Sets the values of each GameObject that makes up the CombatSprite.
+        
         @param - combatant: The monster or player that is to be displayed
 
         @return - A combat sprite reflecting that of the passed in
@@ -65,15 +66,11 @@ namespace Assets.Scripts.UI
             healthBar = gameObject.transform.Find("image_hp_bar").GetComponent<Image>();
             maxHealthValue = gameObject.transform.Find("text_max_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
-
         }
-
 
         private void onMouseHoverEnter()
         {
            
         }
-
-
     }
 }  

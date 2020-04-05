@@ -20,7 +20,7 @@ namespace Assets.Scripts.Util
         {
             Dictionary<string, string> staticAssets = new Dictionary<string, string>()
             {
-                {"lock", "textures/icon_textures/ability_icons/lock" }
+                {"lock", "textures/icon_textures/general/lock" }
             };
 
             foreach (var asset in staticAssets) spriteMap.Add(asset.Key, Resources.Load<Sprite>(asset.Value));

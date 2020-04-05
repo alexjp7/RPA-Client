@@ -80,31 +80,32 @@ namespace Assets.Scripts.Entities.Components
           @param - maxHealing: The upper bound of the healing being applied
           that is used to calculate the actual amount healed.
         **************************************************************/
-        public virtual void applyHealing(int minDamage, int maxDamage)
+        public virtual int  applyHealing(int minValue, int maxValue)
         {
-            float damageHealed = Util.Random.getInt(minDamage, maxDamage);
+            float damageHealed = Util.Random.getInt(minValue, maxValue);
             healthProperties.currentHealth += damageHealed;
-            healthProperties.currentHealth = System.Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+            healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+            return (int) damageHealed;
         }
 
         /***************************************************************
          * Not Implemented Yet
         **************************************************************/
-        public virtual void applyDebuff(in Ability ability)
+        public virtual void applyEffect(int statusEffect, int potency)
         {
-            throw new NotImplementedException("Function: applyDebuf() in object: Combatable");
-        }
+            EffectProcessor.getInstance().applyEffect(this, statusEffect, potency);
+        }   
 
         /***************************************************************
          * Updates cooldown counters for each ability.
         @param - effectiveTurnCount: the amount turns taken
         by a combatable.
         **************************************************************/
-        public virtual void updateAbilityCooldowns(int turnCount)
+        public virtual void updateAbilityCooldowns()
         {
             foreach(Ability ability in abilities)
             {
-                ability.updateCooldown(turnCount);
+                ability.updateCooldown();
             }
         }
 

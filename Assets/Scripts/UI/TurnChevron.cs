@@ -32,10 +32,13 @@ public class TurnChevron : MonoBehaviour
      @param  - position: The new position that the chevron
      transform will be updated to.
     **************************************************************/
-    public static void setPosition(Vector3 position)
+    public static void setPosition(Transform position)
     {
-        Vector3 localPoint = position;
+        Vector3 localPoint = position.position;
+        
         localPoint.y += 100;
+        chevronTransform.SetParent(position.transform);
         chevronTransform.position = localPoint;
+
     }
 }

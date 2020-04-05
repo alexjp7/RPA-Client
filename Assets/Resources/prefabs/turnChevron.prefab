@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3604465751754792280}
   - component: {fileID: 3604465751754792282}
   - component: {fileID: 1197791369733410025}
+  - component: {fileID: 8491003211112984715}
   m_Layer: 5
   m_Name: turnChevron
   m_TagString: Untagged
@@ -25,16 +26,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3604465751754792263}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 125.04268, y: 213.10127, z: 1}
+  m_LocalRotation: {x: -0, y: 0.9948067, z: -0, w: 0.10178276}
+  m_LocalPosition: {x: 0, y: 0, z: -5.4135117e-11}
+  m_LocalScale: {x: 125.04268, y: 213.1013, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 168.31601, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.000015259, y: 77.3}
+  m_AnchoredPosition: {x: 0.000015258575, y: 77.3}
   m_SizeDelta: {x: 55.72, y: 8.67}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &3604465751754792282
@@ -74,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4b3e7ee62ea6254489390b4281f06f7b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 74c7ae51b597e0b42b81eb14ba936636, type: 3}
   m_Color: {r: 1, g: 0.85390794, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -97,3 +98,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7ad66da22ef22f44866eec85ae1acf0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &8491003211112984715
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3604465751754792263}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5c0b101acf8acd344897a8841278f656, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

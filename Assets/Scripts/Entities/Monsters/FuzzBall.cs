@@ -13,29 +13,15 @@
    enemy for developing key features/systems of the monter party.
   **************************************************************/
 
-using System;
-using Assets.Scripts.Entities.Abilities;
-
 namespace Assets.Scripts.Entities.Monsters
 {
     public class FuzzBall : Monster
     {
-
         public FuzzBall()
-        {
+        {   
             this.name += " FuzzBall";
-            this.setId(MonsterTypes.FUZZBALL);
-        }
-
-
-        public override int getTarget()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Ability selectAbility()
-        {
-            throw new NotImplementedException();
+            setId(MonsterTypes.FUZZBALL);
+            healthProperties.setHealthValues(20);
         }
     }
 }
