@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 743354946576365949}
   - component: {fileID: 7281534470509871877}
   m_Layer: 0
-  m_Name: pf_dmg
+  m_Name: PopupText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37,8 +37,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1023.37, y: 36.06}
-  m_SizeDelta: {x: 149.68, y: 99.93}
+  m_AnchoredPosition: {x: -1008.7, y: 26.3}
+  m_SizeDelta: {x: 293.47, y: 70.13}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5933580486191273789
 CanvasRenderer:
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6638053689105530931}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5238b0f6ca25f834fb3148e5e9794d75, type: 3}
+  m_Script: {fileID: 11500000, guid: bae85cd3d49b6464893ceb712e3c5368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &2061413903020712257
@@ -93,7 +93,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 100
+  m_Text: 
 --- !u!210 &743354946576365949
 SortingGroup:
   m_ObjectHideFlags: 0

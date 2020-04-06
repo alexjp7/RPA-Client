@@ -1,35 +1,47 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
-public class ViewController : MonoBehaviour
+namespace Assets.Scripts.Util
 {
-    public void changeScene(int scene)
+    public class ViewController 
     {
-        SceneManager.LoadScene(scene, LoadSceneMode.Single);
+        private static ViewController _instace;
+        public static ViewController INSTANCE
+        {
+            get
+            {
+                if(_instace == null)
+                {
+                    _instace = new ViewController();
+                }
+                return _instace;
+            }
+        }
+
+        public void changeScene(int scene)
+        {
+            SceneManager.LoadScene(scene, LoadSceneMode.Single);
+            setStateScript(scene);
+        }
+
+        public void setStateScript(int scene)
+        {
+            if(scene == 0) //Main Menu
+            {
+
+            }
+            else if(scene == 1) // Character creation
+            {
+
+            }
+            else if(scene == 2) // Battle State
+            {
+                GameObject parent = GameObject.Find("UI");
+                battleState = parent.GetComponent<BattleState>();
+            }
+        }
+
+        //Game State refernces
+        public BattleState battleState;
     }
-
-    public static void notify(string message)
-    {
-        GameObject newCanvas = new GameObject("canvas");
-        Canvas c = newCanvas.AddComponent<Canvas>();
-        c.renderMode = RenderMode.ScreenSpaceOverlay;
-        newCanvas.AddComponent <CanvasScaler> ();
-        GameObject panel = new GameObject("panel");
-
-        panel.AddComponent<CanvasRenderer>();
-        panel.AddComponent<RectTransform>();
-        Image image = panel.AddComponent<Image>();
-        Text text = panel.AddComponent<Text>();
-        text.text = message;
-        image.color = Color.red;
-
-        panel.transform.SetParent(newCanvas.transform, false);
-    }
-
-
-
-
-
-
 }

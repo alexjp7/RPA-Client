@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class DamagePopup : MonoBehaviour
+public class FloatingPopup : MonoBehaviour
 {
     private Text damageText;
     
@@ -9,12 +9,12 @@ public class DamagePopup : MonoBehaviour
     private Color textColor;
     private float moveSpeed;
     
-        public static DamagePopup create(Vector3 spritePosition, string damageDealt, in Color color)
+    public static FloatingPopup create(Vector3 spritePosition, string damageDealt, in Color color)
         {
             Vector2 localPoint = spritePosition;
             localPoint.y += color == Color.green ? 130 : 100;
             Transform damagePopupTransform = Instantiate(GameAssets.instance.damagePopupPrefab, localPoint, Quaternion.identity);
-            DamagePopup damagePopup = damagePopupTransform.GetComponent<DamagePopup>();
+            FloatingPopup damagePopup = damagePopupTransform.GetComponent<FloatingPopup>();
             damagePopup.appear(damageDealt, in color);
   
             return damagePopup;

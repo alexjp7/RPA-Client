@@ -2,12 +2,12 @@
                        COMBATABLE
  ---------------------------------------------------------------*/
 /***************************************************************
- *  The Combatable type contains fields relating to combat
-    including; turn order, health properties (Damageable), abilities
-    and the base logic for applying damage, healing and status 
-    effects to these types of objects. The combatable base
-    provides a abstract type to allow for generic handling
-    of both player and monster types.
+*  The Combatable type contains fields relating to combat
+   including; turn order, health properties (Damageable), abilities
+   and the base logic for applying damage, healing and status 
+   effects to these types of objects. The combatable base
+   provides a abstract type to allow for generic handling
+   of both player and monster types.
 **************************************************************/
 
 using System;
@@ -23,45 +23,59 @@ namespace Assets.Scripts.Entities.Components
         MONSTER
     }
 
-    //Generic implementation of ability effect applications
     public abstract class Combatable
     {
         private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
+
+        public string name { get; protected set;}
+        public CombatantType type { get; protected set;}
         protected string assetPath { get; set; }
 
-        public int combatOrder { get; set; }
+        //Components
+        private CombatSprite _combatSprite; //Instance holder
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
-        public string name { get; protected set;}
-        public CombatantType type { get; protected set;}
 
-        public CombatSprite combatSprite { get; set;}
+        public CombatSprite combatSprite
+        {
+            get
+            {
+                if (_combatSprite == null)
+                {
+                    _combatSprite = CombatSprite.create(this);
+                }
+                return _combatSprite;
+            }
+        }
 
+        //Default Constructor
         public Combatable()
         {
             assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();
         }
 
+        /***************************************************************
+        * sets the path to load/retrieve the asset of this combatable.
+         
+        @param - spriteName: The toString() value of the player/monster
+        enum.
+        **************************************************************/
         protected void setSpritePath(string spriteName)
         {
             assetData.spritePath = assetPath + spriteName;
         }
 
         /***************************************************************
-         * Provides the base logic for dealing damage.
+        * Provides the base logic for dealing damage.
          
-         * Applies damage through a min/max bounded randomly generated
-          value.
-
         @param - minDamage: The lower bound of the damage being applied
         that is used to calculate the actual amount dealt.
         @param - maxDamage: The upper bound of the damage being applied
         that is used to calculate the actual amount dealt.
 
-        @return  - whether the damage applied resulted in the 
-        combatable's HP dropping below 0 (i.e. is defeated).
+        @return  - The damage result.
         **************************************************************/
         public virtual int applyDamage(int minDamage, int maxDamage)
         {
@@ -72,13 +86,15 @@ namespace Assets.Scripts.Entities.Components
         }
 
         /***************************************************************
-         * Provides the base logic for applying a hp recovery/healing
-           effect to a sprite.
+        * Provides the base logic for applying a hp recovery/healing
+          effect to a sprite.
 
-          @param - minHealing: The lower bound of the healing being applied
-          that is used to calculate the actual amount healed.
-          @param - maxHealing: The upper bound of the healing being applied
-          that is used to calculate the actual amount healed.
+        @param - minHealing: The lower bound of the healing being applied
+        that is used to calculate the actual amount healed.
+        @param - maxHealing: The upper bound of the healing being applied
+        that is used to calculate the actual amount healed.
+
+        @return  - The healing result.
         **************************************************************/
         public virtual int  applyHealing(int minValue, int maxValue)
         {
@@ -89,7 +105,11 @@ namespace Assets.Scripts.Entities.Components
         }
 
         /***************************************************************
-         * Not Implemented Yet
+        * Applies the status effect to this combatable.
+        @param - statusEffect: numeric ID for an ability status effect.
+        see EffectProcess.cs.
+        @param - potency: The strength or duration if applicable of the 
+        status effect.
         **************************************************************/
         public virtual void applyEffect(int statusEffect, int potency)
         {
@@ -98,6 +118,7 @@ namespace Assets.Scripts.Entities.Components
 
         /***************************************************************
          * Updates cooldown counters for each ability.
+       
         @param - effectiveTurnCount: the amount turns taken
         by a combatable.
         **************************************************************/

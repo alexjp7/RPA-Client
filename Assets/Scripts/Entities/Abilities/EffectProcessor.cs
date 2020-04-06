@@ -1,9 +1,4 @@
 ﻿using Assets.Scripts.Entities.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.Entities.Abilities
@@ -32,11 +27,26 @@ namespace Assets.Scripts.Entities.Abilities
             switch((StatusEffect)effectId)
             {
                 case StatusEffect.COOLDOWN_CHANGE:
-                    target.abilities.ForEach(ability => ability.cooldownTracker -= potency);
+                    target.abilities.ForEach(ability => ability.cooldownTracker += potency);
                     break;
 
             }
        }
+
+        public static string getEffectLabel(int effectId)
+        {
+            string value = "";
+
+            switch ((StatusEffect)effectId)
+            {
+                case StatusEffect.COOLDOWN_CHANGE:
+                    value = "Cooldowns";
+                    break;
+
+            }
+
+            return value;
+        }
     }
 
 

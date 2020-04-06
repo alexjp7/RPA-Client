@@ -46,7 +46,7 @@ public class BattleState : MonoBehaviour
     private int currentPlayer = 0;
 
     //Game Flags
-    private bool isTargetable = false;
+    private static bool isTargetable = false;
     private bool hasValidTarget = false;
 
     private bool isClientPlayerTurn = false;
@@ -70,7 +70,6 @@ public class BattleState : MonoBehaviour
         initMonsterParty();
         initCombatOrder();
         initPlayerUI();
-        initSpriteCallbacks();
         takeTurn();
     }
 
@@ -82,26 +81,11 @@ public class BattleState : MonoBehaviour
     //Test Data
     private Texture2D[] classIcons;
     private void runTest()
-
     {
+        ViewController.INSTANCE.setStateScript(2);
         createTestPlayers();
         initClassData();
         //testNewAssetLoading();
-    }
-
-    private void testNewAssetLoading()
-    {
-        foreach (Player player in Game.players)
-        {
-            CombatSprite sprite = CombatSprite.create(player_horizontalLayout.transform.position, player.playerClass);
-            sprite.transform.SetParent(player_horizontalLayout.transform);
-        }
-
-        foreach (Monster monster in monsterParty)
-        {
-            CombatSprite sprite = CombatSprite.create(monster_horizontalLayout.transform.position, monster);
-            sprite.transform.SetParent(monster_horizontalLayout.transform);
-        }
     }
 
     /***************************************************************
@@ -112,9 +96,9 @@ public class BattleState : MonoBehaviour
         Game.players = new List<Player>();
         //@Test Data
         Game.players.Add(new Player(6, "Alexjp", 1, true));
-        Game.players.Add(new Player(8, "Frictionburn", 0, true));
-        Game.players.Add(new Player(11, "Kozza", 2, true));
-        Game.players.Add(new Player(4, "Wizzledonker", 3, true));
+        //Game.players.Add(new Player(8, "Frictionburn", 0, true));
+        //Game.players.Add(new Player(11, "Kozza", 2, true));
+        //Game.players.Add(new Player(4, "Wizzledonker", 3, true));
 
         Game.connectedPlayers = Game.players.Count;
 
@@ -159,7 +143,6 @@ public class BattleState : MonoBehaviour
 
         foreach (Monster monster in monsterParty)
         {
-            monster.combatSprite = CombatSprite.create(monster_horizontalLayout.transform.position, monster);
             monster.combatSprite.transform.SetParent(monster_horizontalLayout.transform);
         }
     }
@@ -180,10 +163,6 @@ public class BattleState : MonoBehaviour
         targets = new List<Combatable>();
         System.Random r = new System.Random();
         Game.players = Game.players.OrderBy(player => r.Next()).ToList();
-        int order = 0;
-        Game.players.ForEach(player => player.playerClass.combatOrder = order++);
-        order = 0;
-        monsterParty.ForEach(monster => monster.combatOrder = order++);
     }
 
     /***************************************************************
@@ -202,7 +181,6 @@ public class BattleState : MonoBehaviour
         clientPlayerClass = clientSidePlayer.playerClass;
         foreach (Adventurer player in Game.players.Select(player => player.playerClass))
         {
-            player.combatSprite = CombatSprite.create(player_horizontalLayout.transform.position, player);
             player.combatSprite.transform.SetParent(player_horizontalLayout.transform);
         }
 
@@ -232,81 +210,6 @@ public class BattleState : MonoBehaviour
     }
 
     /***************************************************************
-    * Creates the event handlers for hovering and click events
-      for the player party and monster party sprites.
-       
-    * These event handlers are programtically set to allow
-      for dynamic arguments to represent the index of sprite
-      that has the attached event, this allows varying 
-      length player party and monster party.
-    **************************************************************/
-    private void initSpriteCallbacks()
-    {
-        EventTrigger.Entry mouseEnterEvent;
-        EventTrigger.Entry mouseExitEvent;
-        EventTrigger.Entry mouseClickeEvent;
-
-        //Initialize Party Sprite Events
-        foreach (Combatable combatant in Game.players.Select(player => player.playerClass))
-        {
-            mouseEnterEvent = new EventTrigger.Entry();
-            mouseExitEvent = new EventTrigger.Entry();
-            mouseClickeEvent = new EventTrigger.Entry();
-
-            mouseEnterEvent.eventID = EventTriggerType.PointerEnter;
-            mouseExitEvent.eventID = EventTriggerType.PointerExit;
-            mouseClickeEvent.eventID = EventTriggerType.PointerClick;
-
-            mouseEnterEvent.callback.AddListener(evt => onSpriteEnter(combatant));
-            mouseExitEvent.callback.AddListener(evt => onSpriteExit(combatant));
-            mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatant));
-
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
-        }
-
-        //Initialize Monster Sprite Events
-        foreach (Combatable combatant in monsterParty)
-        {
-            mouseEnterEvent = new EventTrigger.Entry();
-            mouseExitEvent = new EventTrigger.Entry();
-            mouseClickeEvent = new EventTrigger.Entry();
-
-            mouseEnterEvent.eventID = EventTriggerType.PointerEnter;
-            mouseExitEvent.eventID = EventTriggerType.PointerExit;
-            mouseClickeEvent.eventID = EventTriggerType.PointerClick;
-            mouseEnterEvent.callback.AddListener(evt => onSpriteEnter(combatant));
-            mouseExitEvent.callback.AddListener(evt => onSpriteExit(combatant));
-            mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatant));
-
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            combatant.combatSprite.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
-        }
-        //Initialize Ability Handlers
-        for (int i = 0; i < abilityButtons.Count; i++)
-        {
-            int j = i;
-            mouseEnterEvent = new EventTrigger.Entry();
-            mouseExitEvent = new EventTrigger.Entry();
-            mouseClickeEvent = new EventTrigger.Entry();
-
-            mouseEnterEvent.eventID = EventTriggerType.PointerEnter;
-            mouseExitEvent.eventID = EventTriggerType.PointerExit;
-            mouseClickeEvent.eventID = EventTriggerType.PointerClick;
-
-            mouseEnterEvent.callback.AddListener(evt => onAbilityHoverEnter(j));
-            mouseExitEvent.callback.AddListener(evt => onAbilityHoverExit());
-            mouseClickeEvent.callback.AddListener(evt => onAbilityClicked(j));
-
-            abilityButtons[i].GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
-            abilityButtons[i].GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            abilityButtons[i].GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
-        }
-    }
-
-    /***************************************************************
     * takeTurn() is responsible for determining the next turn in combat. 
     
     * This function checks for client side player's turn and toggles 
@@ -328,7 +231,7 @@ public class BattleState : MonoBehaviour
                                              : monsterParty[nextCombatant].combatSprite.transform);
 
         currentPlayerName.text = isPlayerTurn ? Game.players[nextCombatant].name : monsterParty[nextCombatant].name;
-        if (!isPlayerTurn) takeMonsterTurn();
+        //if (!isPlayerTurn) takeMonsterTurn();
     }
 
     /***************************************************************
@@ -493,18 +396,11 @@ public class BattleState : MonoBehaviour
     @param - skillIndex: a value between 0-4 indicating which
     ability from the ability bar is being hovered over.
     **************************************************************/
-    public void onAbilityHoverEnter(int skillIndex)
+    public void onAbilityHoverEnter(in Ability ability)
     {
-        try
-        {
-            AbilityTooltip.show(clientPlayerClass.abilities[skillIndex]);
-            isStandardTooltip = false;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            isStandardTooltip = true;
-            Tooltip.show("Locked");
-        }
+        isStandardTooltip = ability == null;
+        if(isStandardTooltip) Tooltip.show("Locked");
+        else AbilityTooltip.show(ability);  
     }
 
     /***************************************************************
@@ -524,17 +420,16 @@ public class BattleState : MonoBehaviour
       dictionary or otherwise displaying targeting information
       through setting the tint of targeteable sprites.
           
-    @param - skillIndex: a value between 0-4 indicating which
-    ability from the ability bar has been clicked.
+    @param - ability: The ability that was clicked
     **************************************************************/
-    public void onAbilityClicked(int skillIndex)
+    public void onAbilityClicked(Ability ability)
     {
+        if (ability == null) return;
         if (!isClientPlayerTurn) return;
-        if (clientPlayerClass.abilities[skillIndex].isOnCooldown) return;
+        if (ability.isOnCooldown) return;
 
         resetTargets();
-        selectedSkill = skillIndex;
-        Ability ability = clientPlayerClass.abilities[selectedSkill];
+        selectedSkill = clientPlayerClass.abilities.FindIndex(_ability => _ability.id == ability.id);
 
         switch ((AbilityTypes)ability.typeIds[0])
         {
@@ -566,27 +461,52 @@ public class BattleState : MonoBehaviour
             case AbilityTypes.MULTI_DEBUFF:
                 isTargetable = false;
                 hasValidTarget = true;
-                monsterParty.ForEach(monster => monster.combatSprite.sprite.color = Color.red);
-                for (int i = 0; i < monsterParty.Count; i++) targets.Add(monsterParty[i]);
+                
+                monsterParty //Update monster sprite colors 
+                .FindAll(monster=> monster.isAlive())
+                .ForEach(monster => {
+                    monster.combatSprite.sprite.color = Color.red;
+                    targets.Add(monster);
+                });
                 break;
 
             case AbilityTypes.MULTI_HEAL:
             case AbilityTypes.MULTI_BUFF:
                 isTargetable = false;
                 hasValidTarget = true;
-                Game.players.ForEach(player => player.playerClass.combatSprite.sprite.color = Color.green);
-                for (int i = 0; i < Game.players.Count; i++) targets.Add(Game.players[i].playerClass);
+           
+                Game.players //Update Player sprite colors
+                .FindAll(player => player.playerClass.isAlive())
+                .ForEach(player => {
+                    player.playerClass.combatSprite.sprite.color = Color.green;
+                    targets.Add(player.playerClass);
+                });
                 break;
         }
     }
 
+    /***************************************************************
+    * Resets targeting colors to default, and clears any exsiting
+      targets from the previous turn.
+    **************************************************************/
     private void resetTargets()
     {
-        targets.Clear();
-        Game.players.ForEach(player => player.playerClass.combatSprite.sprite.color = Color.white);
-        monsterParty.ForEach(monster => monster.combatSprite.sprite.color = Color.white);
         hasValidTarget = false;
         isTargetable = false;
+        targets.Clear();
+
+        Game.players 
+        .FindAll(player => player.playerClass.isAlive())
+        .ForEach(player => {
+            player.playerClass.combatSprite.sprite.color = Color.white;
+        });
+
+        monsterParty 
+        .FindAll(monster => monster.isAlive())
+        .ForEach(monster => {
+            monster.combatSprite.sprite.color = Color.white;
+        });
+
     }
 
     //SPRITE HANDLERS
@@ -702,11 +622,12 @@ public class BattleState : MonoBehaviour
                 if (metaType == MetaTypes.EFFECT)
                 {
                     affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max);
+                    appyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                 }
             }
         }
 
-        //Update cooldown /targets 
+        //Update Cooldown / Targets 
         abilityUsed.setLastTurnUsed(turnCount);
         setCooldownUI(selectedSkill, turnCount % 2 == 1);
         onSpriteExit(in combatant);
@@ -715,31 +636,54 @@ public class BattleState : MonoBehaviour
     }
 
 
+    /***************************************************************
+    * Client side processing of any special-case scenarios
+      when applying certian status effects. 
+    **************************************************************/
+    private void appyAfterEffect(ref Ability ability)
+    {
+        switch((StatusEffect)ability.statusEffect)
+        {  
+            case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
+                ability.cooldownTracker -= ability.abilityStrength.max;
+                break;
+        }
+    }
+
+    /***************************************************************
+    * Applies a combat status-effect to a target and displays
+      text to user to indicate the abilitiy's effects.
+
+
+    @param - target: The combatant of which the ability is applied too
+    @param - statusEffect: numeric ID for an ability status effect.
+    see EffectProcess.cs.
+    @param - potency: The strength or duration if applicable of the 
+    status effect
+    **************************************************************/
     private void affectTarget(Combatable target, int statusEffect, int potency)
     {
         target.applyEffect(statusEffect, potency);
-    }   
-                
+        FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect) + " " + -potency, Color.blue);
+
+    }
+
     /***************************************************************
     * Performs a healing action on a target; updates new hp value
       to the HP bar fill-amount and text value.
 
-      @param - spriteIndex: a value between 0-players.count() OR
-      0-monsterParty.count() which represents the sprite that was 
-      hovered over. 
+      @param - target: The combatant of which the ability is applied too
       @param - minHealing: The lower bound of the healing being applied
       that is used to calculate the actual amount healed.
       @param - maxHealing: The upper bound of the healing being applied
       that is used to calculate the actual amount healed.
-      @param - isMonster: Used to determine which UI elements to update;
-      between party or monster UI components
     **************************************************************/
     public void healTarget(in Combatable target, int minHealing, int maxHealing)
     {
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
         target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-        DamagePopup.create(target.combatSprite.transform.position, healingAmount.ToString(), Color.green);
+        FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), Color.green);
     }
 
     /***************************************************************
@@ -747,19 +691,12 @@ public class BattleState : MonoBehaviour
       to the HP bar fill-amount and text value.
     
     * Additionaly, if the damage applied to a target causes their hp
-      to fall below 0, the GameObject that contains the targets UI
-      components will disabled, causing it to "dissapear" of the
-      game scene.
-
-      @param - spriteIndex: a value between 0-players.count() OR
-      0-monsterParty.count() which represents the sprite that was 
-      hovered over. 
+      to fall below 0, the combat sprite is destroyed.
+      @param - target: The combatant of which the ability is applied too.
       @param - minDamage: The lower bound of the damage being applied
       that is used to calculate the actual amount dealt.
       @param - maxDamage: The upper bound of the damage being applied
       that is used to calculate the actual amount dealt.
-      @param - isMonster: Used to determine which UI elements to update;
-      between party or monster UI components
     **************************************************************/
     public void attackTarget(in Combatable target, int minDamage, int maxDamage)
     {
@@ -775,7 +712,7 @@ public class BattleState : MonoBehaviour
             target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
         }
 
-        DamagePopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
+        FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
     }
 
     private void checkBattleState()
