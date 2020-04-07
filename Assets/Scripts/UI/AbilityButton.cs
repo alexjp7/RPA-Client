@@ -6,9 +6,16 @@ using UnityEngine.UI;
 
 public class AbilityButton : MonoBehaviour
 {
-    public Image icon;
-    public Button button;
-    public Text cooldownText;
+    public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y};
+    private static int keyIndex = 0;
+
+    public int buttonCount;
+    public bool isPressed;
+    public Text keyText;
+    public Button button { get; private set; }
+    public Text cooldownText { get; private set; }
+    public Image icon { get; set; }
+    private Ability abilityRef;
 
     /***************************************************************
     * instantiates and returns the an AbilityButton instance.
@@ -24,13 +31,16 @@ public class AbilityButton : MonoBehaviour
         Transform buttonTransfrom = Instantiate(GameAssets.INSTANCE.abilityButtonPrefab, Vector2.zero, Quaternion.identity);
         AbilityButton button = buttonTransfrom.GetComponent<AbilityButton>();
         button.setData(in ability);
+        keyIndex++;
         return button;
     }
 
     //Initialize Components
     void Awake()
     {
+        isPressed = false;
         button = gameObject.transform.Find("button").GetComponent<Button>();
+        keyText = gameObject.transform.Find("text_key").GetComponent<Text>();
         icon = button.GetComponent<Image>();
         cooldownText = gameObject.transform.Find("text_cooldown").GetComponent<Text>();
     }
@@ -43,15 +53,18 @@ public class AbilityButton : MonoBehaviour
     **************************************************************/
     private void setData(in Ability ability)
     {
+        buttonCount = keyIndex;
+        keyText.text = keyCodes[buttonCount].ToString();
+        abilityRef = ability;
         icon.sprite = ability == null ? AssetLoader.getSprite("lock") :ability.assetData.sprite;
-        setEventHandlers(ability);
+        setEventHandlers();
     }
 
     /***************************************************************
     * Creates the event handlers for hovering and click events
       for the ability buttons.
     **************************************************************/
-    private void setEventHandlers(Ability ability)
+    private void setEventHandlers()
     {
         EventTrigger.Entry mouseEnterEvent;
         EventTrigger.Entry mouseExitEvent;
@@ -65,12 +78,25 @@ public class AbilityButton : MonoBehaviour
         mouseExitEvent.eventID = EventTriggerType.PointerExit;
         mouseClickeEvent.eventID = EventTriggerType.PointerClick;
 
-        mouseEnterEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityHoverEnter(ability));
+        mouseEnterEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityHoverEnter(abilityRef));
         mouseExitEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityHoverExit());
-        mouseClickeEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityClicked(ability));
+        mouseClickeEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityClicked(abilityRef));
 
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+    }
+
+    private void OnDestroy()
+    {
+        keyIndex--;
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown(keyCodes[buttonCount]))
+        {
+            ViewController.INSTANCE.battleState.onAbilityClicked(abilityRef);
+        }
     }
 }

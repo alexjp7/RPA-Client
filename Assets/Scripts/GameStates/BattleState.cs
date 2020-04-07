@@ -95,10 +95,10 @@ public class BattleState : MonoBehaviour
     {
         Game.players = new List<Player>();
         //@Test Data
-        Game.players.Add(new Player(6, "Alexjp", 1, true));
-        //Game.players.Add(new Player(8, "Frictionburn", 0, true));
-        //Game.players.Add(new Player(11, "Kozza", 2, true));
-        //Game.players.Add(new Player(4, "Wizzledonker", 3, true));
+        Game.players.Add(new Player(6, "Alexjp", 3, true));
+        Game.players.Add(new Player(8, "Frictionburn", 0, true));
+        Game.players.Add(new Player(11, "Kozza", 2, true));
+        Game.players.Add(new Player(4, "Wizzledonker", 3, true));
 
         Game.connectedPlayers = Game.players.Count;
 
@@ -223,15 +223,27 @@ public class BattleState : MonoBehaviour
     {
         if (!hasNextCombatant) return;
 
+
         bool isPlayerTurn = ++turnCount % 2 == 1;
         int nextCombatant = getCombatant(isPlayerTurn);
-
+        Combatable combatant = isPlayerTurn ?  (Combatable) Game.players[nextCombatant].playerClass : monsterParty[nextCombatant];
+         
         togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant].id == clientSidePlayer.id);
-        TurnChevron.setPosition(isPlayerTurn ? Game.players[nextCombatant].playerClass.combatSprite.transform
-                                             : monsterParty[nextCombatant].combatSprite.transform);
+        TurnChevron.setPosition(combatant.combatSprite.transform.transform);
+        currentPlayerName.text = combatant.name;
 
-        currentPlayerName.text = isPlayerTurn ? Game.players[nextCombatant].name : monsterParty[nextCombatant].name;
-        //if (!isPlayerTurn) takeMonsterTurn();
+        //Update condition effect duractions
+        List<int> removedConditions = combatant.updateConditionDurations();
+        if (removedConditions.Count > 0)
+        {
+            foreach (var condition in removedConditions)
+            {
+                FloatingPopup.create(combatant.combatSprite.transform.position, EffectProcessor.getEffectLabel(condition), Color.blue);
+            }
+
+        }
+
+        if (!isPlayerTurn) takeMonsterTurn(nextCombatant);
     }
 
     /***************************************************************
@@ -288,8 +300,7 @@ public class BattleState : MonoBehaviour
     private void togglePlayerTurn(bool isPlayerTurn)
     {
         isClientPlayerTurn = isPlayerTurn;
-        if (isPlayerTurn) clientPlayerClass.updateAbilityCooldowns();
-        
+
         for (int i = 0; i < clientPlayerClass.abilities.Count; i++)
         {
             setCooldownUI(i, isPlayerTurn);
@@ -317,10 +328,7 @@ public class BattleState : MonoBehaviour
             if (ability.isOnCooldown)
             {
                 color.a = .3f;
-                if(ability.cooldownTracker > 0)
-                {
-                    cooldownValue = (ability.cooldownTracker).ToString();
-                }
+                cooldownValue = (ability.cooldownTracker + 1).ToString();
             }
             else
             {
@@ -336,7 +344,7 @@ public class BattleState : MonoBehaviour
             {
                 if (ability.cooldownTracker > 1)
                 {
-                    cooldownValue = (ability.cooldownTracker).ToString();
+                    cooldownValue = (ability.cooldownTracker + 1).ToString();
                 }
             }
         }
@@ -353,7 +361,7 @@ public class BattleState : MonoBehaviour
     @param - nextCombatant: the combat properties relating to the
     monster whos turn it currently is.
     **************************************************************/
-    private void takeMonsterTurn()
+    private void takeMonsterTurn(int monsterIndex)
     {
         targets.Clear();
         System.Random r = new System.Random();
@@ -376,7 +384,7 @@ public class BattleState : MonoBehaviour
         else
         {
             targets.Add(Game.players[target].playerClass);
-            attackTarget(Game.players[target].playerClass, 4, 5);
+            attackTarget(Game.players[target].playerClass, monsterParty[monsterIndex], 4, 5);
         }
         takeTurn();
     }
@@ -608,7 +616,7 @@ public class BattleState : MonoBehaviour
                 {
                     if (metaType == MetaTypes.DAMAGE)
                     {
-                        attackTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                        attackTarget(target, clientPlayerClass, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                     }
                 }
                 else
@@ -621,14 +629,16 @@ public class BattleState : MonoBehaviour
                
                 if (metaType == MetaTypes.EFFECT)
                 {
-                    affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max);
+                    affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max, abilityUsed.abilityStrength.min);
                     appyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                 }
             }
         }
 
         //Update Cooldown / Targets 
-        abilityUsed.setLastTurnUsed(turnCount);
+        abilityUsed.setLastTurnUsed(turnCount); //Flagging whether cooldown
+        abilityUsed.cooldownTracker++;
+        clientPlayerClass.updateAbilityCooldowns(); 
         setCooldownUI(selectedSkill, turnCount % 2 == 1);
         onSpriteExit(in combatant);
         resetTargets();
@@ -650,6 +660,7 @@ public class BattleState : MonoBehaviour
         }
     }
 
+
     /***************************************************************
     * Applies a combat status-effect to a target and displays
       text to user to indicate the abilitiy's effects.
@@ -661,10 +672,10 @@ public class BattleState : MonoBehaviour
     @param - potency: The strength or duration if applicable of the 
     status effect
     **************************************************************/
-    private void affectTarget(Combatable target, int statusEffect, int potency)
+    private void affectTarget(Combatable target, int statusEffect, int potency, int turnsApplied)
     {
-        target.applyEffect(statusEffect, potency);
-        FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect) + " " + -potency, Color.blue);
+        target.applyEffect(statusEffect, potency, turnsApplied);
+        FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect, potency), Color.blue);
 
     }
 
@@ -683,7 +694,7 @@ public class BattleState : MonoBehaviour
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
         target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-        FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), Color.green);
+        FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), new Color(0, 100, 0));
     }
 
     /***************************************************************
@@ -698,9 +709,42 @@ public class BattleState : MonoBehaviour
       @param - maxDamage: The upper bound of the damage being applied
       that is used to calculate the actual amount dealt.
     **************************************************************/
-    public void attackTarget(in Combatable target, int minDamage, int maxDamage)
+    public void attackTarget(in Combatable target, in Combatable caster, int minDamage, int maxDamage)
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
+
+        foreach (Condition condition in target.conditions)
+        {
+            switch ((StatusEffect)condition.effectId)
+            {
+                case StatusEffect.REFLECT_DAMAGE:
+                    float damage = (float)damageDealt * ((float)condition.potency / 100);
+                    attackTarget(caster, (int)damage);
+                    break;
+            }
+        }
+
+        if (!target.isAlive())
+        {
+            Destroy(target.combatSprite.gameObject);
+            checkBattleState();
+        }
+        else
+        {
+            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+        }
+
+        FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
+    }
+
+    /***************************************************************
+    @Overload - Allows for precalculated damage to be done to a target
+    in special combat conditions.
+    **************************************************************/
+    public void attackTarget(in Combatable target, int damage)
+    {
+        int damageDealt = target.applyDamage(damage);
         if (!target.isAlive())
         {
             Destroy(target.combatSprite.gameObject);

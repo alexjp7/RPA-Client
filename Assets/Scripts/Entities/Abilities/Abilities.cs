@@ -82,7 +82,7 @@ namespace Assets.Scripts.Entities.Abilities
             this.isOnCooldown = false;
             this.statusEffect = statusEffect;
             this.lastTurnUsed = -1;
-            this.cooldownTracker = cooldown + 1;
+            this.cooldownTracker = cooldown;
         }
 
         /***************************************************************
@@ -99,9 +99,9 @@ namespace Assets.Scripts.Entities.Abilities
             if (cooldown > 1)
             {
                 cooldownTracker --;
-                if ((cooldown + 1) - cooldownTracker >= cooldown + 1)
+                if ((cooldown) - cooldownTracker > cooldown)
                 {
-                    cooldownTracker = cooldown + 1;
+                    cooldownTracker = cooldown;
                 }
                 else
                 {

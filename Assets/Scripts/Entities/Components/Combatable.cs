@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -32,10 +33,11 @@ namespace Assets.Scripts.Entities.Components
         protected string assetPath { get; set; }
 
         //Components
-        private CombatSprite _combatSprite; //Instance holder
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
+        public List<Condition> conditions { get; set; } //Effect ID, Turns applied for, potency (optional)
+        private CombatSprite _combatSprite; //Instance holder
 
         public CombatSprite combatSprite
         {
@@ -54,6 +56,7 @@ namespace Assets.Scripts.Entities.Components
         {
             assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();
+            conditions = new List<Condition>();
         }
 
         /***************************************************************
@@ -81,10 +84,19 @@ namespace Assets.Scripts.Entities.Components
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
             healthProperties.currentHealth -= damageDealt;
-            
             return (int) damageDealt;
         }
 
+        /***************************************************************
+        @Overload - For applying a non-variable amoount of damage
+        @param - damage; the precalculated damage to be dealt
+        @return  - The damage result.
+        **************************************************************/
+        public virtual int applyDamage(int damage)
+        {
+            healthProperties.currentHealth -= damage;
+            return (int)damage;
+        }
         /***************************************************************
         * Provides the base logic for applying a hp recovery/healing
           effect to a sprite.
@@ -111,9 +123,9 @@ namespace Assets.Scripts.Entities.Components
         @param - potency: The strength or duration if applicable of the 
         status effect.
         **************************************************************/
-        public virtual void applyEffect(int statusEffect, int potency)
+        public virtual void applyEffect(int statusEffect, int potency, int turnsApplied)
         {
-            EffectProcessor.getInstance().applyEffect(this, statusEffect, potency);
+            EffectProcessor.getInstance().applyEffect(this, statusEffect, potency, turnsApplied);
         }   
 
         /***************************************************************
@@ -128,6 +140,29 @@ namespace Assets.Scripts.Entities.Components
             {
                 ability.updateCooldown();
             }
+        }
+
+        /***************************************************************
+         * Updates cooldown counters for each ability.
+       
+        @param - effectiveTurnCount: the amount turns taken
+        by a combatable.
+        **************************************************************/
+        public List<int> updateConditionDurations()
+        {
+            List<int> removedConditions = new List<int>();
+
+            for (int i = 0; i < conditions.Count; i++)
+            {
+                int effectDuraction = conditions[i].reduceEffect();
+                if (effectDuraction <= 0)
+                {
+                    removedConditions.Add(conditions[i].effectId);
+                    conditions.RemoveAt(i);
+                }
+            }
+
+            return removedConditions;
         }
 
         /***************************************************************

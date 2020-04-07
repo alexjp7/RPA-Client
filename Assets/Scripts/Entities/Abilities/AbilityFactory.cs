@@ -220,7 +220,7 @@ namespace Assets.Scripts.Entities.Abilities
             {
                 int potency = abilityJson[potencyProperty][skillLevel].AsInt;
                 abilityPotency = potency.ToString();
-                abilityStrength.min = -1;
+                abilityStrength.min = abilityJson["turns_applied"][skillLevel];
                 abilityStrength.max = potency;
                 statusEffect = abilityJson["status"];
             }
