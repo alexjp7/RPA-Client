@@ -40,10 +40,10 @@ namespace Assets.Scripts.Entities.Monsters
       to enable a more customizable party creation base on the state
       of a running game.
     **************************************************************/
-    public enum MonsterTypes 
+    public enum MonsterTypes
     {
-        FUZZBALL = 0,
-        GOBLIN_FIGHTER = 1,
+        FuzzBall = 0,
+        GoblinFighter = 1,
     }
 
     public abstract class Monster : Combatable

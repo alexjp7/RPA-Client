@@ -15,13 +15,12 @@
       {
         "id": 10,
         "name": "Prayer of Retribution",
-        "icon_path": "warriorStarterSkills_1",
         "tooltip": "Erect @ barrier onto yourself or ally that reflects $% of the the next instance of damage taken.",
         "tooltip_vars":[["a concentrated" ," a powerful","an ominipotent"]],
-        "potency":[200,300,500],
         "types": [[7]],
-        "turns_applied":[2,3,4],
+        "potency":[200,300,500],
         "cooldown":1,
+        "turns_applied":[2,3,4],
         "status":1
       },
       {
@@ -30,9 +29,9 @@
         "icon_path": "warriorStarterSkills_2",
         "tooltip": "Reach out to yourself or an ally and @ them with a healing touch recovering $ health to your target ",
         "tooltip_vars":[["bolster","infuse","revitalize"]],
-        "health":[[10,15],[15,20],[23,31]],
         "types": [[3]],
-        "cooldown":5
+        "cooldown":5,
+        "health":[[10,15],[15,20],[23,31]]
       }
     ]
   }

@@ -1226,7 +1226,7 @@ MonoBehaviour:
   player_horizontalLayout: {fileID: 489765686}
   monster_horizontalLayout: {fileID: 367389712}
   abilityBarLayout: {fileID: 329445345}
-  currentPlayerName: {fileID: 1070843141}
+  currentTurnDisplayName: {fileID: 1070843141}
 --- !u!1 &612508618
 GameObject:
   m_ObjectHideFlags: 0
@@ -2627,7 +2627,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -2.5999756, y: -298.1}
+  m_AnchoredPosition: {x: -2.5999756, y: -298.09998}
   m_SizeDelta: {x: 5.2, y: -577.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1536821008
@@ -2704,7 +2704,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -711.27, y: -2.9245987}
+  m_AnchoredPosition: {x: -711.26996, y: -2.9245987}
   m_SizeDelta: {x: -1178.2, y: -31.532}
   m_Pivot: {x: 0.6036888, y: 0.5619252}
 --- !u!114 &1550046686

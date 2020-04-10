@@ -17,14 +17,22 @@
 **************************************************************/
 
 using Assets.Scripts.RPA_Game;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Monsters
 {
     public class MonsterFactory
     {
+        private System.Random rand;
+
+        public MonsterFactory()
+        {
+            rand = new System.Random();
+        }
+
         /***************************************************************
         * Instantiates a list of monsters.
         @param - amount: the amount of monsters desired to be made.
@@ -33,6 +41,7 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         public List<Monster> createMonsterParty(int amount)
         {
+
             int randomMonsterIndex = Util.Random.getInt(Enum.GetNames(typeof(MonsterTypes)).Length);
             List<Monster> monsterParty = new List<Monster>();
             for (int i = 0; i < amount; i++)
@@ -50,22 +59,35 @@ namespace Assets.Scripts.Entities.Monsters
         private Monster getMonster()
         {
             Monster randomMonster = null;
-            int randomMonsterIndex = Util.Random.getInt(Enum.GetNames(typeof(MonsterTypes)).Length);
-            switch ((MonsterTypes)randomMonsterIndex)
+            string monsterName = ((MonsterTypes)rand.Next(Enum.GetNames(typeof(MonsterTypes)).Length)).ToString();
+            try
             {
-                case MonsterTypes.FUZZBALL:
-                    randomMonster = new FuzzBall();
-                    break;
+                randomMonster = getInstance(monsterName);
+                //Scale monsters based on party size
+                randomMonster.healthProperties.maxHealth = randomMonster.getMaxHp() + (randomMonster.getMaxHp() * Game.players.Count());
+                randomMonster.healthProperties.currentHealth = randomMonster.healthProperties.maxHealth;
+            }
+            catch(ArgumentNullException ex)
+            {
+                Debug.LogErrorFormat("ERROR - Type name inconsistent between Class definition and matching entry in the MonsterTypes enum  for '{0}'. Ensure a concrete monster class has been defined and implemented for '{0}'" +
+                                     "\nSOLUTION - 1) Check '{1}' for missing or missmatched class definition. 2) Ensure the implemented class is a derived type of Monster and calls the setId() member function with a valid MonsterType argument during construction. {2}", monsterName, typeof(Monster).Namespace, ex.StackTrace);
 
-                case MonsterTypes.GOBLIN_FIGHTER:
-                    randomMonster = new GoblinFighter();
-                    break;
+
             }
 
-            //Scale monsters based on party size
-            randomMonster.healthProperties.maxHealth = randomMonster.getMaxHp() + (randomMonster.getMaxHp() * Game.players.Count());
-            randomMonster.healthProperties.currentHealth = randomMonster.healthProperties.maxHealth;
             return randomMonster;
+        }
+
+        /***************************************************************
+        @param - className: String value that represents the type name
+        as specified in the Monster namespace.
+
+        @return - a monster instance through a passed in class name
+        **************************************************************/
+        public Monster getInstance(string className)
+        {
+            Type t = Type.GetType(typeof(Monster).Namespace + "." + className);
+            return Activator.CreateInstance(t) as Monster;
         }
     }
 }

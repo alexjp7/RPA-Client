@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*---------------------------------------------------------------
+                        CONDITION
+ ---------------------------------------------------------------*/
+/***************************************************************
+* Container for storing applied effects on a Combatable, including
+  how long it lasts for (in turns) and how strong is the effect is.
+***************************************************************/
 
 namespace Assets.Scripts.Entities.Abilities
 {
-    /***************************************************************
-    * Container for storing applied effects on a Combatable, including
-      how long it lasts for (in turns) and how strong is the effect is.
-    ***************************************************************/
+
     public class Condition
     {
-        public int effectId { get;}
+        public int effectId { get; private set; }
         public int turnsRemaining { get; private set; }
         public int potency { get; private set; }
 

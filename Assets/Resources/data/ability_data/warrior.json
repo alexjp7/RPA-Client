@@ -4,10 +4,9 @@
     {
       "id": 0,
       "name": "Overhand Strike",
-      "icon_path": "warriorStarterSkills_0",
       "tooltip": "Deliver a @ strike to an enemy dealing $ damage ",
       "tooltip_vars":[["forceful","brutal","devestating"]],
-      "damage":[[5,8],[12,20],[25,40]],
+      "damage":[[12,20],[15,22],[30,45]],
       "types": [[0]],
       "cooldown":1,
       "status":null
@@ -15,23 +14,23 @@
     {
       "id": 1,
       "name": "Whirlwind Slash",
-      "icon_path": "warriorStarterSkills_1",
       "tooltip": "@ swing your blade around yourself in flurry wide sweeping arcs dealing $ damage to all enemies.",
       "tooltip_vars":[["Confidently" ,"Fearlessly","Ferociously"]],
-      "damage":[[2,4],[9,14],[20,25]],
       "types": [[1]],
+      "damage":[[2,4],[9,14],[20,25]],
       "cooldown":3,
       "status":0
     },
     {
       "id": 2,
       "name": "True Defence",
-      "icon_path": "warriorStarterSkills_2",
-      "tooltip": "Fortify yourself with @ defence negating $% incoming damage for the next time",
+      "tooltip": "Fortify yourself with @ defence applying a  $% incoming damage",
       "tooltip_vars":[["a valiant","formidable","an impenetrable"]],
       "types": [[5]],
-      "potency":[50,75,90],
-      "cooldown":4
+      "potency":[-50,-75,-90],
+      "cooldown":1,
+      "turns_applied":[2,3,4],
+      "status":2
     }
   ]
 }

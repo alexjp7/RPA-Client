@@ -7,7 +7,7 @@ namespace Assets.Scripts.Entities.Monsters
         public GoblinFighter() : base()
         {
             this.name += " Goblin Fighter";
-            this.setId(MonsterTypes.GOBLIN_FIGHTER);
+            this.setId(MonsterTypes.GoblinFighter);
             healthProperties.setHealthValues(50);
         }
     }

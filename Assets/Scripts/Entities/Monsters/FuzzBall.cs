@@ -20,7 +20,7 @@ namespace Assets.Scripts.Entities.Monsters
         public FuzzBall()
         {   
             this.name += " FuzzBall";
-            setId(MonsterTypes.FUZZBALL);
+            setId(MonsterTypes.FuzzBall);
             healthProperties.setHealthValues(20);
         }
     }

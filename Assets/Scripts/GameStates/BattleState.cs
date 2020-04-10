@@ -29,12 +29,13 @@ using SimpleJSON;
 using Assets.Scripts.UI;
 #endregion IMPORTS
 
+#pragma warning disable 1234
 public class BattleState : MonoBehaviour
 {
     [SerializeField] private GameObject player_horizontalLayout;
     [SerializeField] private GameObject monster_horizontalLayout;
     [SerializeField] private GameObject abilityBarLayout;
-    [SerializeField] private Text currentPlayerName;
+    [SerializeField] private Text currentTurnDisplayName;
     private List<AbilityButton> abilityButtons;
 
     private List<Combatable> targets;
@@ -60,74 +61,17 @@ public class BattleState : MonoBehaviour
 
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS
-     ---------------------------------------------------------------*/
-    /***************************************************************
+     ---------------------------------------------------------------
     * Called on Scene initialization
     **************************************************************/
     private void Awake()
     {
-        runTest(); //Development/Debug Only!
+        TestSimulator.initTestEnvironment(GameState.BATTLE_STATE); //Test only
         initMonsterParty();
         initCombatOrder();
         initPlayerUI();
         takeTurn();
     }
-
-    #region DEVELOPMENT/TEST FUNCTIONS
-    //################################################################
-    /*---------------------------------------------------------------
-                            TEST-DATA/PROCEDURES
-     ---------------------------------------------------------------*/
-    //Test Data
-    private Texture2D[] classIcons;
-    private void runTest()
-    {
-        ViewController.INSTANCE.setStateScript(2);
-        createTestPlayers();
-        initClassData();
-        //testNewAssetLoading();
-    }
-
-    /***************************************************************
-    *  Creates a list of players for testing/debuggin purposes.
-    **************************************************************/
-    private void createTestPlayers()
-    {
-        Game.players = new List<Player>();
-        //@Test Data
-        Game.players.Add(new Player(6, "Alexjp", 3, true));
-        Game.players.Add(new Player(8, "Frictionburn", 0, true));
-        Game.players.Add(new Player(11, "Kozza", 2, true));
-        Game.players.Add(new Player(4, "Wizzledonker", 3, true));
-
-        Game.connectedPlayers = Game.players.Count;
-
-        foreach (Player player in Game.players) player.applyClass();
-        Game.players[0].isClientPlayer = true;
-    }
-
-    /***************************************************************
-    *  Parses json file for class data and populates icon textures
-    **************************************************************/
-    private void initClassData()
-    {
-        const string CLASS_DATA_FILE = "assets/resources/data/meta_data.json";
-        string classJSON = File.ReadAllText(CLASS_DATA_FILE);
-
-        JSONNode json = JSON.Parse(classJSON);
-        JSONArray classes = json["classes"].AsArray;
-
-        int classCount = classes.Count;
-        classIcons = new Texture2D[classCount];
-
-        for (int i = 0; i < classCount; i++)
-        {
-            classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
-            Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
-        }
-    }
-    //################################################################
-    #endregion DEVELOPMENT/TEST FUNCTIONS
 
     /***************************************************************
     * Generates the monster party via the monster factory class.
@@ -209,7 +153,9 @@ public class BattleState : MonoBehaviour
         catch (NotImplementedException e) { Debug.Log("ERROR:" + e.Message); }
     }
 
-    /***************************************************************
+    /*---------------------------------------------------------------
+                            COMBAT-LOGIC
+     ---------------------------------------------------------------
     * takeTurn() is responsible for determining the next turn in combat. 
     
     * This function checks for client side player's turn and toggles 
@@ -217,20 +163,20 @@ public class BattleState : MonoBehaviour
     
     * The combatant with an active turn has their green turn
       chevron indicator enabled.
-     
     **************************************************************/
     public void takeTurn()
     {
         if (!hasNextCombatant) return;
 
-
         bool isPlayerTurn = ++turnCount % 2 == 1;
         int nextCombatant = getCombatant(isPlayerTurn);
-        Combatable combatant = isPlayerTurn ?  (Combatable) Game.players[nextCombatant].playerClass : monsterParty[nextCombatant];
+        Combatable combatant = isPlayerTurn
+                             ? Game.players[nextCombatant].playerClass as Combatable
+                             : monsterParty[nextCombatant];
          
+        currentTurnDisplayName.text = combatant.name;
         togglePlayerTurn(isPlayerTurn && Game.players[nextCombatant].id == clientSidePlayer.id);
         TurnChevron.setPosition(combatant.combatSprite.transform.transform);
-        currentPlayerName.text = combatant.name;
 
         //Update condition effect duractions
         List<int> removedConditions = combatant.updateConditionDurations();
@@ -390,10 +336,11 @@ public class BattleState : MonoBehaviour
     }
 
     /*---------------------------------------------------------------
-                        CLIENT EVENT HANDLERS
+                        CLIENT SIDE EVENT-HANDLERS
      ---------------------------------------------------------------*/
-    //ABILITY HANDLERS
-    /*************************************************************** 
+    /***************************************************************
+                        ABILITY-HANDLERS
+    *************************************************************** 
     * On mouse hover over ability icons, the tooltip for that ability
       is displayed.
 
@@ -514,11 +461,11 @@ public class BattleState : MonoBehaviour
         .ForEach(monster => {
             monster.combatSprite.sprite.color = Color.white;
         });
-
     }
 
-    //SPRITE HANDLERS
     /***************************************************************
+                        SPRITE HANDLERS
+    ***************************************************************
     * Event handler for defered targeting types (single-target 
       abiltiies).
     

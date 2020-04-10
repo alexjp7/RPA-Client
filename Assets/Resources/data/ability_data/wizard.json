@@ -7,7 +7,7 @@
         "icon_path": "wizardStarterSkills_0",
         "tooltip": "Fire @ pulse of arcane energy dealing $ damage",
         "tooltip_vars":[["an innate","a foccused","a masterful"]],
-        "damage":[[18,25],[12,20],[25,40]],
+        "damage":[[12,20],[15,22],[30,45]],
         "cooldown":1,
         "types": [[0]],
         "status":null

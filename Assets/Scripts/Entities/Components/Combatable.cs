@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
-using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -83,7 +82,29 @@ namespace Assets.Scripts.Entities.Components
         public virtual int applyDamage(int minDamage, int maxDamage)
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
+            float damageAmped = 0;
+            float damageAbsorbed = 0;
+
+            if(conditions.Count > 1)
+            {
+                for (int i = 0; i < conditions.Count; i++)
+                {
+                    if (damageAmped > 0 && damageAbsorbed < 0) break;
+
+                    if (conditions[i].effectId == (int)StatusEffect.DAMAGE_MODIFER)
+                    {
+                        if (conditions[i].potency < 0) damageAbsorbed = conditions[i].potency;
+                        else damageAmped = conditions[i].potency;
+                    }
+
+                }
+            }
+
+            //Apply Damage Modifiers
+            damageDealt = damageDealt * (1 - Math.Abs(damageAbsorbed) /100 );
+            damageDealt = damageDealt * (1 + (damageAmped / 100) );
             healthProperties.currentHealth -= damageDealt;
+
             return (int) damageDealt;
         }
 

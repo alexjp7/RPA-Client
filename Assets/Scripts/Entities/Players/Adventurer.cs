@@ -84,7 +84,7 @@ namespace Assets.Scripts.Entities.Players
         public void loadAbilities(string path, bool isInitialLoad)
         {
             if (path == "") return;
-            if (this.classId == PlayerClasses.ROGUE) throw new NotImplementedException("Abilities Don't Exist For " + this.classId + " in Adventurer.loadAbilities()"); 
+            if (classId == PlayerClasses.ROGUE) throw new NotImplementedException("Abilities Don't Exist For " + this.classId + " in Adventurer.loadAbilities()"); 
 
             int skillLevel = 0;
             string abilityText = File.ReadAllText(path);
