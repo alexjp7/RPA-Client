@@ -21,11 +21,57 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using UnityEngine;
+using System.Reflection;
 
 namespace Assets.Scripts.Entities.Monsters
 {
     public class MonsterFactory
     {
+        private static readonly string monsterTypesNameSpace = "Assets.Scripts.Entities.Monsters.MonsterTypes";
+
+        private static List<Type> _monsterTypes;
+        private static List<Type> monsterTypes
+        {
+            get
+            { 
+                if(_monsterTypes == null) 
+                {
+                    _monsterTypes = getMonsterTypes();
+                }
+
+                return _monsterTypes;
+            }
+
+        }
+
+        /***************************************************************
+        @return - A list of MonsterTypes found in the MonsterTypes
+        namesapce. This list is used in dynamic creation of monster
+        parties.
+        **************************************************************/
+        private static List<Type> getMonsterTypes()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            List<Type> classList = new List<Type>();
+
+            foreach (Type type in assembly.GetTypes())
+            {
+                if (type.Namespace == monsterTypesNameSpace)
+                {
+                    classList.Add(type);
+                }
+            }
+
+            if(classList.Count == 0)
+            {
+                throw new NotImplementedException($"ERROR: Failed to load Monster Assemblies. Could not find any MonsterTypes in the '{monsterTypesNameSpace}' namespace");
+            }
+
+
+            return classList;
+        }
+
+
         private System.Random rand;
 
         public MonsterFactory()
@@ -41,8 +87,6 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         public List<Monster> createMonsterParty(int amount)
         {
-
-            int randomMonsterIndex = Util.Random.getInt(Enum.GetNames(typeof(MonsterTypes)).Length);
             List<Monster> monsterParty = new List<Monster>();
             for (int i = 0; i < amount; i++)
             {
@@ -54,40 +98,38 @@ namespace Assets.Scripts.Entities.Monsters
         }
 
         /***************************************************************
-        @return - a single random mosnter from the 
+        @return - a single random monster, if its sprite data was 
+        no loadable then return it as null which ensures it is not added
+        to the monsterparty.
         **************************************************************/
         private Monster getMonster()
-        {
-            Monster randomMonster = null;
-            string monsterName = ((MonsterTypes)rand.Next(Enum.GetNames(typeof(MonsterTypes)).Length)).ToString();
-            try
+        {   
+            //Get random mosnter type
+            Monster newMonster = getInstance(monsterTypes[rand.Next(monsterTypes.Count)]); ;
+
+            if (newMonster.assetData.sprite == null)
             {
-                randomMonster = getInstance(monsterName);
+                newMonster = null;
+            }
+            else
+            {
                 //Scale monsters based on party size
-                randomMonster.healthProperties.maxHealth = randomMonster.getMaxHp() + (randomMonster.getMaxHp() * Game.players.Count());
-                randomMonster.healthProperties.currentHealth = randomMonster.healthProperties.maxHealth;
-            }
-            catch(ArgumentNullException ex)
-            {
-                Debug.LogErrorFormat("ERROR - Type name inconsistent between Class definition and matching entry in the MonsterTypes enum  for '{0}'. Ensure a concrete monster class has been defined and implemented for '{0}'" +
-                                     "\nSOLUTION - 1) Check '{1}' for missing or missmatched class definition. 2) Ensure the implemented class is a derived type of Monster and calls the setId() member function with a valid MonsterType argument during construction. {2}", monsterName, typeof(Monster).Namespace, ex.StackTrace);
-
-
+                newMonster.healthProperties.maxHealth = newMonster.getMaxHp() + (newMonster.getMaxHp() * (Game.players.Count()-1));
+                newMonster.healthProperties.currentHealth = newMonster.healthProperties.maxHealth;
             }
 
-            return randomMonster;
+            return newMonster;
         }
 
         /***************************************************************
-        @param - className: String value that represents the type name
-        as specified in the Monster namespace.
+        @param - monsterType: the type name as specified in the MonsterTypes
+        namespace.
 
         @return - a monster instance through a passed in class name
         **************************************************************/
-        public Monster getInstance(string className)
+        public Monster getInstance(Type monsterType)
         {
-            Type t = Type.GetType(typeof(Monster).Namespace + "." + className);
-            return Activator.CreateInstance(t) as Monster;
+            return Activator.CreateInstance(monsterType) as Monster;
         }
     }
 }

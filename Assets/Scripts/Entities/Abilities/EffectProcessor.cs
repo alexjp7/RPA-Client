@@ -7,15 +7,19 @@
  for each effect.
 **************************************************************/
 using Assets.Scripts.Entities.Components;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Abilities
 {
     public enum StatusEffect
     {
+        //One-Time Use
         COOLDOWN_CHANGE = 0,
+        //Application Buffs
         REFLECT_DAMAGE = 1,
-        DAMAGE_MODIFER = 2,
-        STUN = 3,
+        DAMAGE_TAKEN_UP = 2,
+        DAMAGE_TAKEN_DOWN = 3,
+        STUN = 5,
     }
 
 
@@ -54,13 +58,17 @@ namespace Assets.Scripts.Entities.Abilities
                     target.abilities.ForEach(ability => ability.cooldownTracker += potency);
                     break;
 
-                case StatusEffect.REFLECT_DAMAGE:
-                    target.conditions.Add(new Condition(effectId, potency, turnsApplied));
+                case StatusEffect.REFLECT_DAMAGE: //Add new effect, or extend effect if exists
+                    if (target.conditions.ContainsKey(effectId)) target.conditions[effectId].extendEffect(turnsApplied);
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
                     break;
 
-                case StatusEffect.DAMAGE_MODIFER:
-                    applyDamageModifer(target, potency, turnsApplied);
+                case StatusEffect.DAMAGE_TAKEN_UP:
+                    applyDamageModifer(target, effectId, potency, turnsApplied);
+                    break;
 
+                case StatusEffect.DAMAGE_TAKEN_DOWN:
+                    applyDamageModifer(target, effectId, potency, turnsApplied);
                     break;
             }
         }
@@ -76,48 +84,36 @@ namespace Assets.Scripts.Entities.Abilities
         @potency - strength of the effect (optional)
         @turnsApplied - The duration of the effect.
         ***************************************************************/
-        private void applyDamageModifer(in Combatable target, int potency, int turnsApplied)
+        private void applyDamageModifer(in Combatable target, int effectId ,int potency, int turnsApplied)
         {
-            bool isAdding = false;
-            bool isUpdating = false;
-            int modifiedIndex = -1;
-            int positiveEffectIndex = -1;
-            int negativeEffectIndex = -1;
+            bool isExtending = false;
 
-            for(int i = 0; i < target.conditions.Count; i++)
+            if(effectId == (int) StatusEffect.DAMAGE_TAKEN_UP)
             {
-                if(negativeEffectIndex > -1 && positiveEffectIndex > -1)
-                    break;
-
-                if(target.conditions[i].effectId == (int) StatusEffect.DAMAGE_MODIFER)
+                if (isExtending = target.conditions.ContainsKey(effectId) )
                 {
-                    if(target.conditions[i].potency < 0)  positiveEffectIndex = i;
-                    else negativeEffectIndex = i;
+                    target.conditions[effectId].extendEffect(turnsApplied);
+                    if (potency > target.conditions[effectId].potency)
+                    {
+                        target.conditions[effectId].potency = potency; 
+                    }
                 }
             }
-      
-            if (positiveEffectIndex == -1 && negativeEffectIndex == -1)  //No Damage modifier effect exists - incoming condition can be added
+            else if (effectId == (int) StatusEffect.DAMAGE_TAKEN_DOWN)
             {
-                isAdding = true;
-            }
-            else if(potency < 0)  // A Buff is being considered, if new value is more powerful update it
-            {
-                modifiedIndex = positiveEffectIndex;
-                isUpdating = potency <= target.conditions[modifiedIndex].potency;
-            }
-            else if(potency > 0) //A Debuff is being considered, if new value is more powerful update it
-            {
-                modifiedIndex = positiveEffectIndex;
-                isUpdating = potency >= target.conditions[modifiedIndex].potency;
+                if (isExtending = target.conditions.ContainsKey(effectId))
+                {
+                    target.conditions[effectId].extendEffect(turnsApplied);
+                    if (potency < target.conditions[effectId].potency)
+                    {
+                        target.conditions[effectId].potency = potency;
+                    }
+                }
             }
 
-            if (isAdding)
+            if(!isExtending)
             {
-                target.conditions.Add(new Condition((int)StatusEffect.DAMAGE_MODIFER, potency, turnsApplied));
-            }
-            else if (isUpdating)
-            {
-                target.conditions[modifiedIndex].extendEffect(turnsApplied);
+                target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
             }
         }
 
@@ -141,11 +137,15 @@ namespace Assets.Scripts.Entities.Abilities
                     break;
 
                 case StatusEffect.REFLECT_DAMAGE:
-                    value = "Reflect " + potency +  "% ";
+                    value = $"Dmg {potency}% Damage";
                     break;
 
-                case StatusEffect.DAMAGE_MODIFER:
-                    value = "Damage " + potency + "% ";
+                case StatusEffect.DAMAGE_TAKEN_UP:
+                    value = $"+{potency}% Incoming Dmg ";
+                    break;
+
+                case StatusEffect.DAMAGE_TAKEN_DOWN:
+                    value = $"{potency}% Incoming Dmg ";
                     break;
             }
 
@@ -166,10 +166,14 @@ namespace Assets.Scripts.Entities.Abilities
             switch ((StatusEffect)effectId)
             {
                 case StatusEffect.REFLECT_DAMAGE:
-                    value = "Reflect ";
+                    value = "Reflect DMG";
                     break;
-                case StatusEffect.DAMAGE_MODIFER:
-                    value = "Damage Modifier ";
+                case StatusEffect.DAMAGE_TAKEN_UP:
+                    value = "+ Incoming DMG";
+                    break;
+
+                case StatusEffect.DAMAGE_TAKEN_DOWN:
+                    value = "- Incoming DMG";
                     break;
             }
 

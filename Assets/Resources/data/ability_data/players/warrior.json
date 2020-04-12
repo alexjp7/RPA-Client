@@ -30,7 +30,7 @@
       "potency":[-50,-75,-90],
       "cooldown":1,
       "turns_applied":[2,3,4],
-      "status":2
+      "status":3
     }
   ]
 }

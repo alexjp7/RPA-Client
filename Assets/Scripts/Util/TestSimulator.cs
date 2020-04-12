@@ -85,7 +85,7 @@ namespace Assets.Scripts.Util
             for (int i = 0; i < classCount; i++)
             {
                 classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
-                Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
+                Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_data"].Value);
             }
         }
     }

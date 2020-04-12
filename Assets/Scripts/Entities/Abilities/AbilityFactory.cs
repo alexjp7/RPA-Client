@@ -45,6 +45,8 @@ using UnityEngine;
 
 using Assets.Scripts.Entities.Components;
 using SimpleJSON;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Entities.Abilities
 {
@@ -93,6 +95,10 @@ namespace Assets.Scripts.Entities.Abilities
 
     class AbilityFactory
     {
+
+        /*---------------------------------------------------------------
+                            PLAYER-ABILITES
+        ---------------------------------------------------------------*/
         /***************************************************************
         * Constructs an ability; setting its name,id,potency,tooltip,
           and sprite fields.
@@ -107,27 +113,88 @@ namespace Assets.Scripts.Entities.Abilities
 
         @return - An ability constructed by the JSON input.
         **************************************************************/
-        public static Ability constructAbility(JSONNode jsonNode, string entityName, int skillLevel)
+        public static Ability constructPlayerAbility(JSONNode jsonNode, string entityName, int skillLevel)
+        {
+            Ability newAbility = new Ability();
+
+            string potencyProperty = "";
+            //Common Ability Properties
+            newAbility.name = jsonNode["name"];
+            newAbility.id = jsonNode["id"].AsInt;
+            newAbility.typeIds = getAbilityTypes(jsonNode["types"].AsArray, skillLevel);
+            newAbility.cooldown = jsonNode["cooldown"].AsInt;
+            newAbility.statusEffect = jsonNode["status"];
+
+            //Player Specific Ability Properties
+            newAbility.assetData = new Renderable(newAbility.name, $"{ Ability.BASE_ABILITY_ICON_PATH }{ entityName }/{ newAbility.name }");
+
+            MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
+            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+                throw new ArgumentException($"Malformed JSON in {jsonNode["entity"]} : {jsonNode["name"]} ");
+
+            newAbility.tooltip = construcTooltip(jsonNode, skillLevel, metaType, potencyProperty);
+            newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, skillLevel, metaType);
+
+            return newAbility;
+        }
+
+        /*---------------------------------------------------------------
+                            MONSTER-ABILITES
+        ---------------------------------------------------------------*/
+        public static List<Ability> constructMonsterAbilities(string monsterName)
+        {
+            List<Ability> abilities = new List<Ability>();
+            string abilityText = File.ReadAllText(Ability.MONSTER_ABILITY_DATA_PATH + monsterName + ".json");
+
+            JSONNode json = JSON.Parse(abilityText);
+            JSONArray abilityJson = json["abilities"].AsArray;
+            int abilityCount = abilityJson.Count;
+
+            //Construct each ability
+            foreach (JSONNode jsonNode in abilityJson)
+            {
+                Ability newAbility = new Ability();
+                string potencyProperty = "";
+
+                newAbility.name = jsonNode["name"];
+                newAbility.typeIds = getAbilityTypes(jsonNode["types"].AsArray, 0);
+                newAbility.cooldown = jsonNode["cooldown"].AsInt;
+                newAbility.statusEffect = jsonNode["status"];
+
+                MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
+                newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, 0, metaType);
+
+                abilities.Add(newAbility);
+            }
+
+
+            return abilities;
+        }
+
+
+
+        /*---------------------------------------------------------------
+                            CONSTRUCTION-METHODS
+        ---------------------------------------------------------------*/
+        private static AbilityStrength constructAbilityStrength(JSONNode abilityJson,string potencyProperty, int skillLevel, MetaTypes metaType)
         {
             AbilityStrength abilityStrength = new AbilityStrength();
-            Renderable assetData = new Renderable();
 
-            int statusEffect = -1;
-            int[] types = getAbilityTypes(jsonNode["types"].AsArray, skillLevel);
-            string tooltip = construcTooltip(jsonNode, skillLevel, types[0], ref abilityStrength, ref statusEffect);
-            string abilityName = jsonNode["name"].Value;
+            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            {
+                abilityStrength.min = abilityJson[potencyProperty][skillLevel][0].AsInt;
+                abilityStrength.max = abilityJson[potencyProperty][skillLevel][1].AsInt;
 
-            assetData.spriteName = abilityName;
-            assetData.spritePath = Ability.BASE_ABILITY_PATH + entityName + (abilityName.ToLower());
+            }
+            else if (metaType == MetaTypes.EFFECT)
+            {
+                abilityStrength.min = abilityJson["turns_applied"][skillLevel];
+                abilityStrength.max = abilityJson[potencyProperty][skillLevel].AsInt;
+            }
 
-            return new Ability(jsonNode["id"].AsInt, 
-                                types, abilityName, 
-                                tooltip,
-                                jsonNode["cooldown"],
-                                statusEffect,
-                                abilityStrength,
-                                assetData);
+            return abilityStrength;
         }
+
 
         /***************************************************************
         * Helper method called when constructing an ability. Converts
@@ -192,37 +259,18 @@ namespace Assets.Scripts.Entities.Abilities
          @return - The completed tooltip description with interpolated
          damage and description values.
         **************************************************************/
-        private static string construcTooltip(in JSONNode abilityJson, int skillLevel, int primaryType, ref AbilityStrength abilityStrength, ref int statusEffect)
+        private static string construcTooltip(in JSONNode abilityJson, int skillLevel, MetaTypes metaType, string potencyProperty)
         {
-            //Determine ability type and meta type, determine what property is used for each skill type 
-            string potencyProperty = "";
-            MetaTypes metaType = getMetaType(primaryType, out potencyProperty);
-
-            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
-            {
-                throw new ArgumentException("Malformed JSON included in ability id: " + abilityJson["id"] + " - " + abilityJson["name"]);
-            }
-
-            //Construct Tooltip and set damage values for ability
+            //Construct Tooltip 
             string tooltip = abilityJson["tooltip"].Value;
             string abilityPotency = "";
             if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
             {
-                int abilityMin = abilityJson[potencyProperty][skillLevel][0].AsInt;
-                int abilityMax = abilityJson[potencyProperty][skillLevel][1].AsInt;
-
-                abilityPotency = abilityMin + "-" + abilityMax;
-                abilityStrength.min = abilityMin;
-                abilityStrength.max = abilityMax;
-
+                abilityPotency = abilityJson[potencyProperty][skillLevel][0].AsInt + "-" + abilityJson[potencyProperty][skillLevel][1].AsInt;
             }
             else if (metaType == MetaTypes.EFFECT)
             {
-                int potency = abilityJson[potencyProperty][skillLevel].AsInt;
-                abilityPotency = potency.ToString();
-                abilityStrength.min = abilityJson["turns_applied"][skillLevel];
-                abilityStrength.max = potency;
-                statusEffect = abilityJson["status"];
+                abilityPotency = abilityJson[potencyProperty][skillLevel].AsInt.ToString();
             }
 
             //Interpolate damage
@@ -230,13 +278,12 @@ namespace Assets.Scripts.Entities.Abilities
             JSONArray toolTipVars = abilityJson["tooltip_vars"].AsArray;
             //Interpolate Description var-args
             for (int i = 0; i < toolTipVars.Count; i++)
+            {
                 tooltip = tooltip.Replace(Ability.toolTipVarTokens[i], toolTipVars[i][skillLevel].Value);
+            }
 
             return tooltip;
         }
-
-
-
 
         /***************************************************************
         * Helper method called when constructing an ability. used in 
@@ -299,6 +346,41 @@ namespace Assets.Scripts.Entities.Abilities
 
             return metaType;
         }
+
+
+
+
+
+        private static void processAbilityStrength(in JSONNode abilityJson, int skillLevel, int primaryType, ref AbilityStrength abilityStrength, ref int statusEffect)
+        {
+            //Determine ability type and meta type, determine what property is used for each skill type 
+            string potencyProperty = "";
+            MetaTypes metaType = getMetaType(primaryType, out potencyProperty);
+
+            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+            {
+                throw new ArgumentException("Malformed JSON included in ability id: " + abilityJson["id"] + " - " + abilityJson["name"]);
+            }
+
+            //Construct Tooltip and set damage values for ability
+            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            {
+                int abilityMin = abilityJson[potencyProperty][skillLevel][0].AsInt;
+                int abilityMax = abilityJson[potencyProperty][skillLevel][1].AsInt;
+
+                abilityStrength.min = abilityMin;
+                abilityStrength.max = abilityMax;
+
+            }
+            else if (metaType == MetaTypes.EFFECT)
+            {
+                int potency = abilityJson[potencyProperty][skillLevel].AsInt;
+                abilityStrength.min = abilityJson["turns_applied"][skillLevel];
+                abilityStrength.max = potency;
+                statusEffect = abilityJson["status"];
+            }
+        }
+
 
         /***************************************************************
         * Helper method to return the string of the ability type 

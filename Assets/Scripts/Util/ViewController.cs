@@ -52,6 +52,5 @@ namespace Assets.Scripts.Util
         public BattleState battleState;
         public CharacterCreator characterCreator;
         public MainMenu mainMenu;
-
     }
 }

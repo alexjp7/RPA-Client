@@ -4,13 +4,12 @@
       {
         "id": 9,
         "name": "Holy Dart",
-        "icon_path": "warriorStarterSkills_0",
         "tooltip": "Focus the power of the sun into a @ dart of energy dealing $ damage to your target",
         "tooltip_vars":[["searing","scorching","divine"]],
         "types": [[0]],
         "damage":[[12,20],[15,22],[30,45]],
         "cooldown":1,
-        "status":null
+        "status":-1
       },
       {
         "id": 10,
@@ -21,7 +20,7 @@
         "potency":[200,300,500],
         "cooldown":1,
         "turns_applied":[2,3,4],
-        "status":1
+        "status":-1
       },
       {
         "id": 11,

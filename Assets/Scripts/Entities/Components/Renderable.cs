@@ -14,15 +14,21 @@ namespace Assets.Scripts.Entities.Components
 {
     public class Renderable
     {
-        public string spriteName { get; set; }
-        public string spritePath { get; set; }
+        public string name { get; set; }
+        public string path { get; set; }
 
         private Sprite _sprite;
+        //Loaded sprite from file, if not found returns null.
         public Sprite sprite
         {
             get
             {
-                return _sprite == null ? _sprite = AssetLoader.getSprite(spriteName, spritePath) : _sprite;
+                if(_sprite == null)
+                {
+                    _sprite = AssetLoader.getSprite(name, path);
+                }
+
+                return _sprite;
             }
             private set
             {
@@ -30,6 +36,16 @@ namespace Assets.Scripts.Entities.Components
             }
         }
 
+        public Renderable(string _name, string _path)
+        {
+            name = _name;
+            path = _path;
+        }
+
+        public Renderable()
+        {
+
+        }
     }
 
 }

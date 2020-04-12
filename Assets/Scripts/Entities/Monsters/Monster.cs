@@ -40,16 +40,10 @@ namespace Assets.Scripts.Entities.Monsters
       to enable a more customizable party creation base on the state
       of a running game.
     **************************************************************/
-    public enum MonsterTypes
-    {
-        FuzzBall = 0,
-        GoblinFighter = 1,
-    }
+
 
     public abstract class Monster : Combatable
     {
-        public MonsterTypes monsterId { get; protected set; }
-
         /***************************************************************
         * During construction, all monsters names and abilities
           are initialised, first through setting the name to the randonly
@@ -65,6 +59,7 @@ namespace Assets.Scripts.Entities.Monsters
             assetPath += "monster_textures/";
             name = getNamePrefix();
             abilities = new List<Ability>();
+            healthProperties = new Damageable();
             type = CombatantType.MONSTER;
         }
 
@@ -79,12 +74,10 @@ namespace Assets.Scripts.Entities.Monsters
 
         @param - monsterId: The sub-classes monster type. 
         **************************************************************/
-        protected void setId(MonsterTypes _monsterId)
+        protected void setSpriteData(string typenName)
         {
-            monsterId = _monsterId;
-            healthProperties = new Damageable();
-            setSpritePath(monsterId.ToString());
-            assetData.spriteName = monsterId.ToString();
+            setSpritePath(typenName);
+            assetData.name = typenName;
         }
 
         /***************************************************************
@@ -99,16 +92,43 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         private string getNamePrefix()
         {
-            string[] namePrefixes = {"Homeless",
-                                     "Self-Employed",
-                                     "Hungry",
-                                     "Uneducated",
-                                     "Clueless",
-                                     "Silly"};
+            string[] namePrefixes = 
+            {
+                "Homeless",
+                "Self-Employed",
+                "Hungry",
+                "Uneducated",
+                "Clueless",
+                "Silly",
+                "Self-Deprecating",
+                "Disorganised", 
+                "Self-Indulged",
+                "Clumsy",
+                "Contaminated",
+                "Forward-Thinking"
+            };
 
             return namePrefixes[Util.Random.getInt(namePrefixes.Length)];
         }
 
+        public virtual Ability selectAbility(int turnCount)
+        {
+            Ability chosenAbility = abilities[0];
+            int abilityCount = abilities.Count;
 
+            if (abilityCount > 1)
+            {
+                for (int i = abilityCount - 1; abilityCount > 0; i--)
+                {
+                    if (!abilities[i].isOnCooldown)
+                    {
+                        chosenAbility = abilities[i];
+                        break;
+                    }
+                }
+            }
+
+            return chosenAbility;
+        }
     }
 }

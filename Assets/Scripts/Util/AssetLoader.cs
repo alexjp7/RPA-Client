@@ -8,6 +8,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 namespace Assets.Scripts.Util
 {
@@ -34,7 +35,16 @@ namespace Assets.Scripts.Util
         **************************************************************/
         public static Sprite getSprite(string key, string path = "")
         {
-            if (!spriteMap.ContainsKey(key)) spriteMap.Add(key, Resources.Load<Sprite>(path));
+            if (!spriteMap.ContainsKey(key))
+            {
+                Sprite sprite = Resources.Load<Sprite>(path);
+                if(sprite == null)
+                {
+                    Debug.LogError($"AssetNotFound- Loading asset '{key}' at path 'Assets/Resources/{path}' failed. Chcek in Assets/Resources directory for missing or missmatched asset path {new System.Diagnostics.StackFrame().ToString()}") ;
+                }
+
+                spriteMap.Add(key, sprite);
+            }
 
             return spriteMap[key];
         }

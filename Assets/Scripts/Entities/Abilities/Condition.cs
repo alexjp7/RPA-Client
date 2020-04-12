@@ -13,7 +13,7 @@ namespace Assets.Scripts.Entities.Abilities
     {
         public int effectId { get; private set; }
         public int turnsRemaining { get; private set; }
-        public int potency { get; private set; }
+        public int potency { get; set; }
 
         public Condition(int _effectId, int _potency, int _turnsRemaining)
         {
@@ -30,6 +30,11 @@ namespace Assets.Scripts.Entities.Abilities
         public int extendEffect(int amount)
         {
             return turnsRemaining += amount;
+        }
+
+        public override string ToString()
+        {
+            return "Effect Id " + effectId + " Turns Remaining " + turnsRemaining + " potency" + potency;
         }
     }
 }

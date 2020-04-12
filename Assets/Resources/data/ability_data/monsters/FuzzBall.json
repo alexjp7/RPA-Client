@@ -1,0 +1,21 @@
+{
+    "entity":"FuzzBall",
+    "abilities": [
+      {
+        "name": "Lacerate",
+        "types": [[0]],
+        "damage":[[4,8]],
+        "cooldown":1,
+        "status":-1,
+      },
+      {
+        "name": "Spot Weakness",
+        "types": [[8]],
+        "potency": [50],
+        "cooldown":3,
+        "turns_applied": [3],
+        "status": 2
+      }
+    ]
+  }
+  

@@ -62,7 +62,7 @@ namespace Assets.Scripts.UI
         {
             combatantRef = combatant;
             displayName.text = combatant.name;
-            sprite.sprite = combatant.assetData.sprite;
+            sprite.sprite =  combatant.assetData.sprite;
             currentHealthValue.text =  ( (int) combatant.healthProperties.currentHealth).ToString();
             maxHealthValue.text = "/" +  (int )combatant.healthProperties.maxHealth;
             setEventHandlers();

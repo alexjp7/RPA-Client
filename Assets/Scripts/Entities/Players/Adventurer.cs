@@ -69,8 +69,8 @@ namespace Assets.Scripts.Entities.Players
         {
             this.classId = classId;
             healthProperties = new Damageable(classId);
+            assetData.name = classId.ToString();
             setSpritePath(classId.ToString());
-            assetData.spriteName = classId.ToString();
         }
 
         /***************************************************************
@@ -94,7 +94,7 @@ namespace Assets.Scripts.Entities.Players
             //Construct abilities
             for (int i = 0; i < abilityJson.Count; i++)
             {
-                abilities.Add(AbilityFactory.constructAbility(abilityJson[i], entityName + "/" , skillLevel));
+                abilities.Add(AbilityFactory.constructPlayerAbility(abilityJson[i], entityName, skillLevel));
             }
         }
 

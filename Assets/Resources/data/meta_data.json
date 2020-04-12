@@ -4,28 +4,28 @@
         "id": 0,
         "name": "warrior",
         "icon_path": "textures/icon_textures/class_icons/warrior_icon",
-        "ability_path": "Assets/Resources/data/ability_data/warrior.json",
+        "ability_data": "Assets/Resources/data/ability_data/players/warrior.json",
         "description": "With your brute stength combined with your unwavering valor, warriors will serve their party in the front lines through devastating swings and severring slashes, controlling the flow and pace of the battle by the virtue of their chilling battlescries and taunts."
       },
       {
         "id": 1,
         "name": "wizard",
         "icon_path": "textures/icon_textures/class_icons/wizard_icon",
-        "ability_path": "Assets/Resources/data/ability_data/wizard.json",
+        "ability_data": "Assets/Resources/data/ability_data/players/wizard.json",
         "description":"Intellect and wisdom guide your desire to unleash your innate command over the elements of the natural and unatural world. a Wizard's vision into the future is perceptive and clear, armed with prediction and time manipulation spells."
       },
       {
         "id": 2,
         "name": "rogue",
         "icon_path": "textures/icon_textures/class_icons/rogue_icon",
-        "ability_path": "Assets/Resources/data/ability_data/rogue.json",
+        "ability_data": "Assets/Resources/data/ability_data/rogue.json",
         "description": "Armed with cunning and missdirection, a Rogue's ability to meld in with the shadows and deliver swift and potent strikes while traversing the battlefield unnoticed is unmathced."
       },
       {
         "id": 3,
         "name": "cleric",
         "icon_path": "textures/icon_textures/class_icons/cleric_icon",
-        "ability_path": "Assets/Resources/data/ability_data/cleric.json",
+        "ability_data": "Assets/Resources/data/ability_data/players/cleric.json",
         "description": "Devoted to purity and prosperity, a Cleric's devotion to resplendant healing and protective magics restore those around them and foil those who are unfaithfull."
       }
     ]

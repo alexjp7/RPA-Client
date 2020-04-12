@@ -47,7 +47,8 @@ namespace Assets.Scripts.Entities.Abilities
     public class Ability
     {
         public static readonly int LEVEL_TIER_LIMIT = 3;
-        public static readonly string BASE_ABILITY_PATH = "textures/icon_textures/ability_icons/";
+        public static readonly string MONSTER_ABILITY_DATA_PATH = "Assets/Resources/data/ability_data/monsters/";
+        public static readonly string BASE_ABILITY_ICON_PATH = "textures/icon_textures/ability_icons/";
         public static readonly string[] toolTipVarTokens = { "@", "#" };
 
         //Read in values

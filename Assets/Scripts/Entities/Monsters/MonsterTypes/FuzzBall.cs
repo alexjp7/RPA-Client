@@ -13,15 +13,22 @@
    enemy for developing key features/systems of the monter party.
   **************************************************************/
 
-namespace Assets.Scripts.Entities.Monsters
+using Assets.Scripts.Entities.Abilities;
+using System.Collections.Generic;
+
+namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
     public class FuzzBall : Monster
     {
+        private static List<Ability> fuzzBallAbilities = AbilityFactory.constructMonsterAbilities(typeof(FuzzBall).Name);
+
         public FuzzBall()
         {   
-            this.name += " FuzzBall";
-            setId(MonsterTypes.FuzzBall);
+            name += " FuzzBall";
+            setSpriteData((typeof(FuzzBall).Name));
+            abilities = new List<Ability>(fuzzBallAbilities);
             healthProperties.setHealthValues(20);
         }
+              
     }
 }

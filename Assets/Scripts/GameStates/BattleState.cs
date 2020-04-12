@@ -73,7 +73,7 @@ public class BattleState : MonoBehaviour
         takeTurn();
     }
 
-    /***************************************************************
+    /***************************************************************f
     * Generates the monster party via the monster factory class.
    
     * Addtionally, this function sets the UI components relevant to
@@ -309,6 +309,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void takeMonsterTurn(int monsterIndex)
     {
+        monsterParty[monsterIndex].updateAbilityCooldowns();
         targets.Clear();
         System.Random r = new System.Random();
 
@@ -330,7 +331,19 @@ public class BattleState : MonoBehaviour
         else
         {
             targets.Add(Game.players[target].playerClass);
-            attackTarget(Game.players[target].playerClass, monsterParty[monsterIndex], 4, 5);
+            Ability ability = monsterParty[monsterIndex].selectAbility(turnCount);
+            MetaTypes metaType = AbilityFactory.getMetaType(ability.typeIds[0]);
+            if (metaType == MetaTypes.DAMAGE)
+            {
+                attackTarget(Game.players[target].playerClass, monsterParty[monsterIndex], ability.abilityStrength.min, ability.abilityStrength.max);
+
+            }
+            else if(metaType == MetaTypes.EFFECT)
+            {
+                affectTarget(Game.players[target].playerClass, ability.statusEffect, ability.abilityStrength.max, ability.abilityStrength.min);
+            }
+
+            FloatingPopup.create(monsterParty[monsterIndex].combatSprite.transform.position, ability.name, Color.gray);
         }
         takeTurn();
     }
@@ -382,7 +395,7 @@ public class BattleState : MonoBehaviour
         if (ability == null) return;
         if (!isClientPlayerTurn) return;
         if (ability.isOnCooldown) return;
-
+        
         resetTargets();
         selectedSkill = clientPlayerClass.abilities.FindIndex(_ability => _ability.id == ability.id);
 
@@ -556,7 +569,7 @@ public class BattleState : MonoBehaviour
         Ability abilityUsed = clientPlayerClass.abilities[selectedSkill];
         foreach (var target in targets)
         {
-            foreach (var abilityType in abilityUsed.typeIds)
+            foreach (int abilityType in abilityUsed.typeIds)
             {
                 MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
                 if(target.combatSprite.isMonster)
@@ -576,6 +589,7 @@ public class BattleState : MonoBehaviour
                
                 if (metaType == MetaTypes.EFFECT)
                 {
+
                     affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max, abilityUsed.abilityStrength.min);
                     appyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                 }
@@ -623,7 +637,6 @@ public class BattleState : MonoBehaviour
     {
         target.applyEffect(statusEffect, potency, turnsApplied);
         FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect, potency), Color.blue);
-
     }
 
     /***************************************************************
@@ -660,12 +673,12 @@ public class BattleState : MonoBehaviour
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
 
-        foreach (Condition condition in target.conditions)
+        foreach (var condition in target.conditions)
         {
-            switch ((StatusEffect)condition.effectId)
+            switch ((StatusEffect)condition.Value.effectId)
             {
                 case StatusEffect.REFLECT_DAMAGE:
-                    float damage = (float)damageDealt * ((float)condition.potency / 100);
+                    float damage = (float)damageDealt * ((float)condition.Value.potency / 100);
                     attackTarget(caster, (int)damage);
                     break;
             }

@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -35,7 +36,7 @@ namespace Assets.Scripts.Entities.Components
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
-        public List<Condition> conditions { get; set; } //Effect ID, Turns applied for, potency (optional)
+        public Dictionary<int,Condition> conditions { get; set; }
         private CombatSprite _combatSprite; //Instance holder
 
         public CombatSprite combatSprite
@@ -55,7 +56,7 @@ namespace Assets.Scripts.Entities.Components
         {
             assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();
-            conditions = new List<Condition>();
+            conditions = new Dictionary<int, Condition>();
         }
 
         /***************************************************************
@@ -66,7 +67,7 @@ namespace Assets.Scripts.Entities.Components
         **************************************************************/
         protected void setSpritePath(string spriteName)
         {
-            assetData.spritePath = assetPath + spriteName;
+            assetData.path = assetPath + spriteName;
         }
 
         /***************************************************************
@@ -82,27 +83,35 @@ namespace Assets.Scripts.Entities.Components
         public virtual int applyDamage(int minDamage, int maxDamage)
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
+            float totalDamageModifier = 0;
             float damageAmped = 0;
             float damageAbsorbed = 0;
 
-            if(conditions.Count > 1)
+            if(conditions.Count > 0)
             {
-                for (int i = 0; i < conditions.Count; i++)
+                if(conditions.ContainsKey((int)StatusEffect.DAMAGE_TAKEN_UP) )
                 {
-                    if (damageAmped > 0 && damageAbsorbed < 0) break;
+                    damageAmped = conditions[(int)StatusEffect.DAMAGE_TAKEN_UP].potency;
+                }
 
-                    if (conditions[i].effectId == (int)StatusEffect.DAMAGE_MODIFER)
-                    {
-                        if (conditions[i].potency < 0) damageAbsorbed = conditions[i].potency;
-                        else damageAmped = conditions[i].potency;
-                    }
-
+                if (conditions.ContainsKey((int)StatusEffect.DAMAGE_TAKEN_DOWN))
+                {
+                    damageAbsorbed = conditions[(int)StatusEffect.DAMAGE_TAKEN_DOWN].potency;
                 }
             }
 
+            totalDamageModifier = damageAmped + damageAbsorbed;
+
             //Apply Damage Modifiers
-            damageDealt = damageDealt * (1 - Math.Abs(damageAbsorbed) /100 );
-            damageDealt = damageDealt * (1 + (damageAmped / 100) );
+            if(totalDamageModifier < 0)
+            {
+                damageDealt = damageDealt * (1 - Math.Abs(totalDamageModifier) / 100);
+            }
+            else if(totalDamageModifier > 0)
+            {
+                damageDealt = damageDealt * (1 + Math.Abs(totalDamageModifier) / 100);
+            }
+
             healthProperties.currentHealth -= damageDealt;
 
             return (int) damageDealt;
@@ -173,15 +182,16 @@ namespace Assets.Scripts.Entities.Components
         {
             List<int> removedConditions = new List<int>();
 
-            for (int i = 0; i < conditions.Count; i++)
+            foreach (var condition in conditions) 
             {
-                int effectDuraction = conditions[i].reduceEffect();
+                int effectDuraction = condition.Value.reduceEffect(1);
                 if (effectDuraction <= 0)
                 {
-                    removedConditions.Add(conditions[i].effectId);
-                    conditions.RemoveAt(i);
+                    removedConditions.Add(condition.Value.effectId);
                 }
             }
+
+            if(removedConditions.Count > 0) removedConditions.ForEach(condition => conditions.Remove(condition));
 
             return removedConditions;
         }
