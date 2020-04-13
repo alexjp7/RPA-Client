@@ -27,7 +27,7 @@ using SimpleJSON;
 
 namespace Assets.Scripts.Entities.Players
 {
-    public enum PlayerClasses
+    public enum PlayerClasses: int
     {
         WARRIOR = 0,
         WIZARD = 1,

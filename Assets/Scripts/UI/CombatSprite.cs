@@ -19,6 +19,7 @@ namespace Assets.Scripts.UI
     {
         public Combatable combatantRef;
         public SpriteRenderer sprite { get; private set;}
+        public GameObject buffBar { get; private set;}
         public Text displayName { get; private set; }
         public Text maxHealthValue { get; private set; }
         public Text currentHealthValue { get; private set; }
@@ -50,6 +51,8 @@ namespace Assets.Scripts.UI
             healthBar = gameObject.transform.Find("image_hp_bar").GetComponent<Image>();
             maxHealthValue = gameObject.transform.Find("text_max_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
+            currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
+            buffBar = gameObject.transform.Find("buff_bar").GetComponent<GameObject>();
         }
 
 

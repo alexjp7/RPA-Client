@@ -29,6 +29,5 @@ namespace Assets.Scripts.Entities.Monsters.MonsterTypes
             abilities = new List<Ability>(fuzzBallAbilities);
             healthProperties.setHealthValues(20);
         }
-              
     }
 }

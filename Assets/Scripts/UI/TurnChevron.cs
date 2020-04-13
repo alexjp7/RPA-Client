@@ -43,7 +43,7 @@ public class TurnChevron : MonoBehaviour
     {
         turnCount++;
         Vector3 localPoint = position.position;
-        localPoint.y += 100;
+        localPoint.y += 150;
         chevronTransform.SetParent(position.transform);
         chevronTransform.position = localPoint;
 

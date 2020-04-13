@@ -9,6 +9,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 namespace Assets.Scripts.Util
 {
@@ -17,15 +18,55 @@ namespace Assets.Scripts.Util
         private static Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();
 
 
-        public static void loadStaticAssets()
+        public static void loadStaticAssets(GameState gameState)
         {
             Dictionary<string, string> staticAssets = new Dictionary<string, string>()
             {
                 {"lock", "textures/icon_textures/general/lock" }
             };
 
-            foreach (var asset in staticAssets) spriteMap.Add(asset.Key, Resources.Load<Sprite>(asset.Value));
+            switch (gameState)
+            {
+                case GameState.MAIN_MENU:
+
+                    break;
+
+                case GameState.CHARACTER_CREATION:
+
+                    break;
+
+                case GameState.BATTLE_STATE:
+                    loadBattleStateAssets();
+                    break;
+
+                default:
+                    Debug.LogError($"Unexpecte Gamestate argument {gameState.ToString()} provided during asset loading.  {new System.Diagnostics.StackFrame().ToString()}");
+                    break;
+
+            }
+
+            foreach (var asset in staticAssets)
+            {
+                if(!spriteMap.ContainsKey(asset.Key))
+                {
+                    spriteMap.Add(asset.Key, Resources.Load<Sprite>(asset.Value));
+                }
+            }
         }
+
+        private static void loadBattleStateAssets()
+        {
+            Sprite[] statusEffectIcons = Resources.LoadAll<Sprite>("textures/icon_textures/status_effects");
+
+            foreach(Sprite iconSprite in statusEffectIcons)
+            {
+                if (!spriteMap.ContainsKey(iconSprite.name))
+                {
+                    spriteMap.Add(iconSprite.name, iconSprite);
+                }
+            }
+        }
+
 
         /***************************************************************
         @param - key: The asset to be loaded/returned

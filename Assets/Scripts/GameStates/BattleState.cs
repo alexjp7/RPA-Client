@@ -129,7 +129,7 @@ public class BattleState : MonoBehaviour
         }
 
         //Load static assets (namely the lock for default ability icon image)
-        AssetLoader.loadStaticAssets();
+        AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         try
         {
             clientPlayerClass.loadAbilities(Adventurer.getAbilityPath(clientPlayerClass.classId), true);

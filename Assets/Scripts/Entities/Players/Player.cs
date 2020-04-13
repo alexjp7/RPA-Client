@@ -86,11 +86,19 @@ namespace Assets.Scripts.Entities.Players
         @paran - ready: flag used to indicate whether the player
         is ready or in favour of a party wide action.
         **************************************************************/
-        public Player(int id, string name, int adventuringClass, bool ready)
+        public Player(int id, string name, int adventuringClass, bool ready = true)
         {
             this.id = id;
             this.name = name;
             this.adventuringClass = adventuringClass;
+            this.ready = ready;
+        }
+
+        public Player(string name, PlayerClasses adventuringClass, bool ready = true)
+        {
+            this.id = RPA_Game.Game.players.Count + 1;
+            this.name = name;
+            this.adventuringClass = (int)adventuringClass;
             this.ready = ready;
         }
 

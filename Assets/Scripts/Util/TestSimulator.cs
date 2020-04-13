@@ -57,10 +57,10 @@ namespace Assets.Scripts.Util
         {
             Game.players = new List<Player>();
             //@Test Data
-            Game.players.Add(new Player(6, "Alexjp", (int)PlayerClasses.WARRIOR, true));
-            //Game.players.Add(new Player(8, "Frictionburn", 0, true));
-            //Game.players.Add(new Player(11, "Kozza", 2, true));
-            //Game.players.Add(new Player(4, "Wizzledonker", 3, true));
+            Game.players.Add(new Player("Alexjp", PlayerClasses.WARRIOR) );
+            Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
+            Game.players.Add(new Player("Kozza", PlayerClasses.CLERIC));
+            Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
             Game.connectedPlayers = Game.players.Count;
 
