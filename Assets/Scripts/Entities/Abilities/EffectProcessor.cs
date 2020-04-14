@@ -23,7 +23,6 @@ namespace Assets.Scripts.Entities.Abilities
     }
 
 
-
     public class EffectProcessor
     {
         public static EffectProcessor INSTANCE;

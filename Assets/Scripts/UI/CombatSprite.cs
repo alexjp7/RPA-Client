@@ -7,7 +7,10 @@
 
  * This script is attached to the CombaSprite prefab.
 **************************************************************/
+using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.Entities.Components;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.GameStates;
 using Assets.Scripts.Util;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,6 +20,7 @@ namespace Assets.Scripts.UI
 {
     public class CombatSprite : MonoBehaviour
     {
+        public static bool hasValidTarget;
         public Combatable combatantRef;
         public SpriteRenderer sprite { get; private set;}
         public GameObject buffBar { get; private set;}
@@ -25,6 +29,9 @@ namespace Assets.Scripts.UI
         public Text currentHealthValue { get; private set; }
         public Image healthBar { get; set; }
         public bool isMonster { get; private set; }
+
+
+        private static TurnController turnController = TurnController.INSTANCE;
         
         /***************************************************************
         * instantiates and returns the a CombatSpriute instance.
@@ -69,6 +76,7 @@ namespace Assets.Scripts.UI
             currentHealthValue.text =  ( (int) combatant.healthProperties.currentHealth).ToString();
             maxHealthValue.text = "/" +  (int )combatant.healthProperties.maxHealth;
             setEventHandlers();
+
             if (combatant.type == CombatantType.PLAYER) isMonster = false;
             else if (combatant.type == CombatantType.MONSTER) isMonster = true;
         }
@@ -96,13 +104,171 @@ namespace Assets.Scripts.UI
             mouseExitEvent.eventID = EventTriggerType.PointerExit;
             mouseClickeEvent.eventID = EventTriggerType.PointerClick;
 
-            mouseEnterEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onSpriteEnter(combatantRef));
-            mouseExitEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onSpriteExit(combatantRef));
-            mouseClickeEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onSpriteClicked(combatantRef));
+            mouseEnterEvent.callback.AddListener(evt => onSpriteEnter(combatantRef));
+            mouseExitEvent.callback.AddListener(evt => onSpriteExit(combatantRef));
+            mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatantRef));
 
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+        }
+
+        /***************************************************************
+                            SPRITE HANDLERS
+        ***************************************************************
+        * Event handler for defered targeting types (single-target 
+          abiltiies).
+
+        * Includes the logic for ensuring the ability type's targeting
+          type has the desired effect on displaying/highlighting
+          the target selection.
+
+        @param - spriteIndex: a value between 0-players.count() OR
+        0-monsterParty.count() which represents the sprite that was 
+        hovered over. 
+        **************************************************************/
+        public void onSpriteEnter(in Combatable combatant)
+        {
+            //Check ability selected
+            int abilityIndex = AbilityButton.selectedAbilityIndex;
+            if (abilityIndex == -1) return;
+            //Check if targeting type applies to manual target selection
+            Ability abilitySelected = turnController.clientPlayer.playerClass.abilities[abilityIndex];
+            if (abilitySelected.targetingType == TargetingType.AUTO) return;
+
+
+            turnController.targets.Clear();
+
+            //Party Member hovered over
+            if (!combatant.combatSprite.isMonster)
+            {
+                if (abilitySelected.targetingType != TargetingType.ENEMY)
+                {
+                    combatant.combatSprite.sprite.color = Color.green;
+                    turnController.hasValidTarget = true;
+                    turnController.targets.Add(combatant);
+                }
+
+            }//Enemy sprite hovered over
+            else
+            {
+                if (abilitySelected.targetingType != TargetingType.ALLIED)
+                {
+                    combatant.combatSprite.sprite.color = Color.red;
+                    turnController.hasValidTarget = true;
+                    turnController.targets.Add(combatant);
+                }
+ 
+            }
+        }
+
+        /***************************************************************
+        * Provides the opposite functionality to onSpriteEnter(),
+          while having selected a defered targeting type the mouse exit
+          event will set the sprite tint back to the sprite's 
+          original color.
+
+        @param - spriteIndex: a value between 0-players.count() OR
+        0-monsterParty.count() which represents the sprite that was 
+        hovered over. 
+        **************************************************************/
+        public void onSpriteExit(in Combatable combatant)
+        {
+            //Check ability selected
+            int abilityIndex = AbilityButton.selectedAbilityIndex;
+            if (abilityIndex == -1) return;
+            //Check if targeting type applies to manual target selection
+            if (TargetingType.AUTO  == turnController.clientAdventurer.abilities[abilityIndex].targetingType)
+                return;
+
+            Ability abilitySelected = turnController.clientAdventurer.abilities[abilityIndex];
+            turnController.targets.Clear();
+            turnController.hasValidTarget = false;
+
+            //Party Member hovered over
+            if (!combatant.combatSprite.isMonster)
+            {
+                if (TargetingType.ENEMY != abilitySelected.targetingType)
+                {
+                    combatant.combatSprite.sprite.color = Color.white;
+                }
+            }//Enemy sprite hovered over
+            else
+            {
+                if (TargetingType.ALLIED != abilitySelected.targetingType)
+                {
+                    combatant.combatSprite.sprite.color = Color.white;
+                }
+            }
+        }
+
+        /***************************************************************
+        * Event handler for when a sprite is clicked after selecting
+          a valid target with valid ability.
+
+        * Applies the abilities effects to the target. 
+
+          @param - spriteIndex: a value between 0-players.count() OR
+          0-monsterParty.count() which represents the sprite that was 
+          hovered over. 
+        **************************************************************/
+        public void onSpriteClicked(in Combatable combatant)
+        {
+            if (!turnController.isClientPlayerTurn) return;
+            if (AbilityButton.selectedAbilityIndex == -1) return;
+
+            Ability abilityUsed = turnController.clientAdventurer.abilities[AbilityButton.selectedAbilityIndex];
+            //If A monster is hoeverd over with an ally target ability 
+            if (isMonster && abilityUsed.targetingType == TargetingType.ALLIED) return;
+            
+            //If A PLAYER is hoeverd over with an enemy target ability
+            if (!isMonster  && abilityUsed.targetingType == TargetingType.ENEMY) return;
+
+            //Auto target abilities automatically allow for valid targets
+            if (!turnController.hasValidTarget)
+            {
+                 if(abilityUsed.targetingType != TargetingType.AUTO)
+                    return;
+            }
+
+            //Process Ability application to target/s
+            foreach (var target in turnController.targets)
+            {
+                foreach (int abilityType in abilityUsed.typeIds)
+                {
+                    MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
+                    if (target.combatSprite.isMonster)
+                    {
+                        if (metaType == MetaTypes.DAMAGE)
+                        {
+                            ViewController.battleState.attackTarget(target, turnController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                        }
+                    }
+                    else
+                    {
+                        if (metaType == MetaTypes.HEALING)
+                        {
+                            ViewController.battleState.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                        }
+                    }
+
+                    if (metaType == MetaTypes.EFFECT)
+                    {
+
+                        ViewController.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max, abilityUsed.abilityStrength.min);
+                        ViewController.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
+                    }
+                }
+            }
+
+            //Update Cooldown / Targets 
+            abilityUsed.setLastTurnUsed(TurnController.turnCount); //Flagging whether cooldown
+            abilityUsed.cooldownTracker++;
+            turnController.clientPlayer.playerClass.updateAbilityCooldowns();
+            ViewController.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
+            onSpriteExit(in combatant);
+            turnController.resetTargets();
+            turnController.takeTurn();
         }
 
         void Update()
@@ -111,7 +277,7 @@ namespace Assets.Scripts.UI
             bool doesContain = sprite.bounds.Contains(position);
             if(doesContain)
             {
-                ViewController.INSTANCE.battleState.onSpriteEnter(combatantRef);
+                onSpriteEnter(combatantRef);
             }
 
         }

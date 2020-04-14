@@ -6,12 +6,12 @@
   used to manipulate the turn indcator instance.
 **************************************************************/
 
+using Assets.Scripts.GameStates;
 using Assets.Scripts.Util;
 using UnityEngine;
 
 public class TurnChevron : MonoBehaviour
 {
-    private static int turnCount = 0;
     private static SpriteRenderer chevronSprite;
     private static Transform instance;
 
@@ -41,13 +41,12 @@ public class TurnChevron : MonoBehaviour
     **************************************************************/
     public static void setPosition(Transform position)
     {
-        turnCount++;
         Vector3 localPoint = position.position;
         localPoint.y += 150;
         chevronTransform.SetParent(position.transform);
         chevronTransform.position = localPoint;
 
-        if(turnCount % 2 == 0)
+        if(TurnController.turnCount % 2 == 0)
         {
             chevronSprite.color = Color.red;
         }

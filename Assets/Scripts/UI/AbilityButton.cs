@@ -1,21 +1,31 @@
 ﻿using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Players;
+using Assets.Scripts.GameStates;
+using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Util;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class AbilityButton : MonoBehaviour
 {
-    public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y};
+    public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y };
+    public static int selectedAbilityIndex { get; set; }
     private static int keyIndex = 0;
+    private static bool isStandardTooltip = false;
 
     public int buttonCount;
-    public bool isPressed;
+
+    //Componenet Fields
     public Text keyText;
     public Button button { get; private set; }
     public Text cooldownText { get; private set; }
     public Image icon { get; set; }
     private Ability abilityRef;
+
+    private static TurnController turnController = TurnController.INSTANCE;
+    private static Adventurer clientPlayer;
 
     /***************************************************************
     * instantiates and returns the an AbilityButton instance.
@@ -30,7 +40,7 @@ public class AbilityButton : MonoBehaviour
     {
         Transform buttonTransfrom = Instantiate(GameAssets.INSTANCE.abilityButtonPrefab, Vector2.zero, Quaternion.identity);
         AbilityButton button = buttonTransfrom.GetComponent<AbilityButton>();
-        button.setData(in ability);
+        button.setData(ability);
         keyIndex++;
         return button;
     }
@@ -38,7 +48,7 @@ public class AbilityButton : MonoBehaviour
     //Initialize Components
     void Awake()
     {
-        isPressed = false;
+        clientPlayer = TurnController.INSTANCE.clientPlayer.playerClass;
         button = gameObject.transform.Find("button").GetComponent<Button>();
         keyText = gameObject.transform.Find("text_key").GetComponent<Text>();
         icon = button.GetComponent<Image>();
@@ -51,7 +61,7 @@ public class AbilityButton : MonoBehaviour
     @param - ability: The ability which will be visuallly
     represnted by this gameobject.
     **************************************************************/
-    private void setData(in Ability ability)
+    private void setData(Ability ability)
     {
         buttonCount = keyIndex;
         keyText.text = keyCodes[buttonCount].ToString();
@@ -78,14 +88,100 @@ public class AbilityButton : MonoBehaviour
         mouseExitEvent.eventID = EventTriggerType.PointerExit;
         mouseClickeEvent.eventID = EventTriggerType.PointerClick;
 
-        mouseEnterEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityHoverEnter(abilityRef));
-        mouseExitEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityHoverExit());
-        mouseClickeEvent.callback.AddListener(evt => ViewController.INSTANCE.battleState.onAbilityClicked(abilityRef));
+        mouseEnterEvent.callback.AddListener(evt => onAbilityHoverEnter(abilityRef));
+        mouseExitEvent.callback.AddListener(evt => onAbilityHoverExit());
+        mouseClickeEvent.callback.AddListener(evt => onAbilityClicked(buttonCount));
 
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
         gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
     }
+
+    /*---------------------------------------------------------------
+                        CLIENT SIDE EVENT-HANDLERS
+     ---------------------------------------------------------------*/
+    /***************************************************************
+                        ABILITY-HANDLERS
+    *************************************************************** 
+    * On mouse hover over ability icons, the tooltip for that ability
+      is displayed.
+
+    * if an ability is locked or not loaded, the called function 
+      will throw an ArgumentOutOfRangeException which indicates
+      that a standard tooltip should be displayed.
+
+    @param - skillIndex: a value between 0-4 indicating which
+    ability from the ability bar is being hovered over.
+    **************************************************************/
+    public void onAbilityHoverEnter(in Ability ability)
+    {
+        isStandardTooltip = ability == null;
+        if (isStandardTooltip) Tooltip.show("Locked");
+        else AbilityTooltip.show(ability);
+    }
+
+    /***************************************************************
+    * Event handler for hiding the ability tooltips upon mouse exit.
+    **************************************************************/
+    public void onAbilityHoverExit()
+    {
+        if (isStandardTooltip) Tooltip.hide();
+        else AbilityTooltip.hide();
+    }
+
+    /***************************************************************
+    * Event handler for click action in ability icon.
+    
+    * Determines the ability type of the ability that was clicked
+      and provides appropriate operations for populating the targets
+      dictionary or otherwise displaying targeting information
+      through setting the tint of targeteable sprites.
+          
+    @param - ability: The ability that was clicked
+    **************************************************************/
+    public void onAbilityClicked(int abilitySelection)
+    {
+        if (clientPlayer.abilities[abilitySelection] == null) return;
+        if (!turnController.isClientPlayerTurn) return; 
+        if (clientPlayer.abilities[abilitySelection].isOnCooldown) return;
+
+        //Reset TargetsS
+        turnController.resetTargets();
+        selectedAbilityIndex = abilitySelection;
+
+        switch ((AbilityTypes)clientPlayer.abilities[abilitySelection].typeIds[0])
+        {
+            //NOTE: Single Target abilities defer targeting to manual combatant selection
+            //Self Target
+            case AbilityTypes.SELF_HEAL:
+            case AbilityTypes.SELF_BUFF:
+                turnController.targets.Add(turnController.clientPlayer.playerClass);
+                clientPlayer.combatSprite.sprite.color = Color.green;
+                break;
+
+            //Multi Target 
+            case AbilityTypes.MULTI_DAMAGE:
+            case AbilityTypes.MULTI_DEBUFF:
+                turnController.monsterParty //Update monster sprite colors 
+                .FindAll(monster => monster.isAlive())
+                .ForEach(monster => {
+                    monster.combatSprite.sprite.color = Color.red;
+                    turnController.targets.Add(monster);
+                });
+                break;
+
+            case AbilityTypes.MULTI_HEAL:
+            case AbilityTypes.MULTI_BUFF:
+                turnController.playerParty //Update Player sprite colors
+                .FindAll(player => player.isAlive())
+                .ForEach(player => {
+                    player.combatSprite.sprite.color = Color.green;
+                    turnController.targets.Add(player);
+                });
+                break;
+        }
+    }
+
 
     private void OnDestroy()
     {
@@ -96,7 +192,7 @@ public class AbilityButton : MonoBehaviour
     {
         if(Input.GetKeyDown(keyCodes[buttonCount]))
         {
-            ViewController.INSTANCE.battleState.onAbilityClicked(abilityRef);
+            onAbilityClicked(buttonCount);
         }
     }
 }

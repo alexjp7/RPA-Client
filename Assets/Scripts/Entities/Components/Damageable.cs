@@ -28,6 +28,7 @@ namespace Assets.Scripts.Entities.Components
             public static readonly float WARRIOR_MOD = 0.15f;
             public static readonly float WIZARD_MOD = -0.15f;
             public static readonly float CLERIC_MOD = -0.10f;
+            public static readonly float ROGUE_MOD =  0.0f;
         }
 
         public static readonly float PLAYER_BASE_HP = 50;

@@ -6,7 +6,7 @@
         "name": "Arcane Pulse",
         "tooltip": "Fire @ pulse of arcane energy dealing $ damage",
         "tooltip_vars":[["an innate","a foccused","a masterful"]],
-        "damage":[[12,20],[15,22],[30,45]],
+        "damage":[[25,32],[35,50],[60,80]],
         "cooldown":1,
         "types": [[0]],
         "status":-1
@@ -16,8 +16,8 @@
         "name": "Wind Surge",
         "tooltip": "Channel @ wind dealing to $ damage all enemies  and applying * to all targets",
         "tooltip_vars":[["a considerable gust of" ,"an unatural gust of","a gale force strength"]],
-        "damage":[[9,15],[9,14],[20,25]],
-        "cooldown":2,
+        "damage":[[20,30],[25,40],[45,60]],
+        "cooldown":4,
         "types": [[1]],
         "status":-1
       },

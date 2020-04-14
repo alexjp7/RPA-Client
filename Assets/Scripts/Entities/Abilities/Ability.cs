@@ -7,6 +7,7 @@
 **************************************************************/
 
 using Assets.Scripts.Entities.Components;
+using System;
 
 namespace Assets.Scripts.Entities.Abilities
 {
@@ -44,6 +45,14 @@ namespace Assets.Scripts.Entities.Abilities
         }
     }
 
+    public enum TargetingType
+    {
+        AUTO = 0,
+        ENEMY  = 1,
+        ALLIED = 2,
+    }
+
+
     public class Ability
     {
         public static readonly int LEVEL_TIER_LIMIT = 3;
@@ -51,7 +60,10 @@ namespace Assets.Scripts.Entities.Abilities
         public static readonly string BASE_ABILITY_ICON_PATH = "textures/icon_textures/ability_icons/";
         public static readonly string[] toolTipVarTokens = { "@", "#" };
 
+        public bool isEnemyTargetable { get; private set;}
+
         //Read in values
+        public TargetingType targetingType { get; private set; }
         public string iconPath { get; set; }
         public int id { get; set; }
         public string tooltip { get; set; }
@@ -84,7 +96,26 @@ namespace Assets.Scripts.Entities.Abilities
             this.statusEffect = statusEffect;
             this.lastTurnUsed = -1;
             this.cooldownTracker = cooldown;
+            setTargetingType();
+          
         }
+
+        public void setTargetingType()
+        {
+            if (Array.Exists(AbilityFactory.enemyTargetingTypes, type => (int)type == typeIds[0]) ) 
+            {
+                targetingType = TargetingType.ENEMY;
+            }
+            else if(Array.Exists(AbilityFactory.allyTargetingTypes, type => (int)type == typeIds[0]) )
+            {
+                targetingType = TargetingType.ALLIED;
+            }
+            else if (Array.Exists(AbilityFactory.autoTargetingTypes, type => (int)type == typeIds[0]) )
+            {
+                targetingType = TargetingType.AUTO;
+            }
+        }
+
 
         /***************************************************************
         * Checks if the amount of turns since last use has exceeded

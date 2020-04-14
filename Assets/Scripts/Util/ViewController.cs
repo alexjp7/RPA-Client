@@ -10,32 +10,20 @@ namespace Assets.Scripts.Util
         BATTLE_STATE = 2,
     }
 
-    public class ViewController 
+    public class ViewController: MonoBehaviour
     {
-        private static ViewController _instace;
-        public static ViewController INSTANCE
-        {
-            get
-            {
-                if(_instace == null)
-                {
-                    _instace = new ViewController();
-                }
-                return _instace;
-            }
-        }
-
-        public void changeScene(int scene)
+        public static void changeScene(int scene)
         {
             SceneManager.LoadScene(scene, LoadSceneMode.Single);
             setStateScript((GameState)scene);
         }
 
-        public void setStateScript(GameState scene)
+        public static void setStateScript(GameState scene)
         {
             if(scene == GameState.MAIN_MENU) //Main Menu
             {
-
+                GameObject parent = GameObject.Find("Canvas");
+                mainMenu = parent.GetComponent<MainMenu>();
             }
             else if(scene == GameState.CHARACTER_CREATION) // Character creation
             {
@@ -49,8 +37,8 @@ namespace Assets.Scripts.Util
         }
 
         //Game State refernces
-        public BattleState battleState;
-        public CharacterCreator characterCreator;
-        public MainMenu mainMenu;
+        public static BattleState battleState;
+        public static CharacterCreator characterCreator;
+        public static MainMenu mainMenu;
     }
 }

@@ -6,7 +6,7 @@
       "name": "Overhand Strike",
       "tooltip": "Deliver a @ strike to an enemy dealing $ damage ",
       "tooltip_vars":[["forceful","brutal","devestating"]],
-      "damage":[[12,20],[15,22],[30,45]],
+      "damage":[[17,20],[25,35],[40,60]],
       "types": [[0]],
       "cooldown":1,
       "status":null
@@ -17,7 +17,7 @@
       "tooltip": "@ swing your blade around yourself in flurry wide sweeping arcs dealing $ damage to all enemies.",
       "tooltip_vars":[["Confidently" ,"Fearlessly","Ferociously"]],
       "types": [[1]],
-      "damage":[[2,4],[9,14],[20,25]],
+      "damage":[[12,15],[20,25],[30,45]],
       "cooldown":3,
       "status":0
     },

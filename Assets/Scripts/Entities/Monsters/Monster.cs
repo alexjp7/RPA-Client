@@ -17,6 +17,11 @@
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.GameStates;
+using Assets.Scripts.Util;
+using System;
+using Assets.Scripts.Entities.Players;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Monsters
 {
@@ -41,6 +46,12 @@ namespace Assets.Scripts.Entities.Monsters
       of a running game.
     **************************************************************/
 
+    public enum Personality
+    {
+        AGGRESSIVE = 0,
+        CONSERVATIVE = 1,
+        SUPPORTIVE = 2
+    }
 
     public abstract class Monster : Combatable
     {
@@ -111,24 +122,109 @@ namespace Assets.Scripts.Entities.Monsters
             return namePrefixes[Util.Random.getInt(namePrefixes.Length)];
         }
 
-        public virtual Ability selectAbility(int turnCount)
-        {
-            Ability chosenAbility = abilities[0];
-            int abilityCount = abilities.Count;
 
-            if (abilityCount > 1)
+
+        public virtual List<Combatable> getTargets(out Ability abilityUsed)
+        {
+            List<Combatable> targets = new List<Combatable>();
+            //Needs implementing - Current health
+
+            var monsterParty = TurnController.INSTANCE.monsterParty;
+            var playerParty = TurnController.INSTANCE.playerParty;
+            abilityUsed = selectAbility(TurnController.turnCount, ref monsterParty, ref playerParty, ref targets);
+
+            return targets;
+        }
+
+        private Ability selectAbility(int turnCount, ref List<Monster> monsterParty, ref List<Adventurer> playerParty, ref List<Combatable> targets)
+        {
+            /*AVAILABLE METHODS FOR COMBATABLES*/
+            //Current Health
+            float monsterCurrentHealth = monsterParty[0].healthProperties.currentHealth;
+            //Max Health
+            float playerMaxHealth = playerParty[0].healthProperties.maxHealth;
+            //Health percent
+            float healthPercent = playerParty[0].getHealthPercent();
+
+            //Enemy (player) types
+            PlayerClasses adventuringClass = playerParty[0].classId;
+            if (adventuringClass == PlayerClasses.WARRIOR) ;
+            else if (adventuringClass == PlayerClasses.WIZARD) ;
+            else if (adventuringClass == PlayerClasses.ROGUE) ;
+            else if (adventuringClass == PlayerClasses.CLERIC) ;
+
+            //To See what conditions a combatant has - Map status effect id -> condition object
+            Dictionary<int, Condition> playerConditions = playerParty[0].conditions; 
+            Dictionary<int, Condition> monsterConditions = monsterParty[0].conditions;
+           
+            //INSERT ABILITY SELECTION LOGIC HERE
+            Ability abilityUsed = this.abilities[0];
+
+            //Ability Processing
+            //MetaType = Damage, Healing, Effect
+            MetaTypes metaType = AbilityFactory.getMetaType(abilityUsed.typeIds[0]);
+            AbilityTypes abilityType = (AbilityTypes)abilityUsed.typeIds[0];
+
+            switch (abilityType)
             {
-                for (int i = abilityCount - 1; abilityCount > 0; i--)
-                {
-                    if (!abilities[i].isOnCooldown)
+                //Target will always be self
+                case AbilityTypes.SELF_HEAL: case AbilityTypes.SELF_BUFF:
+                    targets.Add(this);
+                    break;
+
+                //INSERT TARGETING LOGIC HERE
+                case AbilityTypes.SINGLE_DAMAGE: case AbilityTypes.SINGLE_DEBUFF:
+
+                    //Test - First alive enemy player
+                    foreach (var player in playerParty)
                     {
-                        chosenAbility = abilities[i];
-                        break;
+                        if (player.isAlive())
+                        {
+                            targets.Add(player);
+                            break;
+                        }
                     }
-                }
+
+                    break;
+
+                //INSERT TARGETING LOGIC HERE
+                case AbilityTypes.SINGLE_HEAL: case AbilityTypes.SINGLE_BUFF:
+                    
+                    //Test - First alive allied monster
+                    foreach (var monster in monsterParty)
+                    {
+                        if (monster.isAlive())
+                        {
+                            targets.Add(monster);
+                            break;
+                        }
+                    }
+
+                    break;
+
+                //Target Will alaways be allies
+                case AbilityTypes.MULTI_HEAL: case AbilityTypes.MULTI_BUFF:
+
+                    foreach (var monster in monsterParty)
+                        if (monster.isAlive()) targets.Add(monster);
+
+                    break;
+
+                //Target Will alaways be enemies
+                case AbilityTypes.MULTI_DAMAGE: case AbilityTypes.MULTI_DEBUFF:
+
+                    foreach (var player in playerParty)
+                        if (player.isAlive()) targets.Add(player);
+
+                    break;
+
+                default:
+                    Debug.LogError($"Unimplemented or malformed ability type encountered during {this.name} ability selection {new System.Diagnostics.StackFrame().ToString()}");
+                    break;
             }
 
-            return chosenAbility;
+
+            return abilityUsed;
         }
     }
 }

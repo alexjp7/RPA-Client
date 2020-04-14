@@ -95,6 +95,32 @@ namespace Assets.Scripts.Entities.Abilities
 
     class AbilityFactory
     {
+        public readonly static AbilityTypes[] autoTargetingTypes = 
+        { 
+            AbilityTypes.SELF_HEAL,
+            AbilityTypes.SELF_BUFF,
+            AbilityTypes.MULTI_DAMAGE,
+            AbilityTypes.MULTI_BUFF,
+            AbilityTypes.MULTI_HEAL
+        };
+
+        public readonly static AbilityTypes[] enemyTargetingTypes = 
+        {
+            AbilityTypes.SINGLE_DAMAGE,
+            AbilityTypes.SINGLE_DEBUFF
+        };
+
+        public readonly static AbilityTypes[] allyTargetingTypes =
+        {
+            AbilityTypes.SINGLE_HEAL,
+            AbilityTypes.SINGLE_DEBUFF
+        };
+
+        public readonly static AbilityTypes[] selfTargetTypes =
+        {
+            AbilityTypes.SELF_BUFF,
+            AbilityTypes.SELF_HEAL
+        };
 
         /*---------------------------------------------------------------
                             PLAYER-ABILITES
@@ -134,6 +160,7 @@ namespace Assets.Scripts.Entities.Abilities
 
             newAbility.tooltip = construcTooltip(jsonNode, skillLevel, metaType, potencyProperty);
             newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, skillLevel, metaType);
+            newAbility.setTargetingType();
 
             return newAbility;
         }
@@ -163,7 +190,7 @@ namespace Assets.Scripts.Entities.Abilities
 
                 MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
                 newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, 0, metaType);
-
+                newAbility.setTargetingType();
                 abilities.Add(newAbility);
             }
 

@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Scripts.RPA_Game;
-
+using Assets.Scripts.Util;
 
 public class MainMenu : MonoBehaviour
 {
@@ -23,6 +23,12 @@ public class MainMenu : MonoBehaviour
     public Text name2;
     public Text gameIdField;
     public Text notificationMessage;
+
+
+    void Awake()
+    {
+        ViewController.setStateScript(GameState.MAIN_MENU);
+    }
 
     /*---------------------------------------------------------------
                         CLIENT EVENT HANDLERS

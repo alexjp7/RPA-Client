@@ -17,5 +17,9 @@ namespace Assets.Scripts.Entities.Monsters.MonsterTypes
             abilities = new List<Ability>(goblinFigherAbilities);
             healthProperties.setHealthValues(100);
         }
+
+
+
+
     }
 }

@@ -45,7 +45,7 @@ namespace Assets.Scripts.Util
 
         private void runTest(GameState gameState)
         {
-            ViewController.INSTANCE.setStateScript(gameState);
+            ViewController.setStateScript(gameState);
             createTestPlayers();
             initClassData();
         }
@@ -58,9 +58,9 @@ namespace Assets.Scripts.Util
             Game.players = new List<Player>();
             //@Test Data
             Game.players.Add(new Player("Alexjp", PlayerClasses.WARRIOR) );
-            Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
-            Game.players.Add(new Player("Kozza", PlayerClasses.CLERIC));
-            Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
+            //Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
+            //Game.players.Add(new Player("Kozza", PlayerClasses.CLERIC));
+            //Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
             Game.connectedPlayers = Game.players.Count;
 
