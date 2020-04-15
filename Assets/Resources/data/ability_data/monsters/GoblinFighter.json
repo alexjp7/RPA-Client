@@ -13,7 +13,7 @@
       "types": [[8]],
       "potency": [50],
       "cooldown":2,
-      "turns_applied": [3],
+      "turns_applied": [1],
       "status": 2
     }
   ]

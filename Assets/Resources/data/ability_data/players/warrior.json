@@ -4,12 +4,14 @@
     {
       "id": 0,
       "name": "Overhand Strike",
-      "tooltip": "Deliver a @ strike to an enemy dealing $ damage ",
+      "tooltip": "Deliver a @ strike to an enemy dealing $ damage and applying * for + turn/s to your target.",
       "tooltip_vars":[["forceful","brutal","devestating"]],
       "damage":[[17,20],[25,35],[40,60]],
-      "types": [[0]],
+      "types": [[0,8]],
       "cooldown":1,
-      "status":null
+      "turns_applied": [2],
+      "potency": [20],
+      "status":2
     },
     {
       "id": 1,
@@ -24,12 +26,12 @@
     {
       "id": 2,
       "name": "True Defence",
-      "tooltip": "Fortify yourself with @ defence applying a  $% incoming damage",
+      "tooltip": "Fortify yourself with @ defence taking  $% incoming damage.",
       "tooltip_vars":[["a valiant","formidable","an impenetrable"]],
       "types": [[5]],
       "potency":[-50,-75,-90],
       "cooldown":1,
-      "turns_applied":[2,3,4],
+      "turns_applied":[3,3,4],
       "status":3
     }
   ]

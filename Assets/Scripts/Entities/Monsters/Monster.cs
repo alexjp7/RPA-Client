@@ -156,9 +156,10 @@ namespace Assets.Scripts.Entities.Monsters
             //To See what conditions a combatant has - Map status effect id -> condition object
             Dictionary<int, Condition> playerConditions = playerParty[0].conditions; 
             Dictionary<int, Condition> monsterConditions = monsterParty[0].conditions;
-           
+
             //INSERT ABILITY SELECTION LOGIC HERE
-            Ability abilityUsed = this.abilities[0];
+        
+            Ability abilityUsed = abilities[1].isOnCooldown ? abilities[0]: abilities[1];
 
             //Ability Processing
             //MetaType = Damage, Healing, Effect

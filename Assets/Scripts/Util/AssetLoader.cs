@@ -76,6 +76,7 @@ namespace Assets.Scripts.Util
         **************************************************************/
         public static Sprite getSprite(string key, string path = "")
         {
+            if (spriteMap == null) Debug.Log("spriteMap is null");
             if (!spriteMap.ContainsKey(key))
             {
                 Sprite sprite = Resources.Load<Sprite>(path);

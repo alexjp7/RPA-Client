@@ -190,8 +190,7 @@ namespace Assets.Scripts.Entities.Components
                     removedConditions.Add(condition.Value.effectId);
                 }
             }
-
-            if(removedConditions.Count > 0) removedConditions.ForEach(condition => conditions.Remove(condition));
+            removedConditions.ForEach(condition => conditions.Remove(condition));
 
             return removedConditions;
         }

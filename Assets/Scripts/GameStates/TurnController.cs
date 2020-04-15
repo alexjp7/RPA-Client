@@ -53,6 +53,13 @@ namespace Assets.Scripts.GameStates
             hasValidTarget = false;
         }
 
+        /***************************************************************
+        * Creates the initial combat order for the players and monsters.
+
+        * The combat order is determined through randomising the order 
+          of both  Game.players and the monster party generated in 
+          initMonsterParty().
+        **************************************************************/
         public void init()
         {
             //Set Turn order for players
@@ -74,16 +81,8 @@ namespace Assets.Scripts.GameStates
             monsterParty = mFactory.createMonsterParty(monsterPartySize);
         }
 
-        /***************************************************************
-        * Creates the initial combat order for the players and monsters.
-
-        * The combat order is determined through randomising the order 
-          of both  Game.players and the monster party generated in 
-          initMonsterParty().
-
-        * The targets dictionary is initialised in this function
-          which is used to map the index of a sprite along with the
-          data relating to its health, abilities and active conditions.
+        /***************************************************************f
+        * Makes the call to start the first turn of combat
         **************************************************************/
         public void startCombat()
         {
@@ -108,6 +107,7 @@ namespace Assets.Scripts.GameStates
             int nextCombatant = getCombatant(isPlayerTurn);
             if(hasNextCombatant = nextCombatant > -1)
             {
+                hasNextTurn = true;
                 if (isPlayerTurn)
                 {
                     currentCombatant = playerParty[nextCombatant];
@@ -118,9 +118,10 @@ namespace Assets.Scripts.GameStates
                     currentCombatant = monsterParty[nextCombatant]; 
                     isClientPlayerTurn = false;
                     takeMonsterTurn(nextCombatant);
+                    ViewController.battleState.updateConditionUI();
+                    takeTurn();
                 }
 
-                hasNextTurn = true;
             }
         }
 
@@ -200,7 +201,7 @@ namespace Assets.Scripts.GameStates
                     }
                     else if (metaType == MetaTypes.EFFECT)
                     {
-                        ViewController.battleState.affectTarget(target, ability.statusEffect, ability.abilityStrength.max, ability.abilityStrength.min);
+                        ViewController.battleState.affectTarget(target, ability.statusEffect, ability.conditionStrength.potency, ability.conditionStrength.turnsApplied);
                     }
                     else if(metaType == MetaTypes.HEALING)
                     {
@@ -216,7 +217,6 @@ namespace Assets.Scripts.GameStates
             }
 
             currentMonster.updateAbilityCooldowns();
-            takeTurn(); //Progress to next combatant's turn
         }
 
         /***************************************************************

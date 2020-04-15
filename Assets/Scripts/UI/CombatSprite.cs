@@ -20,10 +20,11 @@ namespace Assets.Scripts.UI
 {
     public class CombatSprite : MonoBehaviour
     {
+        public int popupCount { get; set; } // Have independant tracking of text-popups to make it more readable
         public static bool hasValidTarget;
         public Combatable combatantRef;
         public SpriteRenderer sprite { get; private set;}
-        public GameObject buffBar { get; private set;}
+        public Transform buffBar { get; private set;}
         public Text displayName { get; private set; }
         public Text maxHealthValue { get; private set; }
         public Text currentHealthValue { get; private set; }
@@ -59,7 +60,7 @@ namespace Assets.Scripts.UI
             maxHealthValue = gameObject.transform.Find("text_max_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
-            buffBar = gameObject.transform.Find("buff_bar").GetComponent<GameObject>();
+            buffBar = gameObject.transform.Find("buff_bar");
         }
 
 
@@ -70,6 +71,7 @@ namespace Assets.Scripts.UI
         **************************************************************/
         private void setData(in Combatable combatant)
         {
+            popupCount = 0;
             combatantRef = combatant;
             displayName.text = combatant.name;
             sprite.sprite =  combatant.assetData.sprite;
@@ -114,6 +116,31 @@ namespace Assets.Scripts.UI
         }
 
         /***************************************************************
+                            CONDITION-BAR HANDLERS
+        **************************************************************/
+        public void updateConditions()
+        {
+            int childs = buffBar.transform.childCount;
+            for (var i = childs - 1; i >= 0; i--)
+            {
+                Destroy(buffBar.GetChild(i).gameObject);
+            }
+
+            if (combatantRef.conditions.Count > 0)
+            {
+                foreach(var condition in combatantRef.conditions)
+                {
+                    string conditionName = ((StatusEffect)(condition.Key)).ToString();
+                    GameObject newCondition = new GameObject(conditionName);
+                    Image conditionIcon = newCondition.AddComponent<Image>();
+                    conditionIcon.sprite = AssetLoader.getSprite((conditionName));
+                    newCondition.gameObject.transform.SetParent(buffBar);
+                }
+
+            }
+        }
+
+        /***************************************************************
                             SPRITE HANDLERS
         ***************************************************************
         * Event handler for defered targeting types (single-target 
@@ -129,6 +156,7 @@ namespace Assets.Scripts.UI
         **************************************************************/
         public void onSpriteEnter(in Combatable combatant)
         {
+            if (!turnController.isClientPlayerTurn) return;
             //Check ability selected
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
@@ -174,6 +202,7 @@ namespace Assets.Scripts.UI
         **************************************************************/
         public void onSpriteExit(in Combatable combatant)
         {
+            if (!turnController.isClientPlayerTurn) return;
             //Check ability selected
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
@@ -255,7 +284,7 @@ namespace Assets.Scripts.UI
                     if (metaType == MetaTypes.EFFECT)
                     {
 
-                        ViewController.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.abilityStrength.max, abilityUsed.abilityStrength.min);
+                        ViewController.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
                         ViewController.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                     }
                 }
@@ -279,7 +308,6 @@ namespace Assets.Scripts.UI
             {
                 onSpriteEnter(combatantRef);
             }
-
         }
     }
 

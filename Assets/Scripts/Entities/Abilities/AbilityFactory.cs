@@ -46,6 +46,7 @@ using UnityEngine;
 using Assets.Scripts.Entities.Components;
 using SimpleJSON;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Assets.Scripts.Entities.Abilities
@@ -122,6 +123,15 @@ namespace Assets.Scripts.Entities.Abilities
             AbilityTypes.SELF_HEAL
         };
 
+        public readonly static AbilityTypes[] effectTypes =
+{
+            AbilityTypes.SELF_BUFF,
+            AbilityTypes.SINGLE_BUFF,
+            AbilityTypes.SINGLE_DEBUFF,
+            AbilityTypes.MULTI_BUFF,
+            AbilityTypes.MULTI_DEBUFF,
+        };
+
         /*---------------------------------------------------------------
                             PLAYER-ABILITES
         ---------------------------------------------------------------*/
@@ -158,8 +168,22 @@ namespace Assets.Scripts.Entities.Abilities
             if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
                 throw new ArgumentException($"Malformed JSON in {jsonNode["entity"]} : {jsonNode["name"]} ");
 
-            newAbility.tooltip = construcTooltip(jsonNode, skillLevel, metaType, potencyProperty);
+            newAbility.tooltip = construcTooltip(jsonNode, skillLevel, metaType, newAbility.typeIds, potencyProperty);
             newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, skillLevel, metaType);
+
+
+            foreach(int type in newAbility.typeIds)
+            {
+                if(effectTypes.Contains((AbilityTypes)type) )
+                {
+                    newAbility.conditionStrength = constructionConditionStrength(jsonNode, skillLevel);
+                    newAbility.tooltip = newAbility.tooltip.Replace("+", newAbility.conditionStrength.turnsApplied.ToString());
+                    newAbility.tooltip = newAbility.tooltip.Replace("*", EffectProcessor.getEffectLabel(newAbility.statusEffect, newAbility.conditionStrength.potency));
+                    break;
+                }
+            }
+
+
             newAbility.setTargetingType();
 
             return newAbility;
@@ -190,6 +214,14 @@ namespace Assets.Scripts.Entities.Abilities
 
                 MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
                 newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, 0, metaType);
+                foreach (int type in newAbility.typeIds)
+                {
+                    if (effectTypes.Contains((AbilityTypes)type))
+                    {
+                        newAbility.conditionStrength = constructionConditionStrength(jsonNode, 0);
+                        break;
+                    }
+                }
                 newAbility.setTargetingType();
                 abilities.Add(newAbility);
             }
@@ -213,13 +245,17 @@ namespace Assets.Scripts.Entities.Abilities
                 abilityStrength.max = abilityJson[potencyProperty][skillLevel][1].AsInt;
 
             }
-            else if (metaType == MetaTypes.EFFECT)
-            {
-                abilityStrength.min = abilityJson["turns_applied"][skillLevel];
-                abilityStrength.max = abilityJson[potencyProperty][skillLevel].AsInt;
-            }
+
 
             return abilityStrength;
+        }
+
+        private static ConditionStrength constructionConditionStrength(JSONNode abilityJson, int skillLevel)
+        {
+            ConditionStrength conditionStrength = new ConditionStrength();
+            conditionStrength.turnsApplied = abilityJson["turns_applied"][skillLevel];
+            conditionStrength.potency = abilityJson["potency"][skillLevel].AsInt;
+            return conditionStrength;
         }
 
 
@@ -286,7 +322,7 @@ namespace Assets.Scripts.Entities.Abilities
          @return - The completed tooltip description with interpolated
          damage and description values.
         **************************************************************/
-        private static string construcTooltip(in JSONNode abilityJson, int skillLevel, MetaTypes metaType, string potencyProperty)
+        private static string construcTooltip(in JSONNode abilityJson, int skillLevel,MetaTypes metaType , int[] typeIds, string potencyProperty)
         {
             //Construct Tooltip 
             string tooltip = abilityJson["tooltip"].Value;
@@ -298,6 +334,8 @@ namespace Assets.Scripts.Entities.Abilities
             else if (metaType == MetaTypes.EFFECT)
             {
                 abilityPotency = abilityJson[potencyProperty][skillLevel].AsInt.ToString();
+
+
             }
 
             //Interpolate damage

@@ -14,6 +14,7 @@ public class FloatingPopup : MonoBehaviour
         {
             Vector2 localPoint = spritePosition;
             localPoint.y += 100 + (popupCount * 45);
+
             Transform damagePopupTransform = Instantiate(GameAssets.INSTANCE.damagePopupPrefab, localPoint, Quaternion.identity);
             FloatingPopup popup = damagePopupTransform.GetComponent<FloatingPopup>();
             popup.appear(text, in color);

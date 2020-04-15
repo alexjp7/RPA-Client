@@ -45,6 +45,11 @@ namespace Assets.Scripts.Entities.Abilities
         }
     }
 
+    public struct ConditionStrength
+    {
+        public int potency, turnsApplied;
+    }
+
     public enum TargetingType
     {
         AUTO = 0,
@@ -73,6 +78,7 @@ namespace Assets.Scripts.Entities.Abilities
         public int statusEffect; 
         public Renderable assetData { get; set; }
         public AbilityStrength abilityStrength { get; set; }
+        public ConditionStrength conditionStrength { get; set; }
 
         //Cooldown trackers
         public bool isOnCooldown { get; private set; }

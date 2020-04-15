@@ -58,8 +58,8 @@ namespace Assets.Scripts.Util
             Game.players = new List<Player>();
             //@Test Data
             Game.players.Add(new Player("Alexjp", PlayerClasses.WARRIOR) );
+            //Game.players.Add(new Player("Kozza", PlayerClasses.WARRIOR));
             //Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
-            //Game.players.Add(new Player("Kozza", PlayerClasses.CLERIC));
             //Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
             Game.connectedPlayers = Game.players.Count;

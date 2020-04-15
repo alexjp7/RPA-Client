@@ -136,15 +136,15 @@ namespace Assets.Scripts.Entities.Abilities
                     break;
 
                 case StatusEffect.REFLECT_DAMAGE:
-                    value = $"Dmg {potency}% Damage";
+                    value = $"dmg {potency}% Damage";
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_UP:
-                    value = $"+{potency}% Incoming Dmg ";
+                    value = $"+{potency}% incoming dmg ";
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
-                    value = $"{potency}% Incoming Dmg ";
+                    value = $"{potency}% incoming dmg ";
                     break;
             }
 
@@ -165,14 +165,14 @@ namespace Assets.Scripts.Entities.Abilities
             switch ((StatusEffect)effectId)
             {
                 case StatusEffect.REFLECT_DAMAGE:
-                    value = "Reflect DMG";
+                    value = "reflect DMG";
                     break;
                 case StatusEffect.DAMAGE_TAKEN_UP:
-                    value = "+ Incoming DMG";
+                    value = "+ incoming DMG";
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
-                    value = "- Incoming DMG";
+                    value = "- incoming DMG";
                     break;
             }
 

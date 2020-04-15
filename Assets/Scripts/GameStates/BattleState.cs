@@ -51,6 +51,7 @@ public class BattleState : MonoBehaviour
     {
         TestSimulator.initTestEnvironment(GameState.BATTLE_STATE); //Test only
         TurnController.INSTANCE.init();
+        AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
         initPlayerUI();
     }
@@ -87,7 +88,6 @@ public class BattleState : MonoBehaviour
         abilityButtons = new List<AbilityButton>();
 
         //Load static assets (namely the lock for default ability icon image)
-        AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         try
         {
             TurnController.INSTANCE.clientPlayer.playerClass.loadAbilities(Adventurer.getAbilityPath(clientSidePlayer.playerClass.classId), true);
@@ -111,104 +111,9 @@ public class BattleState : MonoBehaviour
         catch (NotImplementedException e) { Debug.Log("ERROR:" + e.Message); }
     }
 
-     /*---------------------------------------------------------------
-    * The combatant with an active turn has their green turn
-      chevron indicator enabled, name dispalyed in bottom left
-    **************************************************************/
-    public void updateTurnUI()
-    {
-        Combatable currentCombatant = TurnController.INSTANCE.currentCombatant;
-        TurnChevron.setPosition(currentCombatant.combatSprite.transform);
-        currentTurnDisplayName.text = currentCombatant.name;
-        togglePlayerTurn();
-
-        //Update condition effect duractions
-        List<int> removedConditions = currentCombatant.updateConditionDurations();
-        if (removedConditions.Count > 0)
-        {
-            foreach (var condition in removedConditions)
-            {
-                FloatingPopup.create(currentCombatant.combatSprite.transform.position, EffectProcessor.getEffectLabel(condition), Color.blue);
-            }
-
-        }
-    }
-
-    /***************************************************************
-    *  Calls for cooldown trackers to be updated
-
-    @param - isPlayerTurn - passed in to setCooldownUI to determine
-    what colors and values to update the coodlown UI with.
-    **************************************************************/
-    private void togglePlayerTurn()
-    {
-        for (int i = 0; i < clientSidePlayer.playerClass.abilities.Count; i++)
-        {
-            setCooldownUI(i);
-        }
-    }
-
-    /***************************************************************
-    * Updates the UI components to reflect the current ability
-      cooldowns in progres
-
-    @param - isPlayerTurn - if true, all non-cooldowned abilities
-    will become visually active - if false the  ability panel
-    will be visually disabled.
-    **************************************************************/
-    public void setCooldownUI(int abilityIndex)
-    {
-        bool isPlayerTurn = TurnController.INSTANCE.isClientPlayerTurn;
-
-        Ability ability = clientSidePlayer.playerClass.abilities[abilityIndex];
-        AbilityButton abilityButton = abilityButtons[abilityIndex];
-        Color color = abilityButton.button.GetComponent<Image>().color;
-        Text cooldownText = abilityButtons[abilityIndex].cooldownText;
-        string cooldownValue = "";
-        if(isPlayerTurn)
-        {
-            AbilityButton.selectedAbilityIndex = -1;
-            if (ability.isOnCooldown)
-            {
-                color.a = .3f;
-                cooldownValue = (ability.cooldownTracker + 1).ToString();
-            }
-            else
-            {
-                color.a = 1f;
-                abilityButton.cooldownText.text = "";
-                ability.setLastTurnUsed(-1);
-            }
-        }
-        else
-        {
-            color.a = .3f;
-            if (ability.isOnCooldown)
-            {
-                if (ability.cooldownTracker > 1)
-                {
-                    cooldownValue = (ability.cooldownTracker + 1).ToString();
-                }
-            }
-        }
-        abilityButton.button.GetComponent<Image>().color = color;
-        abilityButton.cooldownText.text = cooldownValue;
-    }
-
-    /***************************************************************
-    * Client side processing of any special-case scenarios
-      when applying certian status effects. 
-    **************************************************************/
-    public void applyAfterEffect(ref Ability ability)
-    {
-        switch((StatusEffect)ability.statusEffect)
-        {  
-            case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
-                ability.cooldownTracker -= ability.abilityStrength.max;
-                break;
-        }
-    }
-
+    /*---------------------------------------------------------------
+                    BATTLE-STATE CONTROL FLOWS
+     ---------------------------------------------------------------*/
     /***************************************************************
     * Applies a combat status-effect to a target and displays
       text to user to indicate the abilitiy's effects.
@@ -284,6 +189,7 @@ public class BattleState : MonoBehaviour
         FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
     }
 
+
     /***************************************************************
     @Overload - Allows for precalculated damage to be done to a target
     in special combat conditions.
@@ -304,17 +210,149 @@ public class BattleState : MonoBehaviour
         FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
     }
 
+    /***************************************************************
+    * Client side processing of any special-case scenarios
+      when applying certian status effects. 
+    **************************************************************/
+    public void applyAfterEffect(ref Ability ability)
+    {
+        switch((StatusEffect)ability.statusEffect)
+        {  
+            case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
+                ability.cooldownTracker -= ability.abilityStrength.max;
+                break;
+        }
+    }
+
+    /*---------------------------------------------------------------
+                       UI-CALLBACKS 
+     ---------------------------------------------------------------
+   * The combatant with an active turn has their green turn
+     chevron indicator enabled, name dispalyed in bottom left
+   **************************************************************/
+    public void updateTurnUi()
+    {
+        Combatable currentCombatant = TurnController.INSTANCE.currentCombatant;
+        TurnChevron.setPosition(currentCombatant.combatSprite.transform);
+        currentTurnDisplayName.text = currentCombatant.name;
+    }
+
+    public void updateConditionUI()
+    {
+        //Update condition effect duractions for current combatant
+        Combatable currentCombatant = TurnController.INSTANCE.currentCombatant;
+        List<int> removedConditions = currentCombatant.updateConditionDurations();
+        if (removedConditions.Count > 0)
+        {
+            foreach (var condition in removedConditions)
+            {
+                FloatingPopup.create(currentCombatant.combatSprite.transform.position, EffectProcessor.getEffectLabel(condition), Color.blue);
+            }
+        }
+
+        //Update Condition Bar Ui
+        List<Combatable> allCombatants = new List<Combatable>(TurnController.INSTANCE.playerParty);
+        allCombatants.AddRange(TurnController.INSTANCE.monsterParty);
+        foreach (var combatants in allCombatants)
+        {
+            combatants.combatSprite.updateConditions();
+        }
+    }
+
+    /***************************************************************
+    *  Calls for cooldown trackers to be updated
+
+    @param - isPlayerTurn - passed in to setCooldownUI to determine
+    what colors and values to update the coodlown UI with.
+    **************************************************************/
+    private void updateCooldownUI()
+    {
+        for (int i = 0; i < clientSidePlayer.playerClass.abilities.Count; i++)
+        {
+            setCooldownUI(i);
+        }
+    }
+
+    /***************************************************************
+    * Updates the UI components to reflect the current ability
+      cooldowns in progres
+
+    @param - isPlayerTurn - if true, all non-cooldowned abilities
+    will become visually active - if false the  ability panel
+    will be visually disabled.
+    **************************************************************/
+    public void setCooldownUI(int abilityIndex)
+    {
+        bool isPlayerTurn = TurnController.INSTANCE.isClientPlayerTurn;
+
+        Ability ability = clientSidePlayer.playerClass.abilities[abilityIndex];
+        AbilityButton abilityButton = abilityButtons[abilityIndex];
+        Color color = abilityButton.button.GetComponent<Image>().color;
+        Text cooldownText = abilityButtons[abilityIndex].cooldownText;
+        string cooldownValue = "";
+        if (isPlayerTurn)
+        {
+            AbilityButton.selectedAbilityIndex = -1;
+            if (ability.isOnCooldown)
+            {
+                color.a = .3f;
+                cooldownValue = (ability.cooldownTracker + 1).ToString();
+            }
+            else
+            {
+                color.a = 1f;
+                abilityButton.cooldownText.text = "";
+                ability.setLastTurnUsed(-1);
+            }
+        }
+        else
+        {
+            color.a = .3f;
+            if (ability.isOnCooldown)
+            {
+                if (ability.cooldownTracker > 1)
+                {
+                    cooldownValue = (ability.cooldownTracker + 1).ToString();
+                }
+            }
+        }
+        abilityButton.button.GetComponent<Image>().color = color;
+        abilityButton.cooldownText.text = cooldownValue;
+    }
+
+    /*---------------------------------------------------------------
+                        TEST/DEBUG FUNCTION
+    /***************************************************************
+    * Used to 'skip'/progress the turn order to next combatant
+     is used as an event handler for End Turn button,
+     and should only be used during debug/development.
+    **************************************************************/
     public void takeTurn()
     {
         TurnController.INSTANCE.takeTurn();
     }
 
+
+    /***************************************************************
+    * Updates The UI to reflect a new turn in the combat order.
+    **************************************************************/
+    private void updateUI()
+    {
+        updateTurnUi();
+        updateCooldownUI();
+        updateConditionUI();
+        TurnController.INSTANCE.hasNextTurn = false;
+    }
+
+    /***************************************************************
+    * Checks for a new turn comamnd to be isused by the TurnController
+     and executes various callbacks to reflect the current turn.
+    **************************************************************/
     void Update()
     {
         if (TurnController.INSTANCE.hasNextTurn)
         {
-            updateTurnUI();
-            TurnController.INSTANCE.hasNextTurn = false;
+            updateUI();
         }
     }
 }
