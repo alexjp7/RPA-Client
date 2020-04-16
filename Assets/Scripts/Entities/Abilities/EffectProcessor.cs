@@ -8,6 +8,8 @@
 **************************************************************/
 using Assets.Scripts.Entities.Components;
 using UnityEngine;
+using System;
+
 
 namespace Assets.Scripts.Entities.Abilities
 {
@@ -15,16 +17,18 @@ namespace Assets.Scripts.Entities.Abilities
     {
         //One-Time Use
         COOLDOWN_CHANGE = 0,
-        //Application Buffs
+        //Application Effects
         REFLECT_DAMAGE = 1,
-        DAMAGE_TAKEN_UP = 2,
-        DAMAGE_TAKEN_DOWN = 3,
-        STUN = 5,
+        DAMAGE_TAKEN_UP = 2, DAMAGE_TAKEN_DOWN = 3,
+        BLEED = 5,
+        POISON = 6, POISON_WEAPON = 7,
+        SLEEP = 8
     }
 
 
     public class EffectProcessor
     {
+
         public static EffectProcessor INSTANCE;
 
         private EffectProcessor() { }
@@ -37,6 +41,17 @@ namespace Assets.Scripts.Entities.Abilities
             }
             return INSTANCE;
         }
+
+        public static StatusEffect[] PreConditionEffects =
+        {
+            StatusEffect.BLEED,
+            StatusEffect.POISON,
+        };
+
+        public static StatusEffect[] ImpairingEffects =
+        {
+            StatusEffect.SLEEP
+        };
 
         /***************************************************************
         * Primary implementation for status effects. Either adds
@@ -53,6 +68,7 @@ namespace Assets.Scripts.Entities.Abilities
        {
             switch((StatusEffect)effectId)
             {
+                /******IMEDIATE EFFECT*******/
                 case StatusEffect.COOLDOWN_CHANGE:
                     target.abilities.ForEach(ability => ability.cooldownTracker += potency);
                     break;
@@ -63,12 +79,57 @@ namespace Assets.Scripts.Entities.Abilities
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_UP:
-                    applyDamageModifer(target, effectId, potency, turnsApplied);
+                    if (target.conditions.ContainsKey(effectId)) target.conditions[effectId].extendEffect(turnsApplied);
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
+                    if (target.conditions.ContainsKey(effectId)) target.conditions[effectId].extendEffect(turnsApplied);
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
+                    break;
+
+                /******IMPAIRING-EFFECTS*******/
+                case StatusEffect.SLEEP:
                     applyDamageModifer(target, effectId, potency, turnsApplied);
                     break;
+
+                /******PRE-TURN EFFECT*******/
+                //Stacking effects
+                case StatusEffect.BLEED:
+                    if (target.conditions.ContainsKey(effectId))
+                    {
+                        //Only apply the longer duration
+                        if(turnsApplied > target.conditions[effectId].turnsRemaining)
+                        {
+                            target.conditions[effectId].turnsRemaining = turnsApplied;
+                        }
+
+                        target.conditions[effectId].stacks++;
+                    }
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied, 1));
+                    break;
+
+                case StatusEffect.POISON_WEAPON:
+                    if (target.conditions.ContainsKey(effectId)) target.conditions[effectId].extendEffect(turnsApplied);
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
+                    break;
+
+                case StatusEffect.POISON:
+                    if (target.conditions.ContainsKey(effectId))
+                    {
+                        //Only apply the longer duration
+                        if (turnsApplied > target.conditions[effectId].turnsRemaining)
+                        {
+                            target.conditions[effectId].turnsRemaining = turnsApplied;
+                        }
+
+                        target.conditions[effectId].stacks++;
+                    }
+                    else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied, 1));
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unexpected status effect id = {effectId} being applied to {target.name} - Check the caster's <caster_entity>.json ");
             }
         }
 
@@ -145,6 +206,22 @@ namespace Assets.Scripts.Entities.Abilities
 
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
                     value = $"{potency}% incoming dmg ";
+                    break;
+
+                case StatusEffect.BLEED:
+                    value = $"bleed";
+                    break;
+
+                case StatusEffect.POISON_WEAPON:
+                    value = $"poison weapon";
+                    break;
+
+                case StatusEffect.POISON:
+                    value = $"poison";
+                    break;
+
+                case StatusEffect.SLEEP:
+                    value = $"sleep";
                     break;
             }
 

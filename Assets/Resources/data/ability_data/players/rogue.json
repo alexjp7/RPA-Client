@@ -1,0 +1,38 @@
+{
+    "entity":"rogue",
+    "starting_abilities": [
+      {
+        "id": 12,
+        "name": "Puncture",
+        "tooltip": "Inflict a deep wound dealing $ on your target causing @ blood loss - applying * for + turn/s ",
+        "tooltip_vars":[["noticeable","considerable","rapid"]],
+        "damage":[[10,15],[17,22],[25,30]],
+        "cooldown":1,
+        "potency":[5,10,15],
+        "turns_applied": [3],
+        "types": [[0,8]],
+        "status":5
+      },
+      {
+        "id": 13,
+        "name": "Intoxicating Fumes",
+        "tooltip": "Lob a vial of @ fumes towards a target applying * for + turn/s ",
+        "tooltip_vars":[["pungent" ,"nauseating","intoxicating"]],
+        "types": [[8]],
+        "turns_applied": [2],
+        "cooldown":3,
+        "status":8
+      },
+      {
+        "id": 14,
+        "name": "Laced Blade",
+        "tooltip": "Coat your blade with an elixir of @ poison applying * to yourself for + turn/s. Attacks now inflict ^ on them for + turns/s.",
+        "tooltip_vars":[["harmful","debilitating ","fatal"]],
+        "types": [[5]],
+        "potency":[4],
+        "turns_applied": [3],
+        "cooldown":4,
+        "status":7
+      }
+    ]
+}

@@ -182,6 +182,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7741480381599153485}
   - component: {fileID: 7741480381599153484}
+  - component: {fileID: 6991527245667104187}
   m_Layer: 5
   m_Name: sprite_player
   m_TagString: Untagged
@@ -245,7 +246,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: c47f48f3be25fa74699e131fe26d0314, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 26bc5edcc5f310d42aca5cf62c05d139, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -256,6 +257,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6991527245667104187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741480381599153486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1862395651, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: []
+  delegates: []
 --- !u!1 &7741480381700553737
 GameObject:
   m_ObjectHideFlags: 0
@@ -573,8 +588,8 @@ GameObject:
   - component: {fileID: 7741480382821625824}
   - component: {fileID: 7741480382821625830}
   - component: {fileID: 7741480382821625831}
-  - component: {fileID: 7741480382821625829}
   - component: {fileID: 1377576718638122493}
+  - component: {fileID: 4183217904677367973}
   m_Layer: 5
   m_Name: CombatSprite
   m_TagString: Untagged
@@ -646,26 +661,6 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
---- !u!114 &7741480382821625829
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7741480382821625825}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1862395651, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Delegates:
-  - eventID: 0
-    callback:
-      m_PersistentCalls:
-        m_Calls: []
-      m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
-        Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  delegates: []
 --- !u!114 &1377576718638122493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -678,6 +673,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e5c167a6acaf514ca6a5095420bf605, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4183217904677367973
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7741480382821625825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1862395651, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delegates: []
+  delegates: []
 --- !u!1 &7741480383241789938
 GameObject:
   m_ObjectHideFlags: 0

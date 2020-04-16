@@ -1,0 +1,21 @@
+{
+    "entity":"Slug",
+    "abilities": [
+      {
+        "name": "Lacerate",
+        "types": [[0]],
+        "damage":[[10,10]],
+        "cooldown":1,
+        "status":-1,
+      },
+      {
+        "name": "Spot Weakness",
+        "types": [[8]],
+        "potency": [50],
+        "cooldown":3,
+        "turns_applied": [2],
+        "status": 2
+      }
+    ]
+  }
+  

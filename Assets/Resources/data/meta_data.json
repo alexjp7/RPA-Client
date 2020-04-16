@@ -18,7 +18,7 @@
         "id": 2,
         "name": "rogue",
         "icon_path": "textures/icon_textures/class_icons/rogue_icon",
-        "ability_data": "Assets/Resources/data/ability_data/rogue.json",
+        "ability_data": "Assets/Resources/data/ability_data/players/rogue.json",
         "description": "Armed with cunning and missdirection, a Rogue's ability to meld in with the shadows and deliver swift and potent strikes while traversing the battlefield unnoticed is unmathced."
       },
       {

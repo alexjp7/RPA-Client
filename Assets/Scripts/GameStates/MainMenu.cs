@@ -27,7 +27,7 @@ public class MainMenu : MonoBehaviour
 
     void Awake()
     {
-        ViewController.setStateScript(GameState.MAIN_MENU);
+        StateManager.setStateScript(GameState.MAIN_MENU);
     }
 
     /*---------------------------------------------------------------

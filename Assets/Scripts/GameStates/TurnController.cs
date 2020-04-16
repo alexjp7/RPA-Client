@@ -76,7 +76,7 @@ namespace Assets.Scripts.GameStates
         **************************************************************/
         private void initMonsterParty()
         {
-            int monsterPartySize = 3;
+            int monsterPartySize = 4;
             MonsterFactory mFactory = new MonsterFactory();
             monsterParty = mFactory.createMonsterParty(monsterPartySize);
         }
@@ -108,17 +108,25 @@ namespace Assets.Scripts.GameStates
             if(hasNextCombatant = nextCombatant > -1)
             {
                 hasNextTurn = true;
+                currentCombatant = isPlayerTurn ? currentCombatant = playerParty[nextCombatant] 
+                                                : currentCombatant = monsterParty[nextCombatant];
+
+                StateManager.battleState.applyBeforeEffects(currentCombatant);
+                //Check for turn imparing status effects
+                if (currentCombatant.isImpaired)
+                {
+                    takeTurn();
+                }
+
                 if (isPlayerTurn)
                 {
-                    currentCombatant = playerParty[nextCombatant];
                     isClientPlayerTurn = Game.players[nextCombatant].id == clientPlayer.id;
                 }
                 else
                 {
-                    currentCombatant = monsterParty[nextCombatant]; 
                     isClientPlayerTurn = false;
                     takeMonsterTurn(nextCombatant);
-                    ViewController.battleState.updateConditionUI();
+                    StateManager.battleState.updateConditionUI();
                     takeTurn();
                 }
 
@@ -178,9 +186,9 @@ namespace Assets.Scripts.GameStates
             * The logic relating to a monster's turn priority is refernced
               throgh the member functions of that monster.
 
-            @param - nextCombatant: the combat properties relating to the
-            monster whos turn it currently is.
-            **************************************************************/
+        @param - nextCombatant: the combat properties relating to the
+        monster whos turn it currently is.
+        **************************************************************/
         private void takeMonsterTurn(int monsterIndex)
         {
             targets.Clear();
@@ -196,16 +204,16 @@ namespace Assets.Scripts.GameStates
                 {
                     if (metaType == MetaTypes.DAMAGE)
                     {
-                        ViewController.battleState.attackTarget(target, currentMonster, ability.abilityStrength.min, ability.abilityStrength.max);
+                        StateManager.battleState.attackTarget(target, currentMonster, ability.abilityStrength.min, ability.abilityStrength.max);
 
                     }
                     else if (metaType == MetaTypes.EFFECT)
                     {
-                        ViewController.battleState.affectTarget(target, ability.statusEffect, ability.conditionStrength.potency, ability.conditionStrength.turnsApplied);
+                        StateManager.battleState.affectTarget(target, ability.statusEffect, ability.conditionStrength.potency, ability.conditionStrength.turnsApplied);
                     }
                     else if(metaType == MetaTypes.HEALING)
                     {
-                        ViewController.battleState.healTarget(target, ability.abilityStrength.min , ability.abilityStrength.max);
+                        StateManager.battleState.healTarget(target, ability.abilityStrength.min , ability.abilityStrength.max);
                     }
                 }
 

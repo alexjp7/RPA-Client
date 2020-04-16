@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
-    class FuzzBall : Monster
+    class Harpy : Monster
     {
-        private static List<Ability> abilityList = AbilityFactory.constructMonsterAbilities(typeof(FuzzBall).Name);
+        private static List<Ability> harpyAbilities = AbilityFactory.constructMonsterAbilities(typeof(Harpy).Name);
 
-        public FuzzBall()
+        public Harpy()
         {
-            name += " FuzzBall";
+            name += " Harpy";
             setSpriteData(GetType().Name.ToString());
-            abilities = new List<Ability>(abilityList);
+            abilities = new List<Ability>(harpyAbilities);
             healthProperties.setHealthValues(20);
         }
 

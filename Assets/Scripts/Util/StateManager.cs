@@ -10,7 +10,7 @@ namespace Assets.Scripts.Util
         BATTLE_STATE = 2,
     }
 
-    public class ViewController: MonoBehaviour
+    public class StateManager: MonoBehaviour
     {
         public static void changeScene(int scene)
         {

@@ -13,19 +13,15 @@
 
 #region IMPORTS
 using System;
-using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Linq;
 using Assets.Scripts.Util;
-using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.Entities.Monsters;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
-using SimpleJSON;
 using Assets.Scripts.UI;
 using Assets.Scripts.GameStates;
 #endregion IMPORTS
@@ -114,6 +110,116 @@ public class BattleState : MonoBehaviour
     /*---------------------------------------------------------------
                     BATTLE-STATE CONTROL FLOWS
      ---------------------------------------------------------------*/
+    //START OF TURN
+    /***************************************************************
+    * Client side processing of any status-effects (buffs/debuffs)
+      that require exeucting at the start of a turn
+    **************************************************************/
+    public void applyBeforeEffects(in Combatable combatant)
+    {
+        //Select All the precondition effects
+        List<Condition> preConditions = new List<Condition>();
+
+        foreach (var condition in combatant.conditions)
+        {
+            if (EffectProcessor.PreConditionEffects.Contains((StatusEffect)condition.Key))
+            {
+                preConditions.Add(condition.Value);
+            }
+        }
+
+        //Apply Effect to target - Only works for Damage over time effects (bleedd/poison)
+        foreach (var condition in preConditions)
+        {
+            attackTarget(combatant, condition.potency * condition.stacks, EffectProcessor.getEffectLabel(condition.effectId, 0));
+        }
+    }
+
+    //END OF TURN
+    /***************************************************************
+    * Client side processing of any special-case scenarios
+      when applying certian status effects. 
+    **************************************************************/
+    public void applyAfterEffect(ref Ability ability)
+    {
+        switch ((StatusEffect)ability.statusEffect)
+        {
+            case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
+                ability.cooldownTracker -= ability.abilityStrength.max;
+                break;
+        }
+    }
+
+
+    //DURING TURN
+    /***************************************************************
+    * Performs a damaging action on a target; updates new hp value
+      to the HP bar fill-amount and text value.
+    
+    * Additionaly, if the damage applied to a target causes their hp
+      to fall below 0, the combat sprite is destroyed.
+      @param - target: The combatant of which the ability is applied too.
+      @param - minDamage: The lower bound of the damage being applied
+      that is used to calculate the actual amount dealt.
+      @param - maxDamage: The upper bound of the damage being applied
+      that is used to calculate the actual amount dealt.
+    **************************************************************/
+    public void attackTarget(in Combatable target, in Combatable caster, int minDamage, int maxDamage)
+    {
+        int damageDealt = target.applyDamage(minDamage, maxDamage);
+
+        //Reflect damage is applies
+        if (target.conditions.ContainsKey((int)StatusEffect.REFLECT_DAMAGE))
+        {
+            float damage = (float)damageDealt * ((float)target.conditions[(int)StatusEffect.REFLECT_DAMAGE].potency / 100);
+            attackTarget(caster, (int)damage);
+        }
+
+        if(caster.conditions.ContainsKey((int) StatusEffect.POISON_WEAPON) )
+        {
+            affectTarget(target, (int) StatusEffect.POISON, 6, 3);
+        }
+
+
+        if (!target.isAlive())
+        {
+            Destroy(target.combatSprite.gameObject);
+        }
+        else
+        {
+            //Remove Sleep if exists
+            if (target.conditions.ContainsKey((int)StatusEffect.SLEEP) ) 
+            {
+                target.conditions.Remove((int)StatusEffect.SLEEP);
+            }
+
+            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+        }
+
+        FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
+    }
+
+
+    /***************************************************************
+    @Overload - Allows for precalculated damage to be done to a target
+    in special combat conditions.
+    **************************************************************/
+    public void attackTarget(in Combatable target, int damage, string prefix = "")
+    {
+        int damageDealt = target.applyDamage(damage);
+        if (!target.isAlive())
+        {
+            Destroy(target.combatSprite.gameObject);
+        }
+        else
+        {
+            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+        }
+
+        FloatingPopup.create(target.combatSprite.transform.position, $"{prefix}  {damageDealt.ToString()}", Color.red);
+    }
     /***************************************************************
     * Applies a combat status-effect to a target and displays
       text to user to indicate the abilitiy's effects.
@@ -149,81 +255,6 @@ public class BattleState : MonoBehaviour
         FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), new Color(0, 100, 0));
     }
 
-    /***************************************************************
-    * Performs a damaging action on a target; updates new hp value
-      to the HP bar fill-amount and text value.
-    
-    * Additionaly, if the damage applied to a target causes their hp
-      to fall below 0, the combat sprite is destroyed.
-      @param - target: The combatant of which the ability is applied too.
-      @param - minDamage: The lower bound of the damage being applied
-      that is used to calculate the actual amount dealt.
-      @param - maxDamage: The upper bound of the damage being applied
-      that is used to calculate the actual amount dealt.
-    **************************************************************/
-    public void attackTarget(in Combatable target, in Combatable caster, int minDamage, int maxDamage)
-    {
-        int damageDealt = target.applyDamage(minDamage, maxDamage);
-
-        foreach (var condition in target.conditions)
-        {
-            switch ((StatusEffect)condition.Value.effectId)
-            {
-                case StatusEffect.REFLECT_DAMAGE:
-                    float damage = (float)damageDealt * ((float)condition.Value.potency / 100);
-                    attackTarget(caster, (int)damage);
-                    break;
-            }
-        }
-
-        if (!target.isAlive())
-        {
-            Destroy(target.combatSprite.gameObject);
-        }
-        else
-        {
-            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
-            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-        }
-
-        FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
-    }
-
-
-    /***************************************************************
-    @Overload - Allows for precalculated damage to be done to a target
-    in special combat conditions.
-    **************************************************************/
-    public void attackTarget(in Combatable target, int damage)
-    {
-        int damageDealt = target.applyDamage(damage);
-        if (!target.isAlive())
-        {
-            Destroy(target.combatSprite.gameObject);
-        }
-        else
-        {
-            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
-            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-        }
-
-        FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
-    }
-
-    /***************************************************************
-    * Client side processing of any special-case scenarios
-      when applying certian status effects. 
-    **************************************************************/
-    public void applyAfterEffect(ref Ability ability)
-    {
-        switch((StatusEffect)ability.statusEffect)
-        {  
-            case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
-                ability.cooldownTracker -= ability.abilityStrength.max;
-                break;
-        }
-    }
-
     /*---------------------------------------------------------------
                        UI-CALLBACKS 
      ---------------------------------------------------------------
@@ -250,9 +281,9 @@ public class BattleState : MonoBehaviour
             }
         }
 
-        //Update Condition Bar Ui
-        List<Combatable> allCombatants = new List<Combatable>(TurnController.INSTANCE.playerParty);
-        allCombatants.AddRange(TurnController.INSTANCE.monsterParty);
+        //Redraw conditions for all Combatants
+        List<Combatable> allCombatants = new List<Combatable>( TurnController.INSTANCE.playerParty.FindAll( player => player.isAlive() ) );
+        allCombatants.AddRange(TurnController.INSTANCE.monsterParty.FindAll(monster => monster.isAlive() ) );
         foreach (var combatants in allCombatants)
         {
             combatants.combatSprite.updateConditions();
@@ -327,7 +358,7 @@ public class BattleState : MonoBehaviour
      is used as an event handler for End Turn button,
      and should only be used during debug/development.
     **************************************************************/
-    public void takeTurn()
+    public void skipTurn()
     {
         TurnController.INSTANCE.takeTurn();
     }

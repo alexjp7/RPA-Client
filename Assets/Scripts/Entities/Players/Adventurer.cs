@@ -84,9 +84,7 @@ namespace Assets.Scripts.Entities.Players
         public void loadAbilities(string path, bool isInitialLoad)
         {
             if (path == "") return;
-            if (classId == PlayerClasses.ROGUE) throw new NotImplementedException("Abilities Don't Exist For " + this.classId + " in Adventurer.loadAbilities()"); 
-
-            int skillLevel = 0;
+            int skillLevel = 1;
             string abilityText = File.ReadAllText(path);
             JSONNode json = JSON.Parse(abilityText);
             JSONArray abilityJson = isInitialLoad ? json["starting_abilities"].AsArray : json["abilities"].AsArray;

@@ -6,7 +6,7 @@
         "name": "Arcane Pulse",
         "tooltip": "Fire @ pulse of arcane energy dealing $ damage",
         "tooltip_vars":[["an innate","a foccused","a masterful"]],
-        "damage":[[25,32],[35,50],[60,80]],
+        "damage":[[5,10],[35,50],[60,80]],
         "cooldown":1,
         "types": [[0]],
         "status":-1

@@ -110,7 +110,7 @@ namespace Assets.Scripts.UI
             mouseExitEvent.callback.AddListener(evt => onSpriteExit(combatantRef));
             mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatantRef));
 
-            gameObject.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
+            sprite.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
         }
@@ -270,22 +270,21 @@ namespace Assets.Scripts.UI
                     {
                         if (metaType == MetaTypes.DAMAGE)
                         {
-                            ViewController.battleState.attackTarget(target, turnController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                            StateManager.battleState.attackTarget(target, turnController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
                     else
                     {
                         if (metaType == MetaTypes.HEALING)
                         {
-                            ViewController.battleState.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                            StateManager.battleState.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
 
                     if (metaType == MetaTypes.EFFECT)
                     {
-
-                        ViewController.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
-                        ViewController.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
+                        StateManager.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
+                        StateManager.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                     }
                 }
             }
@@ -294,7 +293,7 @@ namespace Assets.Scripts.UI
             abilityUsed.setLastTurnUsed(TurnController.turnCount); //Flagging whether cooldown
             abilityUsed.cooldownTracker++;
             turnController.clientPlayer.playerClass.updateAbilityCooldowns();
-            ViewController.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
+            StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);
             turnController.resetTargets();
             turnController.takeTurn();

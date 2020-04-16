@@ -1,0 +1,23 @@
+{
+    "entity":"Harpy",
+    "abilities": [
+      {
+        "name": "Razor Wing",
+        "damage":[[10,15],[17,22],[25,30]],
+        "cooldown":1,
+        "potency":[5,10,15],
+        "turns_applied": [3],
+        "types": [[0,8]],
+        "status":5
+      },
+      {
+        "name": "Spot Weakness",
+        "types": [[8]],
+        "potency": [50],
+        "cooldown":3,
+        "turns_applied": [2],
+        "status": 2
+      }
+    ]
+  }
+  

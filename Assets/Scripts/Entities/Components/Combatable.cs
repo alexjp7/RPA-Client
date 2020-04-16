@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
@@ -50,6 +51,28 @@ namespace Assets.Scripts.Entities.Components
                 return _combatSprite;
             }
         }
+
+        //Determines if combatant is able to complete a turn
+        public bool isImpaired
+        {
+            get
+            {
+                foreach(var condition in conditions)
+                {
+                    if(EffectProcessor.ImpairingEffects.Contains( (StatusEffect)condition.Key) )
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+    
+
+
+
+
 
         //Default Constructor
         public Combatable()

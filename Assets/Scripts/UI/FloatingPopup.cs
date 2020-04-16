@@ -13,7 +13,7 @@ public class FloatingPopup : MonoBehaviour
         public static FloatingPopup create(Vector3 spritePosition, string text, in Color color)
         {
             Vector2 localPoint = spritePosition;
-            localPoint.y += 100 + (popupCount * 45);
+            localPoint.y += 100 + (popupCount * 25);
 
             Transform damagePopupTransform = Instantiate(GameAssets.INSTANCE.damagePopupPrefab, localPoint, Quaternion.identity);
             FloatingPopup popup = damagePopupTransform.GetComponent<FloatingPopup>();

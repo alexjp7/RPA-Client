@@ -26,7 +26,7 @@
     {
       "id": 2,
       "name": "True Defence",
-      "tooltip": "Fortify yourself with @ defence taking  $% incoming damage.",
+      "tooltip": "Fortify yourself with @ defence taking  $% incoming damage for + turn/s.",
       "tooltip_vars":[["a valiant","formidable","an impenetrable"]],
       "types": [[5]],
       "potency":[-50,-75,-90],

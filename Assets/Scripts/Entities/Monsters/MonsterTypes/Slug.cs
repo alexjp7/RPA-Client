@@ -1,19 +1,23 @@
 ﻿using Assets.Scripts.Entities.Abilities;
+using System;
 using System.Collections.Generic;
-
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
-    class GoblinFighter: Monster
+    class Slug : Monster
     {
-        private static List<Ability> abilityList = AbilityFactory.constructMonsterAbilities(typeof(GoblinFighter).Name);
+        private static List<Ability> abilityList = AbilityFactory.constructMonsterAbilities(typeof(Slug).Name);
 
-        public GoblinFighter()
+        public Slug()
         {
-            name += " Goblin Fighter";
+            name += " Slug";
             setSpriteData(GetType().Name.ToString());
             abilities = new List<Ability>(abilityList);
             healthProperties.setHealthValues(20);
         }
+
     }
 }
