@@ -10,7 +10,7 @@
 * The included functions of this game state are mainly
   event handlers for server driven events.
 **************************************************************/
-
+#define REQUIRE_TEST_DATA
 #region IMPORTS
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,8 +18,13 @@ using System.IO;
 using Assets.Scripts.RPA_Messages;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
+using Assets.Scripts.UI.CharacterCreation;
 using SimpleJSON;
+using Assets.Scripts.Util;
+using System.Collections.Generic;
+using System;
 #endregion IMPORTS
+
 
 public class CharacterCreator : MonoBehaviour
 {
@@ -34,14 +39,13 @@ public class CharacterCreator : MonoBehaviour
     public Button readyButton;
     public Button startButton;
     //Party textures/text
-    public Text[] partyMembers;
-    public RawImage[] partyClasses;
-    public RawImage[] readyChecks;
+    List<PartyPanel> partyPanels;
+    [SerializeField] private GameObject party_vertical_layout;
     #endregion UI COMPONENTS
 
     //Statically loaded data
     private Texture2D[] classIcons;
-    private const string CLASS_DATA_FILE = "assets/resources/data/meta_data.json";
+    private const string CLASS_DATA_FILE = "Assets/Resources/data/meta_data.json";
     private string[] classDescriptions;
     private string[] classNames;
 
@@ -53,9 +57,18 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     void Awake()
     {
+        if(TestSimulator.isDeveloping)
+            TestSimulator.initTestEnvironment(GameState.CHARACTER_CREATION);
+
+        AssetLoader.loadStaticAssets(GameState.CHARACTER_CREATION);
+        partyPanels = new List<PartyPanel>();
         initClassData();
+    }
+
+    void Start()
+    {
         initPlayerUI();
-        updatePlayerList();
+        generatePlayerPanels();
     }
 
     /***************************************************************
@@ -75,13 +88,10 @@ public class CharacterCreator : MonoBehaviour
 
         for (int i = 0; i < classCount; i++)
         {
-            partyClasses[i].enabled = false;
-            readyChecks[i].enabled = false;
             classNames[i] = classes[i]["name"].Value;
             classDescriptions[i] = classes[i]["description"].Value;
             classIcons[i] = Resources.Load(classes[i]["icon_path"].Value) as Texture2D;
-
-            Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_path"].Value);
+            Adventurer.setDataPaths(classes[i]["id"].AsInt, classes[i]["ability_data"].Value);
         }
     }
 
@@ -94,23 +104,49 @@ public class CharacterCreator : MonoBehaviour
         playerNameField.text = Game.players[0].name;
         gameIdText.text = Game.gameId.ToString();
         playerCountText.text = (Game.connectedPlayers).ToString();
+        if (Game.players[0].ready)
+        {
+            readyText.text = "Cancel Ready";
+            readyButton.interactable = true;
+        }
+        else readyText.text = " Ready Up!";
+
     }
 
     /***************************************************************
-    * Re-populates players name and icons on party menu,
-      called when player data changes (Ready Status, Class Selection),
-      joining or leaveing the game.
+    * Populates the initial display with the existing players
     **************************************************************/
-    private void updatePlayerList()
+    private void generatePlayerPanels()
     {
-        for (int i = 0; i < Game.players.Count; i++)
+        foreach(Player player in Game.players)
         {
-            Player p = Game.players[i];
-            partyMembers[i].text = p.name;
-            if (p.adventuringClass == -1) partyClasses[i].enabled = false;
-            else selectClass(p.adventuringClass, i);
-            renderReadyState(i);
+            if(player.id > -1)
+            {
+                PartyPanel currentPlayer = PartyPanel.create(player);
+                currentPlayer.transform.SetParent(party_vertical_layout.transform);
+                partyPanels.Add(currentPlayer);
+            }
         }
+    }
+
+    /***************************************************************
+    * Adds new player UI to the game
+    **************************************************************/
+    private void addPlayerToUI(in Player player)
+    {
+        PartyPanel currentPlayer = PartyPanel.create(player);
+        currentPlayer.transform.SetParent(party_vertical_layout.transform);
+        partyPanels.Add(currentPlayer);
+    }
+
+    /***************************************************************
+    * Adds new player UI to the game
+    **************************************************************/
+    private void removePlayerFromUi(int playerIndex)
+    {
+        Debug.Log(playerIndex);
+        Destroy( partyPanels[playerIndex].gameObject);
+        partyPanels.RemoveAt(playerIndex);
     }
 
     /*---------------------------------------------------------------
@@ -123,14 +159,15 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void Update()
     {
-        int readyCount = 0;
-        if (Game.gameClient.ready())
-            processServerInstructions(Game.gameClient.read());
+        if(!Game.isSinglePlayer)
+        {
+            if (Game.gameClient.ready())
+            {
+                processServerInstructions(Game.gameClient.read());
+            }
+        }
 
-        foreach (Player p in Game.players)
-            if (p.ready)readyCount++;
-
-        startButton.interactable = readyCount == Game.connectedPlayers;
+        startButton.interactable = PartyPanel.hasAllReady;
     }
 
     /***************************************************************
@@ -144,21 +181,21 @@ public class CharacterCreator : MonoBehaviour
     {
         if (instructions[0] == 'a') { return; }
 
+        Debug.Log(instructions);
         CharacterCreationMessage message = new CharacterCreationMessage(instructions);
-        Player player = message.instructionType == 0 || message.instructionType == 1 ? null: Game.players[message.playerIndex];
+        Player player = Game.players[Game.connectedPlayers - 1];
 
         switch ((CreationInstruction)message.instructionType)
         {
             case CreationInstruction.CONNECTION:
                 Game.addPlayer(message.playerName, message.client_id);
                 playerCountText.text = (Game.connectedPlayers).ToString();
-                partyMembers[Game.connectedPlayers - 1].text = message.playerName;
+                addPlayerToUI(player);
                 break;
 
             case CreationInstruction.DISCONNECTION:
+                removePlayerFromUi(Game.getPlayerIndex(message.client_id));
                 Game.removePlayer(message.client_id);
-                playerCountText.text = (Game.connectedPlayers).ToString();
-                updatePlayerList();
                 break;
 
             case CreationInstruction.CLASS_CHANGE:
@@ -175,6 +212,7 @@ public class CharacterCreator : MonoBehaviour
                 break;
         }
     }
+
 
     /*---------------------------------------------------------------
                         CLIENT EVENT-HANDLERS
@@ -196,24 +234,16 @@ public class CharacterCreator : MonoBehaviour
     public void readyClicked()
     {
         Game.players[0].ready = !Game.players[0].ready;
-        if (Game.players[0].ready) readyText.text = "Cancel Ready";
-        else readyText.text = "Ready Up!";
+        if(Game.players[0].ready) readyText.text = "Cancel Ready";
+        else readyText.text = " Ready Up!";
+
         renderReadyState(0);
+        //Send server ready change
         CharacterCreationMessage readyChange = new CharacterCreationMessage((int)CreationInstruction.READY_UP);
         Game.gameClient.send(readyChange.getMessage());
     }
 
-    /***************************************************************
-    * Sets the UI (green tick) indicator for ready status
-      to the value of the Player's ready status.
 
-     @param - player: The index of the player who has toggled
-     a ready action.
-    **************************************************************/
-    private void renderReadyState(int player)
-    {
-        readyChecks[player].enabled = Game.players[player].ready;
-    }
 
     /***************************************************************
     * Event handler for selecting a class through clicking the
@@ -235,6 +265,12 @@ public class CharacterCreator : MonoBehaviour
         Game.gameClient.send(classChange.getMessage());
     }
 
+    private void renderReadyState(int playerIndex)
+    {
+        partyPanels[playerIndex].setReadyStatus(Game.players[playerIndex].ready);
+    }
+
+
     /***************************************************************
     * Helper function for applying the class changes to the player
       who triggered the event.
@@ -252,9 +288,8 @@ public class CharacterCreator : MonoBehaviour
     private bool selectClass(int classChosen, int playerIndex)
     {
         if (classChosen < 0 || classChosen > 3) { return false; }
-        partyClasses[playerIndex].texture = classIcons[classChosen];
-        partyClasses[playerIndex].enabled = true;
         Game.players[playerIndex].adventuringClass = classChosen;
+        partyPanels[playerIndex].setClass(classChosen);
         return true;
     }
 
@@ -265,12 +300,14 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void startClicked()
     {
-        int connectedPlayers = Game.connectedPlayers;
+        if(!Game.isSinglePlayer)
+        {
+            int connectedPlayers = Game.connectedPlayers;
 
-        if (connectedPlayers != Game.PARTY_LIMIT)
-            Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
+            if (connectedPlayers != Game.PARTY_LIMIT)
+                Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
+        }
 
-        Adventurer.setClassSprites(Game.players);
         foreach (Player player in Game.players)
         {
             player.applyClass();

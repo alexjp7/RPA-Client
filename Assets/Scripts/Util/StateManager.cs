@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.Util
@@ -12,33 +13,49 @@ namespace Assets.Scripts.Util
 
     public class StateManager: MonoBehaviour
     {
-        public static void changeScene(int scene)
+        public static GameState currentState;
+
+        public void changeScene(int scene)
         {
+            currentState = (GameState) scene; ;
             SceneManager.LoadScene(scene, LoadSceneMode.Single);
-            setStateScript((GameState)scene);
         }
 
-        public static void setStateScript(GameState scene)
+        public static void setStateScript()
         {
-            if(scene == GameState.MAIN_MENU) //Main Menu
-            {
-                GameObject parent = GameObject.Find("Canvas");
-                mainMenu = parent.GetComponent<MainMenu>();
-            }
-            else if(scene == GameState.CHARACTER_CREATION) // Character creation
-            {
 
+            if(currentState == GameState.CHARACTER_CREATION) // Character creation
+            {
+                GameObject parent = GameObject.Find("UI");
+                characterCreator = parent.GetComponent<CharacterCreator>();
             }
-            else if(scene == GameState.BATTLE_STATE) // Battle State
+            else if(currentState == GameState.BATTLE_STATE) // Battle State
             {
                 GameObject parent = GameObject.Find("UI");
                 battleState = parent.GetComponent<BattleState>();
             }
+
         }
 
         //Game State refernces
-        public static BattleState battleState;
+        private static BattleState _battleState;
+        public static BattleState battleState
+        {
+            get
+            {
+                if(_battleState == null)
+                {
+                    throw new NullReferenceException("Battle-State refernce is set to null, ensure during game state instantiation (during Awake()/Start()) call StateManager.setStateScript()");
+                }
+
+                return _battleState;
+            }
+            private set
+            {
+                _battleState = value;
+            }
+        }
+
         public static CharacterCreator characterCreator;
-        public static MainMenu mainMenu;
     }
 }

@@ -16,14 +16,15 @@ namespace Assets.Scripts.Util
     public class AssetLoader
     {
         private static Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();
-
+        private static bool isInitialLoad = true;
+        private static GameState activeState;
 
         public static void loadStaticAssets(GameState gameState)
         {
-            Dictionary<string, string> staticAssets = new Dictionary<string, string>()
-            {
-                {"lock", "textures/icon_textures/general/lock" }
-            };
+            if (gameState == activeState) return;
+            dumpPreviousResources();
+            activeState = gameState;
+            loadGeneralAssets();
 
             switch (gameState)
             {
@@ -32,7 +33,7 @@ namespace Assets.Scripts.Util
                     break;
 
                 case GameState.CHARACTER_CREATION:
-
+                    loadCharacterCreationAssets();
                     break;
 
                 case GameState.BATTLE_STATE:
@@ -42,27 +43,80 @@ namespace Assets.Scripts.Util
                 default:
                     Debug.LogError($"Unexpecte Gamestate argument {gameState.ToString()} provided during asset loading.  {new System.Diagnostics.StackFrame().ToString()}");
                     break;
+            }
+        }
 
+        /***************************************************************
+        * Removes unused assets from the sprite map as the game
+          state changes
+        **************************************************************/
+        private static void dumpPreviousResources()
+        {
+            List<string> assetsRemoving = new List<string>();
+
+            foreach(var asset in spriteMap)
+            {
+                if(asset.Key.StartsWith(activeState.ToString()))
+                {
+                    assetsRemoving.Add(asset.Key);
+                }
             }
 
-            foreach (var asset in staticAssets)
+            foreach(var asset in assetsRemoving )
             {
-                if(!spriteMap.ContainsKey(asset.Key))
+                spriteMap.Remove(asset);
+            }
+        }
+
+        /***************************************************************
+        * Loads general assets used over multiple states
+        **************************************************************/
+        private static void loadGeneralAssets()
+        {
+            if (isInitialLoad)
+            {
+                Sprite[] generalAssets = Resources.LoadAll<Sprite>("textures/icon_textures/general");
+
+                foreach (Sprite asset in generalAssets)
                 {
-                    spriteMap.Add(asset.Key, Resources.Load<Sprite>(asset.Value));
+                    if (!spriteMap.ContainsKey(asset.name))
+                    {
+                        spriteMap.Add(asset.name, asset);
+                    }
                 }
             }
         }
 
+        /***************************************************************
+        * Loads character creation assets
+        **************************************************************/
+        private static void loadCharacterCreationAssets()
+        {
+            Sprite[] classIcons = Resources.LoadAll<Sprite>("textures/icon_textures/class_icons");
+
+            foreach (Sprite asset in classIcons)
+            {
+                string stateIdentifiedKey = activeState.ToString() + asset.name;
+                if (!spriteMap.ContainsKey(stateIdentifiedKey) )
+                {
+                    spriteMap.Add(stateIdentifiedKey, asset);
+                }
+            }
+        }
+
+        /***************************************************************
+        * Loads battle state assets
+        **************************************************************/
         private static void loadBattleStateAssets()
         {
             Sprite[] statusEffectIcons = Resources.LoadAll<Sprite>("textures/icon_textures/status_effects");
 
             foreach(Sprite iconSprite in statusEffectIcons)
             {
-                if (!spriteMap.ContainsKey(iconSprite.name))
+                string stateIdentifiedKey = activeState.ToString() + iconSprite.name;
+                if (!spriteMap.ContainsKey(stateIdentifiedKey))
                 {
-                    spriteMap.Add(iconSprite.name, iconSprite);
+                    spriteMap.Add(stateIdentifiedKey, iconSprite);
                 }
             }
         }
@@ -74,10 +128,10 @@ namespace Assets.Scripts.Util
 
         @return - The sprite model for the key passed in.
         **************************************************************/
-        public static Sprite getSprite(string key, string path = "")
+        public static Sprite getSprite(string key, string path = "", bool isStateSpecific = false)
         {
-            if (spriteMap == null) Debug.Log("spriteMap is null");
-            if (!spriteMap.ContainsKey(key))
+            string stateIdentifiedKey = isStateSpecific ? activeState.ToString() + key: key;
+            if (!spriteMap.ContainsKey(stateIdentifiedKey))
             {
                 Sprite sprite = Resources.Load<Sprite>(path);
                 if(sprite == null)
@@ -88,7 +142,7 @@ namespace Assets.Scripts.Util
                 spriteMap.Add(key, sprite);
             }
 
-            return spriteMap[key];
+            return spriteMap[stateIdentifiedKey];
         }
 
         /***************************************************************

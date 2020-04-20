@@ -51,3 +51,5 @@ MonoBehaviour:
     type: 3}
   abilityButtonPrefab: {fileID: 7335571441777240958, guid: 333d5975a14bab948a862e55980a2404,
     type: 3}
+  playerPanelPrefab: {fileID: 3433355326149984283, guid: 87ba1ea3cb96f714d9ada7f5e593ad06,
+    type: 3}

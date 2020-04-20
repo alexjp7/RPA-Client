@@ -1,6 +1,8 @@
 ﻿/*---------------------------------------------------------------
                 TEST-SIMULATOR(Debug/Development Only)
  ---------------------------------------------------------------*/
+//#define REQUIRE_TEST_DATA //Uncomment to generate test data
+
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
 using SimpleJSON;
@@ -12,6 +14,18 @@ namespace Assets.Scripts.Util
 {
     public class TestSimulator
     {
+        public static bool isDeveloping
+        {
+            get
+            {
+            #if REQUIRE_TEST_DATA
+                return true;
+            #else
+                return false;
+            #endif
+}
+        }
+
 
         private static TestSimulator _instance;
         public static TestSimulator INSTANCE
@@ -30,7 +44,6 @@ namespace Assets.Scripts.Util
 
         private TestSimulator() { }
 
-
         public static void initTestEnvironment(GameState gameState)
         {
             INSTANCE.runTest(gameState);
@@ -45,22 +58,40 @@ namespace Assets.Scripts.Util
 
         private void runTest(GameState gameState)
         {
-            StateManager.setStateScript(gameState);
+            StateManager.currentState = gameState;
             createTestPlayers();
-            initClassData();
+
+            switch (gameState)
+            {
+                case GameState.MAIN_MENU:
+
+                    break;
+
+                case GameState.CHARACTER_CREATION:
+                    break;
+
+                case GameState.BATTLE_STATE:
+                    initClassData();
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         /***************************************************************
         *  Creates a list of players for testing/debuggin purposes.
         **************************************************************/
         private void createTestPlayers()
-        {
+        {   //Multiple game states can run tests, we only need to make player party once
+            if (Game.players != null) return;
+
             Game.players = new List<Player>();
             //@Test Data
             Game.players.Add(new Player("Alexjp", PlayerClasses.WIZARD) );
             Game.players.Add(new Player("Kozza", PlayerClasses.WARRIOR));
             Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
-            //Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
+            Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
             Game.connectedPlayers = Game.players.Count;
 

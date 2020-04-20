@@ -74,6 +74,7 @@ namespace Assets.Scripts.RPA_Game
         **************************************************************/
         public void dissconnect()
         {
+            if (stream == null) return;
             stream.Close();
             client.Close();
         }
@@ -99,9 +100,16 @@ namespace Assets.Scripts.RPA_Game
         **************************************************************/
         public void send(string message)
         {
-            Byte[] data = System.Text.Encoding.ASCII.GetBytes(message+"\n");
-            stream = client.GetStream();
-            stream.Write(data, 0, data.Length);
+            try
+            {
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\n");
+                stream = client.GetStream();
+                stream.Write(data, 0, data.Length);
+            }
+            catch (NullReferenceException)
+            {
+
+            }
         }
 
         /***************************************************************

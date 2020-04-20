@@ -16,6 +16,7 @@ using Assets.Scripts.Util;
 
 public class MainMenu : MonoBehaviour
 {
+    [SerializeField] private Toggle isSinglePlayer;
     public GameObject newGamePanel;
     public GameObject joinGamePanel;
     public GameObject notificationPanel;
@@ -25,9 +26,10 @@ public class MainMenu : MonoBehaviour
     public Text notificationMessage;
 
 
+
     void Awake()
     {
-        StateManager.setStateScript(GameState.MAIN_MENU);
+
     }
 
     /*---------------------------------------------------------------
@@ -42,15 +44,24 @@ public class MainMenu : MonoBehaviour
     {
         if (!name1.text.Equals(""))
         {
-            if (Game.start(name1.text, Game.NEW_GAME, -1) )
+            if(isSinglePlayer.isOn)
             {
+                Game.isSinglePlayer = true;
+                Game.startOffline(name1.text);  
                 SceneManager.LoadScene(1);
             }
             else
             {
-                notificationMessage.text = Game.gameMessage;
-                togglePanel(newGamePanel);
-                togglePanel(notificationPanel);
+                if (Game.start(name1.text, Game.NEW_GAME, -1) )
+                {
+                    SceneManager.LoadScene(1);
+                }
+                else
+                {
+                    notificationMessage.text = Game.gameMessage;
+                    togglePanel(newGamePanel);
+                    togglePanel(notificationPanel);
+                }
             }
         }
     }

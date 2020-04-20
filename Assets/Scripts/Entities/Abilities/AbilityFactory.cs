@@ -96,6 +96,10 @@ namespace Assets.Scripts.Entities.Abilities
 
     class AbilityFactory
     {
+        /***************************************************************
+        * Targeting Classifications/Groupings for ability Selection
+        **************************************************************/
+        //Auto-Targeting - Abilities that select the caster OR All allies/enemies
         public readonly static AbilityTypes[] autoTargetingTypes = 
         { 
             AbilityTypes.SELF_HEAL,
@@ -105,26 +109,32 @@ namespace Assets.Scripts.Entities.Abilities
             AbilityTypes.MULTI_HEAL
         };
 
+        //Single-Enemy-Allows for individual enemy selection 
         public readonly static AbilityTypes[] enemyTargetingTypes = 
         {
             AbilityTypes.SINGLE_DAMAGE,
             AbilityTypes.SINGLE_DEBUFF
         };
 
+        //Single-Ally-Allows for individual ally selection 
         public readonly static AbilityTypes[] allyTargetingTypes =
         {
             AbilityTypes.SINGLE_HEAL,
-            AbilityTypes.SINGLE_DEBUFF
+            AbilityTypes.SINGLE_BUFF
         };
 
+        //Self-Targeting - Restricts targeting to self
         public readonly static AbilityTypes[] selfTargetTypes =
         {
             AbilityTypes.SELF_BUFF,
             AbilityTypes.SELF_HEAL
         };
 
+        /***************************************************************
+        * Types that imply a status effect
+        **************************************************************/
         public readonly static AbilityTypes[] effectTypes =
-{
+        {
             AbilityTypes.SELF_BUFF,
             AbilityTypes.SINGLE_BUFF,
             AbilityTypes.SINGLE_DEBUFF,
@@ -133,8 +143,9 @@ namespace Assets.Scripts.Entities.Abilities
         };
 
         /*---------------------------------------------------------------
-                            PLAYER-ABILITES
+                            CONSTRUCTION-METHODS
         ---------------------------------------------------------------*/
+        //PLAYER ABILTIIES
         /***************************************************************
         * Constructs an ability; setting its name,id,potency,tooltip,
           and sprite fields.

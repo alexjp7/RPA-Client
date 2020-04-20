@@ -69,11 +69,6 @@ namespace Assets.Scripts.Entities.Components
             }
         }
     
-
-
-
-
-
         //Default Constructor
         public Combatable()
         {

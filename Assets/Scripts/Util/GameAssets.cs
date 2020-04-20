@@ -26,10 +26,12 @@ namespace Assets.Scripts.Util
                 return _instance;
             }
         }
-
+        //BattleState
         public Transform damagePopupPrefab;
         public Transform turnChevron;
         public Transform combatSpritePrefab;
         public Transform abilityButtonPrefab;
+        //Charactear creation
+        public Transform playerPanelPrefab;
     }
 }

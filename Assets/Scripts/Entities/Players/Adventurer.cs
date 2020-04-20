@@ -84,7 +84,7 @@ namespace Assets.Scripts.Entities.Players
         public void loadAbilities(string path, bool isInitialLoad)
         {
             if (path == "") return;
-            int skillLevel = 1;
+            int skillLevel = 0;
             string abilityText = File.ReadAllText(path);
             JSONNode json = JSON.Parse(abilityText);
             JSONArray abilityJson = isInitialLoad ? json["starting_abilities"].AsArray : json["abilities"].AsArray;

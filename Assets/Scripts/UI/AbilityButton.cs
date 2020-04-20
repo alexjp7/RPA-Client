@@ -40,6 +40,7 @@ public class AbilityButton : MonoBehaviour
         AbilityButton button = buttonTransfrom.GetComponent<AbilityButton>();
         button.setData(ability);
         keyIndex++;
+
         return button;
     }
 

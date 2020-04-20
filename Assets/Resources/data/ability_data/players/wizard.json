@@ -6,7 +6,7 @@
         "name": "Arcane Pulse",
         "tooltip": "Fire @ pulse of arcane energy dealing $ damage",
         "tooltip_vars":[["an innate","a foccused","a masterful"]],
-        "damage":[[5,10],[35,50],[60,80]],
+        "damage":[[5,10],[12,20],[60,80]],
         "cooldown":1,
         "types": [[0]],
         "status":-1
@@ -16,7 +16,7 @@
         "name": "Wind Surge",
         "tooltip": "Channel @ wind dealing to $ damage all enemies  and applying * to all targets",
         "tooltip_vars":[["a considerable gust of" ,"an unatural gust of","a gale force strength"]],
-        "damage":[[20,30],[25,40],[45,60]],
+        "damage":[[4,8],[25,40],[45,60]],
         "cooldown":4,
         "types": [[1]],
         "status":-1
@@ -24,10 +24,10 @@
       {
         "id": 5,
         "name": "Time Distortion",
-        "tooltip": "Peer into @ vision of the future reducing the cooldown of # by 2 turns",
+        "tooltip": "Peer into @ vision of the future reducing the cooldown of # by $ turns",
         "tooltip_vars":[["a cloudy","a surreal ","a vivd"],
                        ["your abilities","either yours OR a party memnber's abilities","all party member's abilities"]],
-        "potency":[-2],
+        "potency":[-2,-3,-3],
         "cooldown":5,
         "types": [[5],[6],[7]],
         "status":0

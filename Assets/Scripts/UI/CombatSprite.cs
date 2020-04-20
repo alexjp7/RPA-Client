@@ -110,7 +110,7 @@ namespace Assets.Scripts.UI
             mouseExitEvent.callback.AddListener(evt => onSpriteExit(combatantRef));
             mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatantRef));
 
-            sprite.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
+            gameObject.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
         }
@@ -133,7 +133,7 @@ namespace Assets.Scripts.UI
                     string conditionName = ((StatusEffect)(condition.Key)).ToString();
                     GameObject newCondition = new GameObject(conditionName);
                     Image conditionIcon = newCondition.AddComponent<Image>();
-                    conditionIcon.sprite = AssetLoader.getSprite((conditionName));
+                    conditionIcon.sprite = AssetLoader.getSprite(conditionName, null, true);
                     newCondition.gameObject.transform.SetParent(buffBar);
                 }
 
@@ -292,7 +292,6 @@ namespace Assets.Scripts.UI
             //Update Cooldown / Targets 
             abilityUsed.setLastTurnUsed(TurnController.turnCount); //Flagging whether cooldown
             abilityUsed.cooldownTracker++;
-            turnController.clientPlayer.playerClass.updateAbilityCooldowns();
             StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);
             turnController.resetTargets();

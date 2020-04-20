@@ -111,6 +111,7 @@ namespace Assets.Scripts.GameStates
                 currentCombatant = isPlayerTurn ? currentCombatant = playerParty[nextCombatant] 
                                                 : currentCombatant = monsterParty[nextCombatant];
 
+                currentCombatant.updateAbilityCooldowns();
                 StateManager.battleState.applyBeforeEffects(currentCombatant);
                 //Check for turn imparing status effects
                 if (currentCombatant.isImpaired)

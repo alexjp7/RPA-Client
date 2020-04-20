@@ -38,6 +38,7 @@ public class BattleState : MonoBehaviour
     private List<AbilityButton> abilityButtons;
     private Player clientSidePlayer;
 
+
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS
      ---------------------------------------------------------------
@@ -45,7 +46,10 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     void Awake()
     {
-        TestSimulator.initTestEnvironment(GameState.BATTLE_STATE); //Test only
+        if (TestSimulator.isDeveloping)
+            TestSimulator.initTestEnvironment(GameState.BATTLE_STATE);
+
+        StateManager.setStateScript();
         TurnController.INSTANCE.init();
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
@@ -105,6 +109,7 @@ public class BattleState : MonoBehaviour
             }
         }
         catch (NotImplementedException e) { Debug.Log("ERROR:" + e.Message); }
+
     }
 
     /*---------------------------------------------------------------
@@ -158,6 +163,7 @@ public class BattleState : MonoBehaviour
     
     * Additionaly, if the damage applied to a target causes their hp
       to fall below 0, the combat sprite is destroyed.
+
       @param - target: The combatant of which the ability is applied too.
       @param - minDamage: The lower bound of the damage being applied
       that is used to calculate the actual amount dealt.

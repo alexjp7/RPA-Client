@@ -24,6 +24,7 @@ namespace Assets.Scripts.RPA_Game
     public class Game : MonoBehaviour
     {
         //Game Constants
+        public static bool isSinglePlayer;
         public static readonly bool NEW_GAME = true;
         public static readonly bool JOINED_GAME = false;
         public static readonly int PARTY_LIMIT = 4;
@@ -68,6 +69,18 @@ namespace Assets.Scripts.RPA_Game
             init(playerName);
             return isStarted;
         }
+
+        public static void startOffline(string playerName)
+        {
+            players = new List<Player>();
+            Player player = new Player();
+            player.name = playerName;
+            players.Add(player);
+
+            connectedPlayers = 1;
+            players[0].isClientPlayer = true; 
+        }
+
 
         /***************************************************************
         * initialises client connection to server, and empty player
