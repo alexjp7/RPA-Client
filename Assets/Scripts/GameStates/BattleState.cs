@@ -24,6 +24,7 @@ using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
 using Assets.Scripts.GameStates;
+using Assets.Scripts.RPA_Game;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -36,7 +37,7 @@ public class BattleState : MonoBehaviour
 
 
     private List<AbilityButton> abilityButtons;
-    private Player clientSidePlayer;
+    private Player clientPlayer { get => Game.clientSidePlayer; }
 
 
     /*---------------------------------------------------------------
@@ -84,20 +85,19 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initPlayerUI()
     {
-        clientSidePlayer = TurnController.INSTANCE.clientPlayer;
         abilityButtons = new List<AbilityButton>();
 
         //Load static assets (namely the lock for default ability icon image)
         try
         {
-            TurnController.INSTANCE.clientPlayer.playerClass.loadAbilities(Adventurer.getAbilityPath(clientSidePlayer.playerClass.classId), true);
+            clientPlayer.playerClass.loadAbilities(Adventurer.getAbilityPath(clientPlayer.playerClass.classId), true);
             for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
             {
                 AbilityButton button;
-                if (i < clientSidePlayer.playerClass.abilities.Count)
+                if (i < clientPlayer.playerClass.abilities.Count)
                 {
-                    button = AbilityButton.create(clientSidePlayer.playerClass.abilities[i]);
-                    button.icon.sprite = clientSidePlayer.playerClass.abilities[i].assetData.sprite;
+                    button = AbilityButton.create(clientPlayer.playerClass.abilities[i]);
+                    button.icon.sprite = clientPlayer.playerClass.abilities[i].assetData.sprite;
                     button.transform.SetParent(abilityBarLayout.transform);
                 }
                 else
@@ -304,7 +304,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void updateCooldownUI()
     {
-        for (int i = 0; i < clientSidePlayer.playerClass.abilities.Count; i++)
+        for (int i = 0; i < clientPlayer.playerClass.abilities.Count; i++)
         {
             setCooldownUI(i);
         }
@@ -322,7 +322,7 @@ public class BattleState : MonoBehaviour
     {
         bool isPlayerTurn = TurnController.INSTANCE.isClientPlayerTurn;
 
-        Ability ability = clientSidePlayer.playerClass.abilities[abilityIndex];
+        Ability ability = clientPlayer.playerClass.abilities[abilityIndex];
         AbilityButton abilityButton = abilityButtons[abilityIndex];
         Color color = abilityButton.button.GetComponent<Image>().color;
         Text cooldownText = abilityButtons[abilityIndex].cooldownText;

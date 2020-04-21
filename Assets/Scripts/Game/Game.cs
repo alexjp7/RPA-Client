@@ -21,23 +21,28 @@ using Assets.Scripts.RPA_Messages;
 
 namespace Assets.Scripts.RPA_Game
 {
-    public class Game : MonoBehaviour
+    public class Game
     {
         //Game Constants
         public static bool isSinglePlayer;
         public static readonly bool NEW_GAME = true;
         public static readonly bool JOINED_GAME = false;
         public static readonly int PARTY_LIMIT = 4;
+
         //Game Properties
+        public static int partyLeaderId { get; set; }
         public static int gameId { get; set;}
         public static List<Player> players { get; set;}
+        public static Player clientSidePlayer { get => players.Find(player => player.isClientPlayer); }
         public static int connectedPlayers { get; set;} //SET PUBLIC ONLY FOR TESTING PURPOSES
         public static string gameMessage { set; get;}
+
         //error/state flags
         private static bool isNewGame;
         private static bool isStarted;
 
         public static Client gameClient = Client.getInstance();
+
 
         /*---------------------------------------------------------------
                             GAME/CLIENT INITIALIZERS
@@ -63,20 +68,25 @@ namespace Assets.Scripts.RPA_Game
         **************************************************************/
         public static bool start(string playerName, bool _isNewGame, int _gameId)
         {
+            partyLeaderId = -1;
             isStarted = false;
             isNewGame = _isNewGame;
             gameId = _gameId;
             init(playerName);
+
             return isStarted;
         }
 
+        /***************************************************************
+        * Sets game/player data to accomidate offline play
+        **************************************************************/
         public static void startOffline(string playerName)
         {
             players = new List<Player>();
             Player player = new Player();
             player.name = playerName;
             players.Add(player);
-
+            partyLeaderId = player.id; 
             connectedPlayers = 1;
             players[0].isClientPlayer = true; 
         }
@@ -97,7 +107,8 @@ namespace Assets.Scripts.RPA_Game
             connectedPlayers = 0;
             players = new List<Player>();
 
-            for (int i = 0; i < PARTY_LIMIT; i++)
+            //Instantiate default player objects during game init
+            for (int i = 0; i < PARTY_LIMIT; i++) 
                 players.Add(new Player());
 
             players[0].isClientPlayer = true; // flag  the player at start of player list as the client side player
@@ -110,8 +121,15 @@ namespace Assets.Scripts.RPA_Game
                 gameClient.send(connectionMessage.getMessage());
                 Task<int> recieveGameId = waitForGameData(playerName);
                 gameId = await recieveGameId;
-                if (gameId == -1) gameMessage = "Game is either full OR doesn't exist yet";  
-                else isStarted = true;
+
+                if (gameId == -1)
+                {
+                    gameMessage = "Game is either full OR doesn't exist yet";
+                }
+                else
+                {
+                    isStarted = true;
+                }
             }
             else gameMessage = "Server Connection failed! Check server status";
         }

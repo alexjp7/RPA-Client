@@ -167,7 +167,7 @@ public class CharacterCreator : MonoBehaviour
             }
         }
 
-        startButton.interactable = PartyPanel.hasAllReady;
+        startButton.interactable = PartyPanel.hasAllReady && Game.clientSidePlayer.isPartyLeader;
     }
 
     /***************************************************************
@@ -181,16 +181,15 @@ public class CharacterCreator : MonoBehaviour
     {
         if (instructions[0] == 'a') { return; }
 
-        Debug.Log(instructions);
         CharacterCreationMessage message = new CharacterCreationMessage(instructions);
-        Player player = Game.players[Game.connectedPlayers - 1];
+        Player player = message.instructionType == 2 || message.instructionType == 3 ? Game.players[Game.connectedPlayers - 1]: null;
 
         switch ((CreationInstruction)message.instructionType)
         {
             case CreationInstruction.CONNECTION:
                 Game.addPlayer(message.playerName, message.client_id);
                 playerCountText.text = (Game.connectedPlayers).ToString();
-                addPlayerToUI(player);
+                addPlayerToUI( Game.players[Game.connectedPlayers - 1] );
                 break;
 
             case CreationInstruction.DISCONNECTION:
@@ -300,6 +299,12 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void startClicked()
     {
+        if(Game.clientSidePlayer.isPartyLeader)
+        {
+            CharacterCreationMessage message = new CharacterCreationMessage((int)CreationInstruction.GAME_START);
+            Game.gameClient.send(message.getMessage());
+        }
+
         if(!Game.isSinglePlayer)
         {
             int connectedPlayers = Game.connectedPlayers;

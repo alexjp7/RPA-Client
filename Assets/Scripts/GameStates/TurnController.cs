@@ -21,15 +21,14 @@ namespace Assets.Scripts.GameStates
         {
             get =>_instance == null ? _instance = new TurnController() : _instance;
         }
+
         public static int turnCount { get; private set; }
-        public Player clientPlayer { get; private set; }
-        public Adventurer clientAdventurer { get =>  clientPlayer.playerClass; }
+        public Adventurer clientAdventurer { get =>  Game.clientSidePlayer.playerClass; }
         //Combatants
         public Combatable currentCombatant { get; private set;}
         public List<Combatable> targets { get; private set; }
         public List<Monster> monsterParty { get; set; }
         public List<Adventurer> playerParty => Game.players.Select(player => player.playerClass).ToList();
-
 
         public string currentTurnNameDisplay { get => currentCombatant.name; }
         //Flags
@@ -43,13 +42,11 @@ namespace Assets.Scripts.GameStates
         private bool _hasNextTurn;
         private int currentMonster = 0;
         private int currentPlayer = 0;
-        private System.Random rand;
 
         private TurnController()
         {
-            rand = new System.Random();
-            targets = new List<Combatable>();
             turnCount = 0;
+            targets = new List<Combatable>();
             hasValidTarget = false;
         }
 
@@ -63,8 +60,8 @@ namespace Assets.Scripts.GameStates
         public void init()
         {
             //Set Turn order for players
+            System.Random rand = new System.Random();
             Game.players = Game.players.OrderBy(player => rand.Next()).ToList();
-            clientPlayer = Game.players.Find(player => player.isClientPlayer);
             initMonsterParty();
         }
 
@@ -121,7 +118,7 @@ namespace Assets.Scripts.GameStates
 
                 if (isPlayerTurn)
                 {
-                    isClientPlayerTurn = Game.players[nextCombatant].id == clientPlayer.id;
+                    isClientPlayerTurn = Game.players[nextCombatant].id == Game.clientSidePlayer.id;
                 }
                 else
                 {

@@ -10,6 +10,7 @@
     with any additional fields provided by the sub-class.
 **************************************************************/
 
+using System;
 using Assets.Scripts.RPA_Game;
 using SimpleJSON;
 
@@ -20,7 +21,8 @@ namespace Assets.Scripts.RPA_Messages
         CONNECTION = 0,
         DISCONNECTION = 1,
         CLASS_CHANGE = 2,
-        READY_UP = 3
+        READY_UP = 3,
+        GAME_START = 4
     }
 
     class CharacterCreationMessage : Message
@@ -79,6 +81,18 @@ namespace Assets.Scripts.RPA_Messages
 
         }
 
+        private string serializeStart()
+        {
+            JSONObject json = new JSONObject();
+            json.Add("state_id", this.state_id);
+            json.Add("game_id", this.game_id);
+            json.Add("client_id", this.actor.id);
+            json.Add("instructionType", this.instructionType);
+            return json.ToString();
+        }
+
+
+
         /***************************************************************
         * Transform game data into a JSON string which is sent by the 
           Client's TCPClient instance which is then communicated to 
@@ -88,14 +102,18 @@ namespace Assets.Scripts.RPA_Messages
         {
             string message = "";
 
-            switch(this.instructionType)
+            switch((CreationInstruction)this.instructionType)
             { 
-                case (int) CreationInstruction.CLASS_CHANGE:
+                case CreationInstruction.CLASS_CHANGE:
                     message = serializeClassChange();    
                     break;
-                case (int) CreationInstruction.READY_UP:
+                case CreationInstruction.READY_UP:
                     message = serializeReadyUp();
                     break;
+                case CreationInstruction.GAME_START:
+                    message = serializeStart();
+                    break;
+
                 default:
                     //Do some error checking
                     break;
@@ -103,6 +121,7 @@ namespace Assets.Scripts.RPA_Messages
             //Should error check empty message
             this.message = message;
         }
+
 
 
         /***************************************************************

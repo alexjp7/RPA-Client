@@ -25,13 +25,6 @@ public class MainMenu : MonoBehaviour
     public Text gameIdField;
     public Text notificationMessage;
 
-
-
-    void Awake()
-    {
-
-    }
-
     /*---------------------------------------------------------------
                         CLIENT EVENT HANDLERS
      ---------------------------------------------------------------*/

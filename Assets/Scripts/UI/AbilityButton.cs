@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
+using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Util;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,7 +24,6 @@ public class AbilityButton : MonoBehaviour
     private Ability abilityRef;
 
     private static TurnController turnController = TurnController.INSTANCE;
-    private static Adventurer clientPlayer;
 
     /***************************************************************
     * instantiates and returns the an AbilityButton instance.
@@ -47,7 +47,6 @@ public class AbilityButton : MonoBehaviour
     //Initialize Components
     void Awake()
     {
-        clientPlayer = TurnController.INSTANCE.clientPlayer.playerClass;
         button = gameObject.transform.Find("button").GetComponent<Button>();
         keyText = gameObject.transform.Find("text_key").GetComponent<Text>();
         icon = button.GetComponent<Image>();
@@ -140,22 +139,22 @@ public class AbilityButton : MonoBehaviour
     **************************************************************/
     public void onAbilityClicked(int abilitySelection)
     {
-        if (clientPlayer.abilities[abilitySelection] == null) return;
+        if (Game.clientSidePlayer.playerClass.abilities[abilitySelection] == null) return;
         if (!turnController.isClientPlayerTurn) return; 
-        if (clientPlayer.abilities[abilitySelection].isOnCooldown) return;
+        if (Game.clientSidePlayer.playerClass.abilities[abilitySelection].isOnCooldown) return;
 
         //Reset TargetsS
         turnController.resetTargets();
         selectedAbilityIndex = abilitySelection;
 
-        switch ((AbilityTypes)clientPlayer.abilities[abilitySelection].typeIds[0])
+        switch ((AbilityTypes)Game.clientSidePlayer.playerClass.abilities[abilitySelection].typeIds[0])
         {
             //NOTE: Single Target abilities defer targeting to manual combatant selection
             //Self Target
             case AbilityTypes.SELF_HEAL:
             case AbilityTypes.SELF_BUFF:
-                turnController.targets.Add(turnController.clientPlayer.playerClass);
-                clientPlayer.combatSprite.sprite.color = Color.green;
+                turnController.targets.Add(Game.clientSidePlayer.playerClass);
+                Game.clientSidePlayer.playerClass.combatSprite.sprite.color = Color.green;
                 break;
 
             //Multi Target 

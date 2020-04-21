@@ -32,6 +32,7 @@
           the appropraite layers of the Player object hierachy.
 **************************************************************/
 
+using Assets.Scripts.RPA_Game;
 using System;
 
 namespace Assets.Scripts.Entities.Players
@@ -41,6 +42,7 @@ namespace Assets.Scripts.Entities.Players
         public int id { get; set; }
         public string name { get; set; }
         public bool ready { get; set; }
+        public bool isPartyLeader { get => id == Game.partyLeaderId; }
         public bool isClientPlayer { set; get;} //flag for marking the client side player
         
         public Adventurer playerClass { get; set; }

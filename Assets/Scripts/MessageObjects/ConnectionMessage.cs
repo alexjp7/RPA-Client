@@ -13,7 +13,7 @@
 
 using Assets.Scripts.RPA_Game;
 using SimpleJSON;
-
+using UnityEngine;
 
 namespace Assets.Scripts.RPA_Messages
 {
@@ -75,10 +75,19 @@ namespace Assets.Scripts.RPA_Messages
             //Add players to game directly
             for (int i = playerJson.Count - 1; i >= 0; i--)
             {
-                Game.addPlayer(playerJson[i]["id"].AsInt,
-                                       playerJson[i]["name"].Value,
-                                       playerJson[i]["adventuringClass"].AsInt,
-                                       playerJson[i]["ready"].AsBool);
+                //Player data
+                int id = playerJson[i]["id"].AsInt;
+                string name = playerJson[i]["name"].Value;
+                int adventuringClass = playerJson[i]["adventuringClass"].AsInt;
+                bool isReady = playerJson[i]["ready"].AsBool;
+                
+                //Party leader Id set by game server
+                if (playerJson[i]["isPartyLeader"].AsBool)
+                {
+                    Game.partyLeaderId = id;
+                }
+
+                Game.addPlayer(id, name, adventuringClass, isReady);
             }
         }
     }

@@ -11,6 +11,7 @@ using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
+using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Util;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -161,7 +162,7 @@ namespace Assets.Scripts.UI
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
             //Check if targeting type applies to manual target selection
-            Ability abilitySelected = turnController.clientPlayer.playerClass.abilities[abilityIndex];
+            Ability abilitySelected = Game.clientSidePlayer.playerClass.abilities[abilityIndex];
             if (abilitySelected.targetingType == TargetingType.AUTO) return;
 
 
