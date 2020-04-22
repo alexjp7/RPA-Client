@@ -75,6 +75,14 @@ namespace Assets.Scripts.Entities.Monsters
             type = CombatantType.MONSTER;
         }
 
+        public Monster(string name)
+        {
+            assetPath += "monster_textures/";
+            abilities = new List<Ability>();
+            healthProperties = new Damageable();
+            type = CombatantType.MONSTER;
+        }
+
         /***************************************************************
         * the setID() member function allows for a defered setting 
           of the Monster's ID until the sub-class constructor
@@ -125,19 +133,15 @@ namespace Assets.Scripts.Entities.Monsters
 
 
 
-        public virtual List<Combatable> getTargets(out Ability abilityUsed)
+        public virtual List<Combatable> getTargets(out Ability abilityUsed, in List<Monster> monsterParty,  List<Adventurer> playerParty)
         {
             List<Combatable> targets = new List<Combatable>();
-            //Needs implementing - Current health
-
-            var monsterParty = TurnController.INSTANCE.monsterParty;
-            var playerParty = TurnController.INSTANCE.playerParty;
-            abilityUsed = selectAbility(TurnController.turnCount, ref monsterParty, ref playerParty, ref targets);
+            abilityUsed = selectAbility(monsterParty, playerParty, ref targets);
 
             return targets;
         }
 
-        private Ability selectAbility(int turnCount, ref List<Monster> monsterParty, ref List<Adventurer> playerParty, ref List<Combatable> targets)
+        private Ability selectAbility(List<Monster> monsterParty, List<Adventurer> playerParty, ref List<Combatable> targets)
         {
             /*AVAILABLE METHODS FOR COMBATABLES*/
             //Current Health

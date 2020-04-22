@@ -33,8 +33,8 @@ namespace Assets.Scripts.UI
         public bool isMonster { get; private set; }
 
 
-        private static TurnController turnController = TurnController.INSTANCE;
-        
+        private static TurnController turnController => StateManager.battleState.turnController;
+
         /***************************************************************
         * instantiates and returns the a CombatSpriute instance.
         
@@ -291,7 +291,7 @@ namespace Assets.Scripts.UI
             }
 
             //Update Cooldown / Targets 
-            abilityUsed.setLastTurnUsed(TurnController.turnCount); //Flagging whether cooldown
+            abilityUsed.setLastTurnUsed(turnController.turnCount); //Flagging whether cooldown
             abilityUsed.cooldownTracker++;
             StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);

@@ -16,18 +16,12 @@ namespace Assets.Scripts.GameStates
     public class TurnController
     {
 
-        private static TurnController _instance;
-        public static TurnController INSTANCE
-        {
-            get =>_instance == null ? _instance = new TurnController() : _instance;
-        }
-
-        public static int turnCount { get; private set; }
+        public int turnCount { get; private set; }
         public Adventurer clientAdventurer { get =>  Game.clientSidePlayer.playerClass; }
         //Combatants
         public Combatable currentCombatant { get; private set;}
         public List<Combatable> targets { get; private set; }
-        public List<Monster> monsterParty { get; set; }
+        public List<Monster> monsterParty;
         public List<Adventurer> playerParty => Game.players.Select(player => player.playerClass).ToList();
 
         public string currentTurnNameDisplay { get => currentCombatant.name; }
@@ -40,12 +34,15 @@ namespace Assets.Scripts.GameStates
 
 
         private bool _hasNextTurn;
-        private int currentMonster = 0;
-        private int currentPlayer = 0;
+        private int currentMonster;
+        private int currentPlayer;
 
-        private TurnController()
+        public TurnController()
         {
             turnCount = 0;
+            currentMonster = 0;
+            currentPlayer = 0;
+
             targets = new List<Combatable>();
             hasValidTarget = false;
         }
@@ -57,12 +54,11 @@ namespace Assets.Scripts.GameStates
           of both  Game.players and the monster party generated in 
           initMonsterParty().
         **************************************************************/
-        public void init()
+        public void initTurnOrder()
         {
             //Set Turn order for players
             System.Random rand = new System.Random();
             Game.players = Game.players.OrderBy(player => rand.Next()).ToList();
-            initMonsterParty();
         }
 
         /***************************************************************f
@@ -71,7 +67,7 @@ namespace Assets.Scripts.GameStates
         * Addtionally, this function sets the UI components relevant to
           the monsters loaded from the factory.
         **************************************************************/
-        private void initMonsterParty()
+        public void initMonsterParty(int partySize)
         {
             int monsterPartySize = 4;
             MonsterFactory mFactory = new MonsterFactory();
@@ -192,7 +188,7 @@ namespace Assets.Scripts.GameStates
             targets.Clear();
             Monster currentMonster = currentCombatant as Monster;
             Ability ability = null;
-            targets = monsterParty[monsterIndex].getTargets(out ability);
+            targets = monsterParty[monsterIndex].getTargets(out ability, in monsterParty, playerParty);
 
             try
             {

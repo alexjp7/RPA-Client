@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
                 TEST-SIMULATOR(Debug/Development Only)
  ---------------------------------------------------------------*/
-//#define REQUIRE_TEST_DATA //Uncomment to generate test data
+#define REQUIRE_TEST_DATA //Uncomment to generate test data
 
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
@@ -94,7 +94,7 @@ namespace Assets.Scripts.Util
             Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
             Game.connectedPlayers = Game.players.Count;
-
+            Game.partyLeaderId = Game.players[0].id;
             foreach (Player player in Game.players) player.applyClass();
             Game.players[0].isClientPlayer = true;
         }

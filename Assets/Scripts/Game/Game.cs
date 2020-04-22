@@ -102,6 +102,7 @@ namespace Assets.Scripts.RPA_Game
         @param - playerName: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
         **************************************************************/
+
         private async static void init(string playerName)
         {
             connectedPlayers = 0;

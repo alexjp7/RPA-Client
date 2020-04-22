@@ -118,7 +118,7 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void generatePlayerPanels()
     {
-        foreach(Player player in Game.players)
+            foreach(Player player in Game.players)
         {
             if(player.id > -1)
             {
@@ -144,7 +144,6 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void removePlayerFromUi(int playerIndex)
     {
-        Debug.Log(playerIndex);
         Destroy( partyPanels[playerIndex].gameObject);
         partyPanels.RemoveAt(playerIndex);
     }
@@ -179,11 +178,11 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void processServerInstructions(string instructions)
     {
-        if (instructions[0] == 'a') { return; }
-
+        if (instructions == "" || instructions[0] == 'a') { return; }
         CharacterCreationMessage message = new CharacterCreationMessage(instructions);
         Player player = message.instructionType == 2 || message.instructionType == 3 ? Game.players[Game.connectedPlayers - 1]: null;
-
+        Debug.Log(instructions);
+        Debug.Log(((CreationInstruction)message.instructionType).ToString());
         switch ((CreationInstruction)message.instructionType)
         {
             case CreationInstruction.CONNECTION:
@@ -195,6 +194,7 @@ public class CharacterCreator : MonoBehaviour
             case CreationInstruction.DISCONNECTION:
                 removePlayerFromUi(Game.getPlayerIndex(message.client_id));
                 Game.removePlayer(message.client_id);
+                playerCountText.text = (Game.connectedPlayers).ToString();
                 break;
 
             case CreationInstruction.CLASS_CHANGE:
@@ -205,6 +205,11 @@ public class CharacterCreator : MonoBehaviour
             case CreationInstruction.READY_UP:
                 player.ready = message.playerReadyStatus;
                 renderReadyState(message.playerIndex);
+                break;
+
+            case CreationInstruction.GAME_START:
+                Debug.Log("Game starting");
+                startClicked();
                 break;
 
             default:
@@ -232,6 +237,7 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void readyClicked()
     {
+        Debug.Log("Is Party Leader: " + Game.clientSidePlayer.isPartyLeader);
         Game.players[0].ready = !Game.players[0].ready;
         if(Game.players[0].ready) readyText.text = "Cancel Ready";
         else readyText.text = " Ready Up!";
@@ -317,5 +323,7 @@ public class CharacterCreator : MonoBehaviour
         {
             player.applyClass();
         }
+
+        StateManager.changeScene(GameState.BATTLE_STATE);
     }
 }

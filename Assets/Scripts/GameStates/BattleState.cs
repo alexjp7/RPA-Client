@@ -34,11 +34,12 @@ public class BattleState : MonoBehaviour
     [SerializeField] private GameObject monster_horizontalLayout;
     [SerializeField] private GameObject abilityBarLayout;
     [SerializeField] private Text currentTurnDisplayName;
-
-
     private List<AbilityButton> abilityButtons;
-    private Player clientPlayer { get => Game.clientSidePlayer; }
 
+    //Client Player Alias
+    private Player clientPlayer { get => Game.clientSidePlayer; }
+    //Combat Controllers
+    public TurnController turnController { get; private set;}
 
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS
@@ -47,33 +48,89 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     void Awake()
     {
-        if (TestSimulator.isDeveloping)
-            TestSimulator.initTestEnvironment(GameState.BATTLE_STATE);
+        initEnvironment(); // Updates static references
+        initControllers(); // Constructs turn controller - party leader sends to server 
+        initBattleField(); // UI initialisation
+    }
 
+    /**************************************************************
+    * Sets this script as the current active state script, 
+      allowing for static acces to callback/ui handlers and
+      TurnController.
+    **************************************************************/
+    private void initEnvironment()
+    {
+        if (TestSimulator.isDeveloping) //Flaggged by REQUIRE_TEST_DATA directive in TestSimulaotr
+        {
+            TestSimulator.initTestEnvironment(GameState.BATTLE_STATE);
+        }
+
+        //If using Test data, ensure test environment is executed before this
         StateManager.setStateScript();
-        TurnController.INSTANCE.init();
+    }
+
+    /**************************************************************
+    * Initialises controller responsible for delegating and enforcing
+      the turn based logic for combat rounds.
+    **************************************************************/
+    private void initControllers()
+    {
+        turnController = new TurnController();
+
+        //Party leader combat initialisation
+        if (clientPlayer.isPartyLeader)
+        {
+            turnController.initTurnOrder();
+            turnController.initMonsterParty(4);
+
+            //Collate combat order/monster party 
+            int[] playerTurnOrder = Game.players.Select(player => player.id).ToArray(); //Streamed player Ids
+            List< KeyValuePair<string, string> > monsters = new List<KeyValuePair<string, string> >(); //Monster types => monster name
+
+            foreach(var monster in turnController.monsterParty)
+            {
+                monsters.Add(new KeyValuePair<string,string>(monster.assetData.name, monster.name) );
+            }
+
+            //Send combat order and monster party to server
+
+        }
+        else
+        {
+            //Wait for party leader to send combat oder/monster party data
+
+            //Re-order players based on combat order
+
+            //Populate monsters 
+        }
+
+    }
+
+    /*---------------------------------------------------------------
+                        UI-INIATIALISATIONS
+    ---------------------------------------------------------------
+    /**************************************************************
+    * Initializes any UI components
+    **************************************************************/
+    private void initBattleField()
+    {
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
         initPlayerUI();
     }
-
-    void Start()
-    {
-        TurnController.INSTANCE.startCombat();
-    }
-
+    
 
     /***************************************************************f
     * Generates the monster and player party sprites to screen.
     **************************************************************/
     private void generateCombatantSprites()
     {
-        foreach (Monster monster in TurnController.INSTANCE.monsterParty)
+        foreach (Monster monster in turnController.monsterParty)
         {
             monster.combatSprite.transform.SetParent(monster_horizontalLayout.transform);
         }
 
-        foreach (Adventurer player in TurnController.INSTANCE.playerParty)
+        foreach (Adventurer player in turnController.playerParty)
         {
             player.combatSprite.transform.SetParent(player_horizontalLayout.transform);
         }
@@ -110,6 +167,11 @@ public class BattleState : MonoBehaviour
         }
         catch (NotImplementedException e) { Debug.Log("ERROR:" + e.Message); }
 
+    }
+
+    void Start()
+    {
+        turnController.startCombat();
     }
 
     /*---------------------------------------------------------------
@@ -269,7 +331,7 @@ public class BattleState : MonoBehaviour
    **************************************************************/
     public void updateTurnUi()
     {
-        Combatable currentCombatant = TurnController.INSTANCE.currentCombatant;
+        Combatable currentCombatant = turnController.currentCombatant;
         TurnChevron.setPosition(currentCombatant.combatSprite.transform);
         currentTurnDisplayName.text = currentCombatant.name;
     }
@@ -277,7 +339,7 @@ public class BattleState : MonoBehaviour
     public void updateConditionUI()
     {
         //Update condition effect duractions for current combatant
-        Combatable currentCombatant = TurnController.INSTANCE.currentCombatant;
+        Combatable currentCombatant = turnController.currentCombatant;
         List<int> removedConditions = currentCombatant.updateConditionDurations();
         if (removedConditions.Count > 0)
         {
@@ -288,8 +350,8 @@ public class BattleState : MonoBehaviour
         }
 
         //Redraw conditions for all Combatants
-        List<Combatable> allCombatants = new List<Combatable>( TurnController.INSTANCE.playerParty.FindAll( player => player.isAlive() ) );
-        allCombatants.AddRange(TurnController.INSTANCE.monsterParty.FindAll(monster => monster.isAlive() ) );
+        List<Combatable> allCombatants = new List<Combatable>( turnController.playerParty.FindAll( player => player.isAlive() ) );
+        allCombatants.AddRange(turnController.monsterParty.FindAll(monster => monster.isAlive() ) );
         foreach (var combatants in allCombatants)
         {
             combatants.combatSprite.updateConditions();
@@ -320,13 +382,14 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     public void setCooldownUI(int abilityIndex)
     {
-        bool isPlayerTurn = TurnController.INSTANCE.isClientPlayerTurn;
+        bool isPlayerTurn = turnController.isClientPlayerTurn;
 
         Ability ability = clientPlayer.playerClass.abilities[abilityIndex];
         AbilityButton abilityButton = abilityButtons[abilityIndex];
         Color color = abilityButton.button.GetComponent<Image>().color;
         Text cooldownText = abilityButtons[abilityIndex].cooldownText;
         string cooldownValue = "";
+
         if (isPlayerTurn)
         {
             AbilityButton.selectedAbilityIndex = -1;
@@ -366,7 +429,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     public void skipTurn()
     {
-        TurnController.INSTANCE.takeTurn();
+        turnController.takeTurn();
     }
 
 
@@ -378,7 +441,7 @@ public class BattleState : MonoBehaviour
         updateTurnUi();
         updateCooldownUI();
         updateConditionUI();
-        TurnController.INSTANCE.hasNextTurn = false;
+        turnController.hasNextTurn = false;
     }
 
     /***************************************************************
@@ -387,7 +450,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     void Update()
     {
-        if (TurnController.INSTANCE.hasNextTurn)
+        if (turnController.hasNextTurn)
         {
             updateUI();
         }

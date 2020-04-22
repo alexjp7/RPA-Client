@@ -15,10 +15,10 @@ namespace Assets.Scripts.Util
     {
         public static GameState currentState;
 
-        public void changeScene(int scene)
+        public static void changeScene(GameState scene)
         {
-            currentState = (GameState) scene; ;
-            SceneManager.LoadScene(scene, LoadSceneMode.Single);
+            currentState = scene; ;
+            SceneManager.LoadScene((int)scene, LoadSceneMode.Single);
         }
 
         public static void setStateScript()

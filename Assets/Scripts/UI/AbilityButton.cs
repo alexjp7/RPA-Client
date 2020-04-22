@@ -23,7 +23,7 @@ public class AbilityButton : MonoBehaviour
     public Image icon { get; set; }
     private Ability abilityRef;
 
-    private static TurnController turnController = TurnController.INSTANCE;
+    private static TurnController turnController => StateManager.battleState.turnController;
 
     /***************************************************************
     * instantiates and returns the an AbilityButton instance.

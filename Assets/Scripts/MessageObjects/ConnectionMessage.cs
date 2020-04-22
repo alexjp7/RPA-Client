@@ -85,8 +85,8 @@ namespace Assets.Scripts.RPA_Messages
                 if (playerJson[i]["isPartyLeader"].AsBool)
                 {
                     Game.partyLeaderId = id;
+                    Debug.Log(name + " is party leader");
                 }
-
                 Game.addPlayer(id, name, adventuringClass, isReady);
             }
         }

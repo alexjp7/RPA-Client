@@ -15,6 +15,7 @@ public class TurnChevron : MonoBehaviour
     private static SpriteRenderer chevronSprite;
     private static Transform instance;
 
+    private static TurnController turnController => StateManager.battleState.turnController;
 
     /***************************************************************
     * The position of the chevron.
@@ -46,7 +47,7 @@ public class TurnChevron : MonoBehaviour
         chevronTransform.SetParent(position.transform);
         chevronTransform.position = localPoint;
 
-        if(TurnController.turnCount % 2 == 0)
+        if(turnController.turnCount % 2 == 0)
         {
             chevronSprite.color = Color.red;
         }

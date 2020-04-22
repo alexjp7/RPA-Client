@@ -41,13 +41,12 @@ public class MainMenu : MonoBehaviour
             {
                 Game.isSinglePlayer = true;
                 Game.startOffline(name1.text);  
-                SceneManager.LoadScene(1);
             }
             else
             {
                 if (Game.start(name1.text, Game.NEW_GAME, -1) )
                 {
-                    SceneManager.LoadScene(1);
+                    StateManager.changeScene(GameState.CHARACTER_CREATION);
                 }
                 else
                 {
