@@ -87,13 +87,18 @@ namespace Assets.Scripts.Util
             if (Game.players != null) return;
 
             Game.players = new List<Player>();
-            //@Test Data
-            Game.players.Add(new Player("Alexjp", PlayerClasses.WIZARD) );
-            Game.players.Add(new Player("Kozza", PlayerClasses.WARRIOR));
-            Game.players.Add(new Player("Frictionburn", PlayerClasses.WIZARD) );
-            Game.players.Add(new Player("Wizzledonker", PlayerClasses.ROGUE) );
 
-            Game.connectedPlayers = Game.players.Count;
+            for(int i = 0; i < Game.PARTY_LIMIT; i++)
+            {
+                Game.players.Add(new Player());
+            }
+
+            //@Test Data
+            Game.addPlayer("Alexjp", PlayerClasses.WIZARD);
+            Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
+            Game.addPlayer("Kozza", PlayerClasses.WARRIOR);
+            Game.addPlayer("Wizzledonker", PlayerClasses.CLERIC);
+
             Game.partyLeaderId = Game.players[0].id;
             foreach (Player player in Game.players) player.applyClass();
             Game.players[0].isClientPlayer = true;

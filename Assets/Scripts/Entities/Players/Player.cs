@@ -34,6 +34,7 @@
 
 using Assets.Scripts.RPA_Game;
 using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Players
 {
@@ -43,9 +44,27 @@ namespace Assets.Scripts.Entities.Players
         public string name { get; set; }
         public bool ready { get; set; }
         public bool isPartyLeader { get => id == Game.partyLeaderId; }
-        public bool isClientPlayer { set; get;} //flag for marking the client side player
-        
+        public bool isClientPlayer { set; get; } //flag for marking the client side player
+
         public Adventurer playerClass { get; set; }
+
+        //Check if all players is ready
+        public static bool hasAllReady {get =>  checkAllReady();}
+
+        private static bool checkAllReady()
+        {
+            int result = 0;
+            foreach(var player in Game.players)
+            {
+                if(player.ready)
+                {
+                    result++;
+                }
+            }
+
+            return result == Game.connectedPlayers;
+        }
+
 
         /***************************************************************
         * Used to indicate class in character creation screen, allowing 
@@ -98,7 +117,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Player(string name, PlayerClasses adventuringClass, bool ready = true)
         {
-            this.id = RPA_Game.Game.players.Count + 1;
+            this.id = Game.connectedPlayers;
             this.name = name;
             this.adventuringClass = (int)adventuringClass;
             this.ready = ready;
@@ -118,24 +137,25 @@ namespace Assets.Scripts.Entities.Players
             switch ((PlayerClasses)adventuringClass)
             {
                 case PlayerClasses.WARRIOR:
-                    playerClass = new Warrior(name);
+                    playerClass = new Warrior(name, id);
                     break;
 
                 case PlayerClasses.WIZARD:
-                    playerClass = new Wizard(name);
+                    playerClass = new Wizard(name, id);
                     break;
 
                 case PlayerClasses.ROGUE:
-                    playerClass = new Rogue(name);
+                    playerClass = new Rogue(name, id);
                     break;
 
                 case PlayerClasses.CLERIC:
-                    playerClass = new Cleric(name);
+                    playerClass = new Cleric(name, id);
                     break;
                 default:
                     throw new NotImplementedException("ERROR - Either; Adventuring Class is not implemented or an unexpected class ID was encountered during player.applyClass()");
             }
         }
+
 
         public string toString()
         {

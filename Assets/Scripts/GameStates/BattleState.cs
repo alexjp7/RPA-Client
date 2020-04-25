@@ -25,6 +25,9 @@ using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
+using Assets.Scripts.RPA_Messages;
+using System.Threading.Tasks;
+using System.Threading;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -49,8 +52,15 @@ public class BattleState : MonoBehaviour
     void Awake()
     {
         initEnvironment(); // Updates static references
-        initControllers(); // Constructs turn controller - party leader sends to server 
-        initBattleField(); // UI initialisation
+        if (clientPlayer.isPartyLeader)
+        {
+            initControllers(); // Constructs turn controller - party leader sends to server 
+            initBattleField(); // UI initialisation
+        }
+        else
+        {
+            initControllers();
+        }
     }
 
     /**************************************************************
@@ -73,37 +83,54 @@ public class BattleState : MonoBehaviour
     * Initialises controller responsible for delegating and enforcing
       the turn based logic for combat rounds.
     **************************************************************/
-    private void initControllers()
+    private async void initControllers()
     {
         turnController = new TurnController();
 
-        //Party leader combat initialisation
-        if (clientPlayer.isPartyLeader)
-        {
-            turnController.initTurnOrder();
-            turnController.initMonsterParty(4);
-
-            //Collate combat order/monster party 
-            int[] playerTurnOrder = Game.players.Select(player => player.id).ToArray(); //Streamed player Ids
-            List< KeyValuePair<string, string> > monsters = new List<KeyValuePair<string, string> >(); //Monster types => monster name
-
-            foreach(var monster in turnController.monsterParty)
+            //Party leader combat initialisation
+            if (clientPlayer.isPartyLeader)
             {
-                monsters.Add(new KeyValuePair<string,string>(monster.assetData.name, monster.name) );
+                turnController.initTurnOrder();
+                turnController.initMonsterParty(4);
+                if (!Game.isSinglePlayer)
+                {
+                //Send combat order and monster party to server
+                    BattleMessage initCombatMessage = new BattleMessage(BattleInstruction.COMBAT_INIT);
+                    Game.gameClient.send(initCombatMessage.message);
+                }
             }
+            else
+            {
+                //Wait for party leader to send combat oder/monster party data
+                BattleMessage message = await Task.Run( () => waitForCombatInitialisation());
 
-            //Send combat order and monster party to server
+                turnController.initTurnOrder(message.turnOrder);
+                turnController.initMonsterParty(message.monsters);
+                initBattleField();
+            }
+    }
 
-        }
-        else
+    private BattleMessage waitForCombatInitialisation()
+    {
+        bool hasData = false;
+        BattleMessage battleMessage = null;
+        string serverMessage;
+
+        while (!hasData)
         {
-            //Wait for party leader to send combat oder/monster party data
+            if (Game.gameClient.ready())
+            {
+                serverMessage = Game.gameClient.read();
 
-            //Re-order players based on combat order
-
-            //Populate monsters 
+                if (serverMessage != "a")
+                {
+                    battleMessage = new BattleMessage(serverMessage);
+                    hasData = true;
+                }
+            }
         }
 
+        return battleMessage;
     }
 
     /*---------------------------------------------------------------
@@ -350,11 +377,14 @@ public class BattleState : MonoBehaviour
         }
 
         //Redraw conditions for all Combatants
-        List<Combatable> allCombatants = new List<Combatable>( turnController.playerParty.FindAll( player => player.isAlive() ) );
-        allCombatants.AddRange(turnController.monsterParty.FindAll(monster => monster.isAlive() ) );
-        foreach (var combatants in allCombatants)
+        foreach (var players in turnController.playerParty.FindAll(player => player.isAlive()))
         {
-            combatants.combatSprite.updateConditions();
+            players.combatSprite.updateConditions();
+        }
+
+        foreach (var monsters in turnController.monsterParty.FindAll(monster => monster.isAlive()))
+        {
+            monsters.combatSprite.updateConditions();
         }
     }
 
@@ -440,9 +470,16 @@ public class BattleState : MonoBehaviour
     {
         updateTurnUi();
         updateCooldownUI();
-        updateConditionUI();
+
+        if(turnController.turnCount > 1)
+        {
+            updateConditionUI();
+
+        }
         turnController.hasNextTurn = false;
     }
+
+
 
     /***************************************************************
     * Checks for a new turn comamnd to be isused by the TurnController
@@ -450,9 +487,93 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     void Update()
     {
+        if (!Game.isSinglePlayer)
+        {
+            if (Game.gameClient.ready())
+            {
+                processServerInstructions(Game.gameClient.read());
+            }
+        }
+
         if (turnController.hasNextTurn)
         {
             updateUI();
         }
     }
+
+    private void processServerInstructions(string instructions)
+    {
+        if (instructions == "" || instructions[0] == 'a') { return; }
+        BattleMessage message = new BattleMessage(instructions);
+
+        switch ((BattleInstruction)message.instructionType)
+        {
+            case BattleInstruction.TURN_PROGRESSED:
+                turnController.takeTurn();
+                break;
+            case BattleInstruction.TURN_ACTION:
+                processTurnAction(ref message);
+              
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void processTurnAction(ref BattleMessage message)
+    {
+        //Apply ability on player turn
+        if(turnController.isPlayerTurn)
+        {
+            //Buff/heal ally
+            if (message.abilityTargeting == TargetingType.ALLIED)
+            {
+                foreach (var target in turnController.playerParty)
+                {
+                    if(target.isAlive())
+                    {
+                        if(message.targets.ContainsKey(target.id))
+                        {
+                            Combatable allyPlayer = Game.getPlayerById(target.id).playerClass;
+
+                        }
+                    }
+                }
+            }
+            else if (message.abilityTargeting == TargetingType.ENEMY)
+            {
+                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
+                Debug.Log("Caster = " + caster.name);
+                FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
+                foreach (var target in message.targets)
+                {
+                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    //Calculate damage taken as this clients value for the mosnter's hp - the new value
+                    int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
+                    attackTarget(enemyMonster, damageDealt);
+                }
+            }
+            else if(message.abilityTargeting == TargetingType.AUTO)
+            {
+                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
+                Debug.Log("Caster = "+caster.name);
+                FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
+
+                foreach (var target in message.targets)
+                {
+                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    //Calculate damage taken as this clients value for the mosnter's hp - the new value
+                    int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
+                    attackTarget(enemyMonster, damageDealt);
+                }
+            }
+        }//Apply ability on monster turn
+        else
+        {
+
+        }
+
+    }
 }
+

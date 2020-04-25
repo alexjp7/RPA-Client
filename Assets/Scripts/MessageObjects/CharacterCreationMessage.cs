@@ -38,10 +38,10 @@ namespace Assets.Scripts.RPA_Messages
           the object will be constructed to be used for seriazation or
           deserialization.
         **************************************************************/
-        public CharacterCreationMessage(int instructionType) : base()
+        public CharacterCreationMessage(CreationInstruction instructionType) : base()
         {
-            this.state_id = (int)States.CHARACTER_CREATION;
-            this.instructionType = instructionType;
+            this.stateId = (int)State.CHARACTER_CREATION;
+            this.instructionType = (int)instructionType;
             serialize();
         }
 
@@ -57,8 +57,8 @@ namespace Assets.Scripts.RPA_Messages
         private string serializeClassChange()
         {
             JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
+            json.Add("state_id", this.stateId);
+            json.Add("game_id", this.gameId);
             json.Add("client_id", this.actor.id);
             json.Add("instructionType", this.instructionType);
             json.Add("adventuringClass", this.actor.adventuringClass);
@@ -72,8 +72,8 @@ namespace Assets.Scripts.RPA_Messages
         private string serializeReadyUp()
         {
             JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
+            json.Add("state_id", this.stateId);
+            json.Add("game_id", this.gameId);
             json.Add("client_id", this.actor.id);
             json.Add("instructionType", this.instructionType);
             json.Add("ready", this.actor.ready);
@@ -84,8 +84,8 @@ namespace Assets.Scripts.RPA_Messages
         private string serializeStart()
         {
             JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
+            json.Add("state_id", this.stateId);
+            json.Add("game_id", this.gameId);
             json.Add("client_id", this.actor.id);
             json.Add("instructionType", this.instructionType);
             return json.ToString();
@@ -133,9 +133,9 @@ namespace Assets.Scripts.RPA_Messages
             base.deserialize(jsonString);
 
             JSONNode json = JSON.Parse(jsonString);
-            this.client_id = json["client_id"].AsInt;
+            this.clientId = json["client_id"].AsInt;
             this.instructionType = json["instructionType"].AsInt;
-            this.playerIndex = Game.getPlayerIndex(client_id);
+            this.playerIndex = Game.getPlayerIndex(clientId);
             this.adventuringClass  = json["adventuringClass"].AsInt;
             this.playerName = json["name"].Value;
             this.playerReadyStatus= json["ready"].AsBool;

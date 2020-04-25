@@ -62,7 +62,7 @@ namespace Assets.Scripts.Entities.Abilities
     * The logic to determine the Metatype can be seen in the 
       getMetaType() function.
     **************************************************************/
-    enum MetaTypes
+    enum MetaType
     {
         DAMAGE = 0,
         HEALING = 1,
@@ -175,8 +175,8 @@ namespace Assets.Scripts.Entities.Abilities
             //Player Specific Ability Properties
             newAbility.assetData = new Renderable(newAbility.name, $"{ Ability.BASE_ABILITY_ICON_PATH }{ entityName }/{ newAbility.name }");
 
-            MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
-            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+            MetaType metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
+            if (potencyProperty == "" || metaType == MetaType.UNIMPLEMENTED)
                 throw new ArgumentException($"Malformed JSON in {jsonNode["entity"]} : {jsonNode["name"]} ");
 
             newAbility.tooltip = construcTooltip(jsonNode, skillLevel, metaType, newAbility.typeIds, potencyProperty);
@@ -223,7 +223,7 @@ namespace Assets.Scripts.Entities.Abilities
                 newAbility.cooldown = jsonNode["cooldown"].AsInt;
                 newAbility.statusEffect = jsonNode["status"];
 
-                MetaTypes metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
+                MetaType metaType = getMetaType(newAbility.typeIds[0], out potencyProperty);
                 newAbility.abilityStrength = constructAbilityStrength(jsonNode, potencyProperty, 0, metaType);
                 foreach (int type in newAbility.typeIds)
                 {
@@ -246,11 +246,11 @@ namespace Assets.Scripts.Entities.Abilities
         /*---------------------------------------------------------------
                             CONSTRUCTION-METHODS
         ---------------------------------------------------------------*/
-        private static AbilityStrength constructAbilityStrength(JSONNode abilityJson,string potencyProperty, int skillLevel, MetaTypes metaType)
+        private static AbilityStrength constructAbilityStrength(JSONNode abilityJson,string potencyProperty, int skillLevel, MetaType metaType)
         {
             AbilityStrength abilityStrength = new AbilityStrength();
 
-            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            if (metaType == MetaType.DAMAGE || metaType == MetaType.HEALING)
             {
                 abilityStrength.min = abilityJson[potencyProperty][skillLevel][0].AsInt;
                 abilityStrength.max = abilityJson[potencyProperty][skillLevel][1].AsInt;
@@ -333,16 +333,16 @@ namespace Assets.Scripts.Entities.Abilities
          @return - The completed tooltip description with interpolated
          damage and description values.
         **************************************************************/
-        private static string construcTooltip(in JSONNode abilityJson, int skillLevel,MetaTypes metaType , int[] typeIds, string potencyProperty)
+        private static string construcTooltip(in JSONNode abilityJson, int skillLevel,MetaType metaType , int[] typeIds, string potencyProperty)
         {
             //Construct Tooltip 
             string tooltip = abilityJson["tooltip"].Value;
             string abilityPotency = "";
-            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            if (metaType == MetaType.DAMAGE || metaType == MetaType.HEALING)
             {
                 abilityPotency = abilityJson[potencyProperty][skillLevel][0].AsInt + "-" + abilityJson[potencyProperty][skillLevel][1].AsInt;
             }
-            else if (metaType == MetaTypes.EFFECT)
+            else if (metaType == MetaType.EFFECT)
             {
                 abilityPotency = abilityJson[potencyProperty][skillLevel].AsInt.ToString();
 
@@ -374,25 +374,25 @@ namespace Assets.Scripts.Entities.Abilities
 
         @return - The metatype of an ability  
         **************************************************************/
-        public static MetaTypes getMetaType(int primaryType, out string potencyProperty)
+        public static MetaType getMetaType(int primaryType, out string potencyProperty)
         {
-            MetaTypes metaType = MetaTypes.UNIMPLEMENTED;
+            MetaType metaType = MetaType.UNIMPLEMENTED;
             potencyProperty = "";
 
             if (primaryType == 0 || primaryType == 1)
             {
                 potencyProperty = "damage";
-                metaType = MetaTypes.DAMAGE;
+                metaType = MetaType.DAMAGE;
             }
             else if (primaryType > 1 && primaryType <= 4)
             {
                 potencyProperty = "health";
-                metaType = MetaTypes.HEALING;
+                metaType = MetaType.HEALING;
             }
             else if (primaryType > 4 && primaryType <= 9)
             {
                 potencyProperty = "potency";
-                metaType = MetaTypes.EFFECT;
+                metaType = MetaType.EFFECT;
             }
 
             return metaType;
@@ -409,16 +409,16 @@ namespace Assets.Scripts.Entities.Abilities
         @return - The Metatype, i.e. whether the ability is
         classified as an Attack,Heal or Effect ability.  
         **************************************************************/
-        public static MetaTypes getMetaType(int primaryType)
+        public static MetaType getMetaType(int primaryType)
         {
-            MetaTypes metaType = MetaTypes.UNIMPLEMENTED;
+            MetaType metaType = MetaType.UNIMPLEMENTED;
 
             if (primaryType == 0 || primaryType == 1)
-                metaType = MetaTypes.DAMAGE;
+                metaType = MetaType.DAMAGE;
             else if (primaryType > 1 && primaryType <= 4)
-                metaType = MetaTypes.HEALING;
+                metaType = MetaType.HEALING;
             else if (primaryType > 4 && primaryType <= 9)
-                metaType = MetaTypes.EFFECT;
+                metaType = MetaType.EFFECT;
 
             return metaType;
         }
@@ -431,15 +431,15 @@ namespace Assets.Scripts.Entities.Abilities
         {
             //Determine ability type and meta type, determine what property is used for each skill type 
             string potencyProperty = "";
-            MetaTypes metaType = getMetaType(primaryType, out potencyProperty);
+            MetaType metaType = getMetaType(primaryType, out potencyProperty);
 
-            if (potencyProperty == "" || metaType == MetaTypes.UNIMPLEMENTED)
+            if (potencyProperty == "" || metaType == MetaType.UNIMPLEMENTED)
             {
                 throw new ArgumentException("Malformed JSON included in ability id: " + abilityJson["id"] + " - " + abilityJson["name"]);
             }
 
             //Construct Tooltip and set damage values for ability
-            if (metaType == MetaTypes.DAMAGE || metaType == MetaTypes.HEALING)
+            if (metaType == MetaType.DAMAGE || metaType == MetaType.HEALING)
             {
                 int abilityMin = abilityJson[potencyProperty][skillLevel][0].AsInt;
                 int abilityMax = abilityJson[potencyProperty][skillLevel][1].AsInt;
@@ -448,7 +448,7 @@ namespace Assets.Scripts.Entities.Abilities
                 abilityStrength.max = abilityMax;
 
             }
-            else if (metaType == MetaTypes.EFFECT)
+            else if (metaType == MetaType.EFFECT)
             {
                 int potency = abilityJson[potencyProperty][skillLevel].AsInt;
                 abilityStrength.min = abilityJson["turns_applied"][skillLevel];

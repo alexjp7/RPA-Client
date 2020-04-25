@@ -19,20 +19,27 @@ namespace Assets.Scripts.RPA_Messages
     public abstract class Message
     {
         //Comment Message fields
-        public int state_id;
-        public int game_id;
-        public int client_id;
+        public int stateId;
+        public int gameId;
+        public int clientId;
         public string message;
         protected Player actor;
+
 
         /***************************************************************
         * The States enum is used to indicate what game state is currently
           being operated on and is shared between client and server.
         **************************************************************/
-        public enum States: int
+        public enum State: int
         {
             CONNECTION = 0,
-            CHARACTER_CREATION = 1
+            CHARACTER_CREATION = 1,
+            BATTLE = 2
+        }
+
+        public static void send(Message gameMessage)
+        {
+            Game.gameClient.send(gameMessage.message);
         }
 
         /***************************************************************
@@ -41,11 +48,11 @@ namespace Assets.Scripts.RPA_Messages
         **************************************************************/
         public Message()
         {
-            actor = Game.players[0] == null ? null : Game.players[0] ;
-            this.game_id = Game.gameId;
-            this.state_id = -1;
+            actor = Game.clientSidePlayer == null ? null : Game.clientSidePlayer;
+            this.gameId = Game.gameId;
+            this.stateId = -1;
             this.message = "";
-            this.client_id = actor == null ? -1 : actor.id;
+            this.clientId = actor == null ? -1 : actor.id;
         }
 
         /***************************************************************
@@ -69,8 +76,8 @@ namespace Assets.Scripts.RPA_Messages
         protected virtual void deserialize(string jsonString)
         {
             JSONNode json = JSON.Parse(jsonString);
-            this.state_id = json["state_id"].AsInt;
-            this.game_id = json["game_id"].AsInt;
+            this.stateId = json["state_id"].AsInt;
+            this.gameId = json["game_id"].AsInt;
 
         }
 

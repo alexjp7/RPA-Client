@@ -12,7 +12,9 @@ using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
+using Assets.Scripts.RPA_Messages;
 using Assets.Scripts.Util;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -261,28 +263,31 @@ namespace Assets.Scripts.UI
                     return;
             }
 
+            //Set to allow server/client distribution of what ability was used
+            turnController.lastAbilityUsed = abilityUsed;
+
             //Process Ability application to target/s
             foreach (var target in turnController.targets)
             {
                 foreach (int abilityType in abilityUsed.typeIds)
                 {
-                    MetaTypes metaType = AbilityFactory.getMetaType(abilityType);
+                    MetaType metaType = AbilityFactory.getMetaType(abilityType);
                     if (target.combatSprite.isMonster)
                     {
-                        if (metaType == MetaTypes.DAMAGE)
+                        if (metaType == MetaType.DAMAGE)
                         {
                             StateManager.battleState.attackTarget(target, turnController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
                     else
                     {
-                        if (metaType == MetaTypes.HEALING)
+                        if (metaType == MetaType.HEALING)
                         {
                             StateManager.battleState.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
 
-                    if (metaType == MetaTypes.EFFECT)
+                    if (metaType == MetaType.EFFECT)
                     {
                         StateManager.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
                         StateManager.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
@@ -295,8 +300,26 @@ namespace Assets.Scripts.UI
             abilityUsed.cooldownTracker++;
             StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);
-            turnController.resetTargets();
-            turnController.takeTurn();
+
+            if(!Game.isSinglePlayer)
+            {
+                //Send action performed to server, along with turn progression message
+                Task.Run(() =>
+                {
+                    Message.send(new BattleMessage(BattleInstruction.TURN_ACTION));
+                    Message.send(new BattleMessage(BattleInstruction.TURN_PROGRESSED));
+                    turnController.resetTargets();
+                    turnController.takeTurn();
+                });
+
+            }
+            else
+            {
+                turnController.resetTargets();
+                turnController.takeTurn();
+            }
+            //Perform turn progression client side
+
         }
 
         void Update()

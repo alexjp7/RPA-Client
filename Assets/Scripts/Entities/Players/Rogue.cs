@@ -29,7 +29,7 @@ namespace Assets.Scripts.Entities.Players
         public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }
 
-        public Rogue(string name) : base(name)
+        public Rogue(string name, int id) : base(name, id)
         {
             this.setId(PlayerClasses.ROGUE);
 

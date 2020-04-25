@@ -7,6 +7,7 @@
 **************************************************************/
 
 using Assets.Scripts.Entities.Components;
+using SimpleJSON;
 using System;
 
 namespace Assets.Scripts.Entities.Abilities
@@ -152,6 +153,35 @@ namespace Assets.Scripts.Entities.Abilities
         {
             lastTurnUsed = turn;
             if(turn != -1) updateCooldown();
+        }
+
+
+        public JSONObject toJson()
+        {
+            JSONObject json = new JSONObject();
+            JSONArray typeIdJson = new JSONArray();
+            JSONArray abilityStrenghJson = new JSONArray();
+            JSONArray conditionStrengthJson = new JSONArray();
+
+            foreach(var type in typeIds)
+            {
+                typeIdJson.Add(type);
+            }
+
+            abilityStrenghJson.Add(abilityStrength.min);
+            abilityStrenghJson.Add(abilityStrength.max);
+
+            conditionStrengthJson.Add(conditionStrength.potency);
+            conditionStrengthJson.Add(conditionStrength.turnsApplied);
+
+            json.Add("name", name);
+            json.Add("type_ids", typeIdJson);
+            json.Add("status_effet", statusEffect);
+            json.Add("ability_strength", abilityStrenghJson);
+            json.Add("condition_strength", conditionStrengthJson);
+            json.Add("targeting_type", (int) targetingType);
+
+            return json;
         }
         public override string ToString()
         {

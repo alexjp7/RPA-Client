@@ -68,6 +68,7 @@ namespace Assets.Scripts.RPA_Game
         **************************************************************/
         public static bool start(string playerName, bool _isNewGame, int _gameId)
         {
+            isSinglePlayer = false; 
             partyLeaderId = -1;
             isStarted = false;
             isNewGame = _isNewGame;
@@ -82,13 +83,17 @@ namespace Assets.Scripts.RPA_Game
         **************************************************************/
         public static void startOffline(string playerName)
         {
+            isSinglePlayer = true;
             players = new List<Player>();
             Player player = new Player();
             player.name = playerName;
-            players.Add(player);
+            player.id = 1;
             partyLeaderId = player.id; 
+            player.isClientPlayer = true; 
+           
             connectedPlayers = 1;
-            players[0].isClientPlayer = true; 
+            players.Add(player);
+
         }
 
 
@@ -113,13 +118,14 @@ namespace Assets.Scripts.RPA_Game
                 players.Add(new Player());
 
             players[0].isClientPlayer = true; // flag  the player at start of player list as the client side player
-            ConnectionMessage connectionMessage = new ConnectionMessage(playerName, (int) ConnectionMessage.ConnectionMessageType.OUTBOUND);
+
             gameClient.connect();
 
             //Wait for return message of game creation/joining
             if(gameClient.isConnected())
             {
-                gameClient.send(connectionMessage.getMessage());
+
+                Message.send(new ConnectionMessage(playerName, ConnectionMessageType.OUTBOUND));
                 Task<int> recieveGameId = waitForGameData(playerName);
                 gameId = await recieveGameId;
 
@@ -162,8 +168,8 @@ namespace Assets.Scripts.RPA_Game
 
                     else if (serverMessage != "a")
                     {  
-                        ConnectionMessage message = new ConnectionMessage(serverMessage, (int)ConnectionMessage.ConnectionMessageType.INBOUND);
-                        result = message.game_id;
+                        ConnectionMessage message = new ConnectionMessage(serverMessage, ConnectionMessageType.INBOUND);
+                        result = message.gameId;
                         hasGameId = true;
                     }
                 } 
@@ -188,6 +194,16 @@ namespace Assets.Scripts.RPA_Game
         {
             players[connectedPlayers].name = name;
             players[connectedPlayers].id = id;
+            connectedPlayers++;
+        }
+
+        //@Test 
+        public static void addPlayer(string name, PlayerClasses adventuringClass)
+        {
+            players[connectedPlayers].name = name;
+            players[connectedPlayers].id = connectedPlayers + 1;
+            players[connectedPlayers].adventuringClass = (int)adventuringClass;
+            players[connectedPlayers].ready = true;
             connectedPlayers++;
         }
 

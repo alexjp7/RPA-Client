@@ -17,31 +17,33 @@ using UnityEngine;
 
 namespace Assets.Scripts.RPA_Messages
 {
+    public enum ConnectionMessageType
+    {
+        OUTBOUND = 0,
+        INBOUND = 1
+    }
+
     class ConnectionMessage : Message
     {
         public string name;
 
-        public enum ConnectionMessageType
-        {
-            OUTBOUND = 0,
-            INBOUND = 1
-        }
+
 
         /***************************************************************
         * On Message consturction, based on the paramater/s used in construciton
           the object will be constructed to be used for seriazation or
           deserialization.
         **************************************************************/
-        public ConnectionMessage(string token, int instructionType) : base()
+        public ConnectionMessage(string token, ConnectionMessageType instructionType) : base()
         {
-            this.state_id = (int)States.CONNECTION;
-            if (instructionType == (int)ConnectionMessageType.INBOUND)
+            this.stateId = (int)State.CONNECTION;
+            if (instructionType == ConnectionMessageType.INBOUND)
             {
                 this.deserialize(token);
             }
-            else if (instructionType == (int)ConnectionMessageType.OUTBOUND)
+            else if (instructionType == ConnectionMessageType.OUTBOUND)
             {
-                this.client_id = -1;
+                this.clientId = -1;
                 this.name = token;
                 serialize();
             }
@@ -55,10 +57,10 @@ namespace Assets.Scripts.RPA_Messages
         protected override void serialize()
         {
             JSONObject json = new JSONObject();
-            json.Add("state_id", this.state_id);
-            json.Add("game_id", this.game_id);
+            json.Add("state_id", this.stateId);
+            json.Add("game_id", this.gameId);
             json.Add("name", this.name);
-            json.Add("client_id", this.client_id);
+            json.Add("client_id", this.clientId);
             this.message = json.ToString();
         }
 
@@ -85,7 +87,6 @@ namespace Assets.Scripts.RPA_Messages
                 if (playerJson[i]["isPartyLeader"].AsBool)
                 {
                     Game.partyLeaderId = id;
-                    Debug.Log(name + " is party leader");
                 }
                 Game.addPlayer(id, name, adventuringClass, isReady);
             }

@@ -59,7 +59,6 @@ public class CharacterCreator : MonoBehaviour
     {
         if(TestSimulator.isDeveloping)
             TestSimulator.initTestEnvironment(GameState.CHARACTER_CREATION);
-
         AssetLoader.loadStaticAssets(GameState.CHARACTER_CREATION);
         partyPanels = new List<PartyPanel>();
         initClassData();
@@ -104,6 +103,7 @@ public class CharacterCreator : MonoBehaviour
         playerNameField.text = Game.players[0].name;
         gameIdText.text = Game.gameId.ToString();
         playerCountText.text = (Game.connectedPlayers).ToString();
+
         if (Game.players[0].ready)
         {
             readyText.text = "Cancel Ready";
@@ -118,7 +118,7 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void generatePlayerPanels()
     {
-            foreach(Player player in Game.players)
+        foreach(Player player in Game.players)
         {
             if(player.id > -1)
             {
@@ -128,95 +128,6 @@ public class CharacterCreator : MonoBehaviour
             }
         }
     }
-
-    /***************************************************************
-    * Adds new player UI to the game
-    **************************************************************/
-    private void addPlayerToUI(in Player player)
-    {
-        PartyPanel currentPlayer = PartyPanel.create(player);
-        currentPlayer.transform.SetParent(party_vertical_layout.transform);
-        partyPanels.Add(currentPlayer);
-    }
-
-    /***************************************************************
-    * Adds new player UI to the game
-    **************************************************************/
-    private void removePlayerFromUi(int playerIndex)
-    {
-        Destroy( partyPanels[playerIndex].gameObject);
-        partyPanels.RemoveAt(playerIndex);
-    }
-
-    /*---------------------------------------------------------------
-                        SERVER-HANDLERS
-    ---------------------------------------------------------------*/
-    /***************************************************************
-    * Continually polls the TCP Client instance to check for 
-      server communication, and passes any valid communication
-      to processor functions.
-    **************************************************************/
-    private void Update()
-    {
-        if(!Game.isSinglePlayer)
-        {
-            if (Game.gameClient.ready())
-            {
-                processServerInstructions(Game.gameClient.read());
-            }
-        }
-
-        startButton.interactable = PartyPanel.hasAllReady && Game.clientSidePlayer.isPartyLeader;
-    }
-
-    /***************************************************************
-    * Processes the packet sent from server to determine what
-      client side event to trigger.
-    
-    @param: instructions: The JSON string of any player-party
-    driven changes, or 'a' as an alive check.
-    **************************************************************/
-    private void processServerInstructions(string instructions)
-    {
-        if (instructions == "" || instructions[0] == 'a') { return; }
-        CharacterCreationMessage message = new CharacterCreationMessage(instructions);
-        Player player = message.instructionType == 2 || message.instructionType == 3 ? Game.players[Game.connectedPlayers - 1]: null;
-        Debug.Log(instructions);
-        Debug.Log(((CreationInstruction)message.instructionType).ToString());
-        switch ((CreationInstruction)message.instructionType)
-        {
-            case CreationInstruction.CONNECTION:
-                Game.addPlayer(message.playerName, message.client_id);
-                playerCountText.text = (Game.connectedPlayers).ToString();
-                addPlayerToUI( Game.players[Game.connectedPlayers - 1] );
-                break;
-
-            case CreationInstruction.DISCONNECTION:
-                removePlayerFromUi(Game.getPlayerIndex(message.client_id));
-                Game.removePlayer(message.client_id);
-                playerCountText.text = (Game.connectedPlayers).ToString();
-                break;
-
-            case CreationInstruction.CLASS_CHANGE:
-                player.adventuringClass = message.adventuringClass;
-                selectClass(player.adventuringClass, message.playerIndex);
-                break;
-
-            case CreationInstruction.READY_UP:
-                player.ready = message.playerReadyStatus;
-                renderReadyState(message.playerIndex);
-                break;
-
-            case CreationInstruction.GAME_START:
-                Debug.Log("Game starting");
-                startClicked();
-                break;
-
-            default:
-                break;
-        }
-    }
-
 
     /*---------------------------------------------------------------
                         CLIENT EVENT-HANDLERS
@@ -229,6 +140,7 @@ public class CharacterCreator : MonoBehaviour
     public void mainMenuClicked()
     {
         Game.gameClient.dissconnect();
+        StateManager.changeScene(GameState.MAIN_MENU);
     }
 
     /***************************************************************
@@ -237,15 +149,13 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void readyClicked()
     {
-        Debug.Log("Is Party Leader: " + Game.clientSidePlayer.isPartyLeader);
         Game.players[0].ready = !Game.players[0].ready;
         if(Game.players[0].ready) readyText.text = "Cancel Ready";
         else readyText.text = " Ready Up!";
 
         renderReadyState(0);
         //Send server ready change
-        CharacterCreationMessage readyChange = new CharacterCreationMessage((int)CreationInstruction.READY_UP);
-        Game.gameClient.send(readyChange.getMessage());
+        Message.send(new CharacterCreationMessage(CreationInstruction.READY_UP));
     }
 
 
@@ -266,8 +176,8 @@ public class CharacterCreator : MonoBehaviour
 
         classDescription.text = classDescriptions[classChosen];
         classChoice.text = classNames[classChosen];
-        CharacterCreationMessage classChange = new CharacterCreationMessage((int)CreationInstruction.CLASS_CHANGE);
-        Game.gameClient.send(classChange.getMessage());
+
+        Message.send(new CharacterCreationMessage(CreationInstruction.CLASS_CHANGE));
     }
 
     private void renderReadyState(int playerIndex)
@@ -305,14 +215,14 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void startClicked()
     {
-        if(Game.clientSidePlayer.isPartyLeader)
-        {
-            CharacterCreationMessage message = new CharacterCreationMessage((int)CreationInstruction.GAME_START);
-            Game.gameClient.send(message.getMessage());
-        }
 
         if(!Game.isSinglePlayer)
         {
+            if (Game.clientSidePlayer.isPartyLeader)
+            {
+                Message.send(new CharacterCreationMessage(CreationInstruction.GAME_START));
+            }
+
             int connectedPlayers = Game.connectedPlayers;
 
             if (connectedPlayers != Game.PARTY_LIMIT)
@@ -326,4 +236,91 @@ public class CharacterCreator : MonoBehaviour
 
         StateManager.changeScene(GameState.BATTLE_STATE);
     }
+
+    /***************************************************************
+    * Adds new player UI to the game
+    **************************************************************/
+    private void addPlayerToUI(in Player player)
+    {
+        PartyPanel currentPlayer = PartyPanel.create(player);
+        currentPlayer.transform.SetParent(party_vertical_layout.transform);
+        partyPanels.Add(currentPlayer);
+    }
+
+    /***************************************************************
+    * Adds new player UI to the game
+    **************************************************************/
+    private void removePlayerFromUi(int playerIndex)
+    {
+        Destroy(partyPanels[playerIndex].gameObject);
+        partyPanels.RemoveAt(playerIndex);
+    }
+
+    /*---------------------------------------------------------------
+                        SERVER-HANDLERS
+    ---------------------------------------------------------------*/
+    /***************************************************************
+    * Continually polls the TCP Client instance to check for 
+      server communication, and passes any valid communication
+      to processor functions.
+    **************************************************************/
+    private void Update()
+    {
+        if (!Game.isSinglePlayer)
+        {
+            if (Game.gameClient.ready())
+            {
+                processServerInstructions(Game.gameClient.read());
+            }
+        }
+
+        startButton.interactable = Player.hasAllReady && Game.clientSidePlayer.isPartyLeader;
+    }
+
+    /***************************************************************
+    * Processes the packet sent from server to determine what
+      client side event to trigger.
+    
+    @param: instructions: The JSON string of any player-party
+    driven changes, or 'a' as an alive check.
+    **************************************************************/
+    private void processServerInstructions(string instructions)
+    {
+        if (instructions == "" || instructions[0] == 'a') { return; }
+        CharacterCreationMessage message = new CharacterCreationMessage(instructions);
+        Player player = message.instructionType == 2 || message.instructionType == 3 ? Game.players[Game.connectedPlayers - 1] : null;
+        switch ((CreationInstruction)message.instructionType)
+        {
+            case CreationInstruction.CONNECTION:
+                Game.addPlayer(message.playerName, message.clientId);
+                playerCountText.text = (Game.connectedPlayers).ToString();
+                addPlayerToUI(Game.players[Game.connectedPlayers - 1]);
+                break;
+
+            case CreationInstruction.DISCONNECTION:
+                removePlayerFromUi(Game.getPlayerIndex(message.clientId));
+                Game.removePlayer(message.clientId);
+                playerCountText.text = (Game.connectedPlayers).ToString();
+                break;
+
+            case CreationInstruction.CLASS_CHANGE:
+                player.adventuringClass = message.adventuringClass;
+                selectClass(player.adventuringClass, message.playerIndex);
+                break;
+
+            case CreationInstruction.READY_UP:
+                player.ready = message.playerReadyStatus;
+                renderReadyState(message.playerIndex);
+                break;
+
+            case CreationInstruction.GAME_START:
+                startClicked();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+
 }

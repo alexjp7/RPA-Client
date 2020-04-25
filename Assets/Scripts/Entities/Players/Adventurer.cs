@@ -45,12 +45,18 @@ namespace Assets.Scripts.Entities.Players
         /***************************************************************
         @param - name: sets the Combatable base object's name field.
         **************************************************************/
-        public Adventurer(string _name)
+        public Adventurer(string _name, int id)
         {
+            this.id = id;
             assetPath += PLAYER_SPRITE_PATH;
             name = _name;
             type = CombatantType.PLAYER;
             abilities = new List<Ability>();
+        }
+
+        public Adventurer(string name)
+        {
+            this.name = name;
         }
 
         /***************************************************************

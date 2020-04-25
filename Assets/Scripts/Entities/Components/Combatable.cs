@@ -29,7 +29,8 @@ namespace Assets.Scripts.Entities.Components
     {
         private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
 
-        public string name { get; protected set;}
+        public int id { get; set; }
+        public string name { get; set;}
         public CombatantType type { get; protected set;}
         protected string assetPath { get; set; }
 

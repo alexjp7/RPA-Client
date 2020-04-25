@@ -39,8 +39,8 @@ public class MainMenu : MonoBehaviour
         {
             if(isSinglePlayer.isOn)
             {
-                Game.isSinglePlayer = true;
-                Game.startOffline(name1.text);  
+                Game.startOffline(name1.text);
+                StateManager.changeScene(GameState.CHARACTER_CREATION);
             }
             else
             {
@@ -69,7 +69,7 @@ public class MainMenu : MonoBehaviour
         {
             if(Game.start(name2.text, Game.JOINED_GAME, Int32.Parse(gameIdField.text)))
             {
-                SceneManager.LoadScene(1);
+                StateManager.changeScene(GameState.CHARACTER_CREATION);
             }
             else
             {

@@ -33,7 +33,7 @@ namespace Assets.Scripts.Entities.Players
         public static Renderable staticAssets { get; set; }
         public static string abilityPath { get; set; }
             
-        public Wizard(string name) : base(name)
+        public Wizard(string name, int id) : base(name, id)
         {
             this.setId(PlayerClasses.WIZARD);
         }

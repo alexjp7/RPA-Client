@@ -56,6 +56,9 @@ namespace Assets.Scripts.Entities.Monsters
 
     public abstract class Monster : Combatable
     {
+        //Used to send to other clients to communicate targeting information
+        public static int monsterCount = 0;
+
         /***************************************************************
         * During construction, all monsters names and abilities
           are initialised, first through setting the name to the randonly
@@ -68,16 +71,9 @@ namespace Assets.Scripts.Entities.Monsters
         **************************************************************/
         public Monster()
         {
+            id = monsterCount++;
             assetPath += "monster_textures/";
             name = getNamePrefix();
-            abilities = new List<Ability>();
-            healthProperties = new Damageable();
-            type = CombatantType.MONSTER;
-        }
-
-        public Monster(string name)
-        {
-            assetPath += "monster_textures/";
             abilities = new List<Ability>();
             healthProperties = new Damageable();
             type = CombatantType.MONSTER;
@@ -168,7 +164,7 @@ namespace Assets.Scripts.Entities.Monsters
 
             //Ability Processing
             //MetaType = Damage, Healing, Effect
-            MetaTypes metaType = AbilityFactory.getMetaType(abilityUsed.typeIds[0]);
+            MetaType metaType = AbilityFactory.getMetaType(abilityUsed.typeIds[0]);
             AbilityTypes abilityType = (AbilityTypes)abilityUsed.typeIds[0];
 
             switch (abilityType)
