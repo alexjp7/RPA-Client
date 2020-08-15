@@ -52,16 +52,10 @@ public class BattleState : MonoBehaviour
     void Awake()
     {
         initEnvironment(); // Updates static references
-        if (clientPlayer.isPartyLeader)
-        {
-            initControllers(); // Constructs turn controller - party leader sends to server 
-            initBattleField(); // UI initialisation
-        }
-        else
-        {
-            initControllers();
-        }
+        initControllers(); // Constructs turn controller - party leader sends to server 
+        initCombat(); // Sends/Requests combat data to other clients     
     }
+
 
     /**************************************************************
     * Sets this script as the current active state script, 
@@ -83,34 +77,45 @@ public class BattleState : MonoBehaviour
     * Initialises controller responsible for delegating and enforcing
       the turn based logic for combat rounds.
     **************************************************************/
-    private async void initControllers()
+    private void initControllers()
     {
+        //Combat-wide controllers....
         turnController = new TurnController();
+    }
 
-            //Party leader combat initialisation
+    private async Task initCombat()
+    {
+        if (Game.isSinglePlayer)
+        {
+            initBattleField(); // UI initialisation
+        }
+        else //Handle Multiplayer session communication
+        {
             if (clientPlayer.isPartyLeader)
             {
                 turnController.initTurnOrder();
                 turnController.initMonsterParty(4);
-                if (!Game.isSinglePlayer)
-                {
-                //Send combat order and monster party to server
-                    BattleMessage initCombatMessage = new BattleMessage(BattleInstruction.COMBAT_INIT);
-                    Game.gameClient.send(initCombatMessage.message);
-                }
+                await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)) );
+                initBattleField();
             }
             else
             {
-                //Wait for party leader to send combat oder/monster party data
-                BattleMessage message = await Task.Run( () => waitForCombatInitialisation());
-
-                turnController.initTurnOrder(message.turnOrder);
-                turnController.initMonsterParty(message.monsters);
+                await requestBattleData();
                 initBattleField();
             }
+        }
     }
 
-    private BattleMessage waitForCombatInitialisation()
+    private async Task requestBattleData()
+    {
+        //Wait for party leader to send combat oder/monster party data
+        BattleMessage message = await Task.Run(() => awaitCombatInit());
+        
+        turnController.initTurnOrder(message.turnOrder);
+        turnController.initMonsterParty(message.monsters);
+    }
+
+    private BattleMessage awaitCombatInit()
     {
         bool hasData = false;
         BattleMessage battleMessage = null;
@@ -141,6 +146,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initBattleField()
     {
+        Debug.Log("in initBattleField()");
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
         initPlayerUI();
@@ -503,7 +509,13 @@ public class BattleState : MonoBehaviour
 
     private void processServerInstructions(string instructions)
     {
-        if (instructions == "" || instructions[0] == 'a') { return; }
+        //Ignore non-valid or server keep-alive token
+        if (string.IsNullOrEmpty(instructions) || instructions[0] == Client.SERVER_ALIVE_TOKEN)
+        {
+            return;
+        }
+
+        //Begin processing
         BattleMessage message = new BattleMessage(instructions);
 
         switch ((BattleInstruction)message.instructionType)

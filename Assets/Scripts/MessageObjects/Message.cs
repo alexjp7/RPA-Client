@@ -18,10 +18,13 @@ namespace Assets.Scripts.RPA_Messages
 {
     public abstract class Message
     {
-        //Comment Message fields
-        public int stateId;
+        //Game ID
         public int gameId;
+        //Game state ID
+        public int stateId;
+        //Client who is sending/recieving a message
         public int clientId;
+        //JSON message
         public string message;
         protected Player actor;
 

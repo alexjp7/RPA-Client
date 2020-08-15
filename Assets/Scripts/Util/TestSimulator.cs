@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
                 TEST-SIMULATOR(Debug/Development Only)
  ---------------------------------------------------------------*/
-#define REQUIRE_TEST_DATA //Uncomment to generate test data
+//#define REQUIRE_TEST_DATA //Uncomment to generate test data
 
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;

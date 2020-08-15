@@ -23,6 +23,8 @@ namespace Assets.Scripts.RPA_Game
         //Singleton instance
         public static Client INSTANCE;
 
+        public static readonly char SERVER_ALIVE_TOKEN = 'a';
+
         private TcpClient client;
         private NetworkStream stream;
         private StreamReader reader;

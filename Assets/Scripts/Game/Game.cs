@@ -28,6 +28,7 @@ namespace Assets.Scripts.RPA_Game
         public static readonly bool NEW_GAME = true;
         public static readonly bool JOINED_GAME = false;
         public static readonly int PARTY_LIMIT = 4;
+        public static readonly int NEW_GAME_ID = -1;
 
         //Game Properties
         public static int partyLeaderId { get; set; }
@@ -107,8 +108,7 @@ namespace Assets.Scripts.RPA_Game
         @param - playerName: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
         **************************************************************/
-
-        private async static void init(string playerName)
+         private async static void init(string playerName)
         {
             connectedPlayers = 0;
             players = new List<Player>();
@@ -260,6 +260,20 @@ namespace Assets.Scripts.RPA_Game
         {
             int playerRemoving = getPlayerIndex(playerId);
             resize(playerRemoving);
+            connectedPlayers--;
+        }
+
+        /***************************************************************
+           * Removes the player from the player list based on the player
+             index passed in. This function is called when the server notifies
+             when a player has dissconnected from the game session.
+           * 
+           @param - playerIndex: position of player being removed in
+           players array.       
+        **************************************************************/
+        public static void removePlayerByIndex(int playerIndex)
+        {
+            resize(playerIndex);
             connectedPlayers--;
         }
 

@@ -44,7 +44,7 @@ public class MainMenu : MonoBehaviour
             }
             else
             {
-                if (Game.start(name1.text, Game.NEW_GAME, -1) )
+                if (Game.start(name1.text, Game.NEW_GAME, Game.NEW_GAME_ID) )
                 {
                     StateManager.changeScene(GameState.CHARACTER_CREATION);
                 }
@@ -67,7 +67,15 @@ public class MainMenu : MonoBehaviour
     {
         if (!name2.text.Equals("") && !gameIdField.Equals("") )
         {
-            if(Game.start(name2.text, Game.JOINED_GAME, Int32.Parse(gameIdField.text)))
+            int gameIdEntered = -1;
+            if (!Int32.TryParse(gameIdField.text, out gameIdEntered))
+            {
+                notificationMessage.text = "Game ID must be a number.";
+                togglePanel(notificationPanel);
+                return;
+            }
+
+            if (Game.start(name2.text, Game.JOINED_GAME, gameIdEntered))
             {
                 StateManager.changeScene(GameState.CHARACTER_CREATION);
             }
@@ -78,6 +86,11 @@ public class MainMenu : MonoBehaviour
                 togglePanel(notificationPanel);
             }
         }
+        else
+        {
+            notificationMessage.text = "Please enter a name and Game ID.";
+            togglePanel(notificationPanel);
+        }
     }
 
     /***************************************************************
@@ -86,7 +99,7 @@ public class MainMenu : MonoBehaviour
     @param - panel: The Unity game object that represents the
     new game OR join game panels.
     **************************************************************/
-    public void togglePanel(GameObject panel)
+    private void togglePanel(GameObject panel)
     {
         if (panel != null)
             panel.SetActive(!panel.activeSelf);
@@ -95,7 +108,7 @@ public class MainMenu : MonoBehaviour
     /***************************************************************
     * Exits the application.
     **************************************************************/
-    public void exitClicked()
+    private void exitClicked()
     {
         Application.Quit();
     }
