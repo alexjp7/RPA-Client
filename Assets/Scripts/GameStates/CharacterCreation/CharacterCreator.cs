@@ -58,7 +58,10 @@ public class CharacterCreator : MonoBehaviour
     void Awake()
     {
         if(TestSimulator.isDeveloping)
+        {
             TestSimulator.initTestEnvironment(GameState.CHARACTER_CREATION);
+        }
+
         AssetLoader.loadStaticAssets(GameState.CHARACTER_CREATION);
         partyPanels = new List<PartyPanel>();
         initClassData();
@@ -109,8 +112,10 @@ public class CharacterCreator : MonoBehaviour
             readyText.text = "Cancel Ready";
             readyButton.interactable = true;
         }
-        else readyText.text = " Ready Up!";
-
+        else
+        {
+            readyText.text = " Ready Up!";
+        }
     }
 
     /***************************************************************
@@ -260,7 +265,7 @@ public class CharacterCreator : MonoBehaviour
                         SERVER-HANDLERS
     ---------------------------------------------------------------*/
     /***************************************************************
-    * Continually polls the TCP Client instance to check for 
+    * Continually polls the TCP NetworkClient instance to check for 
       server communication, and passes any valid communication
       to processor functions.
     **************************************************************/

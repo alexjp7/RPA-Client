@@ -91,7 +91,10 @@ namespace Assets.Scripts.Entities.Monsters
             for (int i = 0; i < amount; i++)
             {
                 Monster monster = getMonster();
-                if(monster != null) monsterParty.Add(monster);
+                if (monster != null)
+                {
+                    monsterParty.Add(monster);
+                }
             }
 
             return monsterParty;

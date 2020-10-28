@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------
                 TEST-SIMULATOR(Debug/Development Only)
  ---------------------------------------------------------------*/
-//#define REQUIRE_TEST_DATA //Uncomment to generate test data
+#define REQUIRE_TEST_DATA //Uncomment to generate test data
 
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
-using SimpleJSON;
+using SimpleJSON;   
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -94,11 +94,12 @@ namespace Assets.Scripts.Util
             }
 
             //@Test Data
-            Game.addPlayer("Alexjp", PlayerClasses.WIZARD);
+            Game.addPlayer("Alexjp", PlayerClasses.ROGUE);
+          /*
             Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
             Game.addPlayer("Kozza", PlayerClasses.WARRIOR);
             Game.addPlayer("Wizzledonker", PlayerClasses.CLERIC);
-
+        */
             Game.partyLeaderId = Game.players[0].id;
             foreach (Player player in Game.players) player.applyClass();
             Game.players[0].isClientPlayer = true;

@@ -2,7 +2,7 @@
                         CONDITION
  ---------------------------------------------------------------*/
 /***************************************************************
-* Container for storing applied effects on a Combatable, including
+* Container for storing applied effects on a Combatant, including
   how long it lasts for (in turns) and how strong is the effect is.
 ***************************************************************/
 
