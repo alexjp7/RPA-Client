@@ -151,6 +151,7 @@ namespace Assets.Scripts.Entities.Players
                 case PlayerClasses.CLERIC:
                     playerClass = new Cleric(name, id);
                     break;
+
                 default:
                     throw new NotImplementedException("ERROR - Either; Adventuring Class is not implemented or an unexpected class ID was encountered during player.applyClass()");
             }

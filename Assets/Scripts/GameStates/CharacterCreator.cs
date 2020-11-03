@@ -22,7 +22,6 @@ using Assets.Scripts.UI.CharacterCreation;
 using SimpleJSON;
 using Assets.Scripts.Util;
 using System.Collections.Generic;
-using System;
 #endregion IMPORTS
 
 
@@ -226,7 +225,9 @@ public class CharacterCreator : MonoBehaviour
             int connectedPlayers = Game.connectedPlayers;
 
             if (connectedPlayers != Game.PARTY_LIMIT)
+            {
                 Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
+            }
         }
 
         foreach (Player player in Game.players)
@@ -315,9 +316,6 @@ public class CharacterCreator : MonoBehaviour
 
             case CreationInstruction.GAME_START:
                 startClicked();
-                break;
-
-            default:
                 break;
         }
     }

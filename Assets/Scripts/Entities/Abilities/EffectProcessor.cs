@@ -13,6 +13,9 @@ using System;
 
 namespace Assets.Scripts.Entities.Abilities
 {
+    /// <summary>
+    /// Status effect types
+    /// </summary>
     public enum StatusEffect
     {
         //One-Time Use
@@ -53,20 +56,18 @@ namespace Assets.Scripts.Entities.Abilities
             StatusEffect.SLEEP
         };
 
-        /***************************************************************
-        * Primary implementation for status effects. Either adds
-          the effect to the conditions list of a Combatable or directly
-          applies the effect to a target/state of the combat.
-         
-        @param - target: The target who the effect is being applied to
-        @paran - effectId: Numeric identifier for the status effect 
-        that an abilility applies.
-        @potency - strength of the effect (optional)
-        @turnsApplied - The duration of the effect.
-        ***************************************************************/
-        public void applyEffect(in Combatable target, int effectId, int potency, int turnsApplied)
-       {
-            switch((StatusEffect)effectId)
+
+        /// <summary>
+        /// Primary implementation for status effects. Either adds the effect to the conditions list of a Combatant or directly applies the effect to a target/state of the combat.     
+        /// 
+        /// </summary>
+        /// <param name="target"> The combatant whom will recieve the effect.</param>
+        /// <param name="effectId"> The status effect ID that will be applied to the target </param>
+        /// <param name="potency">  strength of the effect (optional)</param>
+        /// <param name="turnsApplied"> The duration of the effect.</param>
+        public void applyEffect(in Combatant target, int effectId, int potency, int turnsApplied)
+        {
+            switch ((StatusEffect)effectId)
             {
                 /******IMEDIATE EFFECT*******/
                 case StatusEffect.COOLDOWN_CHANGE:
@@ -99,7 +100,7 @@ namespace Assets.Scripts.Entities.Abilities
                     if (target.conditions.ContainsKey(effectId))
                     {
                         //Only apply the longer duration
-                        if(turnsApplied > target.conditions[effectId].turnsRemaining)
+                        if (turnsApplied > target.conditions[effectId].turnsRemaining)
                         {
                             target.conditions[effectId].turnsRemaining = turnsApplied;
                         }
@@ -144,22 +145,22 @@ namespace Assets.Scripts.Entities.Abilities
         @potency - strength of the effect (optional)
         @turnsApplied - The duration of the effect.
         ***************************************************************/
-        private void applyDamageModifer(in Combatable target, int effectId ,int potency, int turnsApplied)
+        private void applyDamageModifer(in Combatant target, int effectId, int potency, int turnsApplied)
         {
             bool isExtending = false;
 
-            if(effectId == (int) StatusEffect.DAMAGE_TAKEN_UP)
+            if (effectId == (int)StatusEffect.DAMAGE_TAKEN_UP)
             {
-                if (isExtending = target.conditions.ContainsKey(effectId) )
+                if (isExtending = target.conditions.ContainsKey(effectId))
                 {
                     target.conditions[effectId].extendEffect(turnsApplied);
                     if (potency > target.conditions[effectId].potency)
                     {
-                        target.conditions[effectId].potency = potency; 
+                        target.conditions[effectId].potency = potency;
                     }
                 }
             }
-            else if (effectId == (int) StatusEffect.DAMAGE_TAKEN_DOWN)
+            else if (effectId == (int)StatusEffect.DAMAGE_TAKEN_DOWN)
             {
                 if (isExtending = target.conditions.ContainsKey(effectId))
                 {
@@ -171,21 +172,18 @@ namespace Assets.Scripts.Entities.Abilities
                 }
             }
 
-            if(!isExtending)
+            if (!isExtending)
             {
                 target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
             }
         }
 
-
-
-        /***************************************************************
-        * Called when applying a status effect and the UI is required to
-         display the labal/description of what an effect does.
-         
-        @paran - effectId: Numeric identifier for the status effect 
-        that an abilility applies.
-        ***************************************************************/
+        /// <summary>
+        /// Called when applying a status effect and the UI is required to  display the labal/description of what an effect does.
+        /// </summary>
+        /// <param name="effectId"> Numeric identifier for the status effect that an abilility applies.</param>
+        /// <param name="potency"> The strength of the effect </param>
+        /// <returns></returns>
         public static string getEffectLabel(int effectId, int potency)
         {
             string value = "";

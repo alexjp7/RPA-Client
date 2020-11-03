@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
+
 namespace Assets.Scripts.RPA_Game
 {
     public sealed class Client 
@@ -45,12 +46,10 @@ namespace Assets.Scripts.RPA_Game
             return INSTANCE;
         }
 
-        /***************************************************************
-        * Attempts to connect to the remote address and instanciates
-          a streamreader object used for reading packets sent from the
-          server.
-        **************************************************************/
-        public  void connect()  
+        /// <summary>
+        /// Attempts to connect to the remote address and instanciates a streamreader object used for reading packets sent from the server
+        /// </summary>
+        public void connect()  
         {
             try
             {
@@ -61,19 +60,22 @@ namespace Assets.Scripts.RPA_Game
             }
             catch(SocketException) {}
         }
-        /***************************************************************
-        @return - true: The connection is open.
-                - false: The connection is closed.
-        **************************************************************/
+
+ 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns> True: The connection is open. False: The connection is closed. </returns>
         public bool isConnected()
         {
             return client.Connected;
         }
 
         /***************************************************************
-        * Closes the connection and stream reader, terminating
-          connection to the remote address.
         **************************************************************/
+        /// <summary>
+        ///  Closes the connection and stream reader, terminating  connection to the remote address.
+        /// </summary>
         public void dissconnect()
         {
             if (stream == null) return;
@@ -81,25 +83,22 @@ namespace Assets.Scripts.RPA_Game
             client.Close();
         }
 
-        /***************************************************************
-        @return - the string of a JSON serialized object when trasnfering
-        game data OR the character 'a' as an "isAlive" check.
-        **************************************************************/
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns> the string of a JSON serialized object when trasnfering game data OR the character 'a' as an "isAlive" check.</returns>
         public string read()
         {
             return reader.ReadLine();
         }
 
-        /***************************************************************
-        * formats the serialized string data into a byte array and 
-          sends it to the server.
-        
-        * The message is suffixed with a newline '\n' character, in order
-          to distinguish the end of a message when read by the server.
-
-        @param - message: the JSON serialized data created from an 
-        appropraite Message object.
-        **************************************************************/
+        /// <summary>
+        /// Formats the serialized string data into a byte array and sends it to the server.
+        /// <para>
+        ///  The message is suffixed with a newline '\n' character, in order to distinguish the end of a message when read by the server.
+        /// </para>
+        /// </summary>
+        /// <param name="message"> The JSON serialized data created from an  appropraite Message object.</param>
         public void send(string message)
         {
             try
@@ -114,10 +113,10 @@ namespace Assets.Scripts.RPA_Game
             }
         }
 
-        /***************************************************************
-        @return - true: The Streamreader has data available to read.
-                - false: There is no new data to read.
-        **************************************************************/
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns> True: The Streamreader has data available to read. False: There is no new data to read.</returns>
         public bool ready()
         {
             return stream == null ? false: stream.DataAvailable;

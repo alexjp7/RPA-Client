@@ -11,7 +11,7 @@
   loading functions used for loading sprite and ability data.
 
 * To allow for generic handling of player and monster types,
-  this class inherits from the Combatable type, which supports
+  this class inherits from the Combatant type, which supports
   polymorphic collections between players/monsters.
 **************************************************************/
 
@@ -35,7 +35,7 @@ namespace Assets.Scripts.Entities.Players
         CLERIC = 3
     }
 
-    public class Adventurer : Combatable
+    public class Adventurer : Combatant
     {
         public static readonly int ABILITY_LIMIT = 5;
         public static readonly string PLAYER_SPRITE_PATH = "player_textures/";
@@ -43,7 +43,7 @@ namespace Assets.Scripts.Entities.Players
         public PlayerClasses classId { get; protected set; }
 
         /***************************************************************
-        @param - name: sets the Combatable base object's name field.
+        @param - name: sets the Combatant base object's name field.
         **************************************************************/
         public Adventurer(string _name, int id)
         {

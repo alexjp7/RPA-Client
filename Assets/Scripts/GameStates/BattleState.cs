@@ -27,7 +27,6 @@ using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.RPA_Messages;
 using System.Threading.Tasks;
-using System.Threading;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -146,7 +145,6 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initBattleField()
     {
-        Debug.Log("in initBattleField()");
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
         initPlayerUI();
@@ -215,7 +213,7 @@ public class BattleState : MonoBehaviour
     * Client side processing of any status-effects (buffs/debuffs)
       that require exeucting at the start of a turn
     **************************************************************/
-    public void applyBeforeEffects(in Combatable combatant)
+    public void applyBeforeEffects(in Combatant combatant)
     {
         //Select All the precondition effects
         List<Condition> preConditions = new List<Condition>();
@@ -265,7 +263,7 @@ public class BattleState : MonoBehaviour
       @param - maxDamage: The upper bound of the damage being applied
       that is used to calculate the actual amount dealt.
     **************************************************************/
-    public void attackTarget(in Combatable target, in Combatable caster, int minDamage, int maxDamage)
+    public void attackTarget(in Combatant target, in Combatant caster, int minDamage, int maxDamage)
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
 
@@ -306,7 +304,7 @@ public class BattleState : MonoBehaviour
     @Overload - Allows for precalculated damage to be done to a target
     in special combat conditions.
     **************************************************************/
-    public void attackTarget(in Combatable target, int damage, string prefix = "")
+    public void attackTarget(in Combatant target, int damage, string prefix = "")
     {
         int damageDealt = target.applyDamage(damage);
         if (!target.isAlive())
@@ -332,7 +330,7 @@ public class BattleState : MonoBehaviour
     @param - potency: The strength or duration if applicable of the 
     status effect
     **************************************************************/
-    public void affectTarget(Combatable target, int statusEffect, int potency, int turnsApplied)
+    public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
     {
         target.applyEffect(statusEffect, potency, turnsApplied);
         FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect, potency), Color.blue);
@@ -348,7 +346,7 @@ public class BattleState : MonoBehaviour
       @param - maxHealing: The upper bound of the healing being applied
       that is used to calculate the actual amount healed.
     **************************************************************/
-    public void healTarget(in Combatable target, int minHealing, int maxHealing)
+    public void healTarget(in Combatant target, int minHealing, int maxHealing)
     {
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
@@ -364,7 +362,7 @@ public class BattleState : MonoBehaviour
    **************************************************************/
     public void updateTurnUi()
     {
-        Combatable currentCombatant = turnController.currentCombatant;
+        Combatant currentCombatant = turnController.currentCombatant;
         TurnChevron.setPosition(currentCombatant.combatSprite.transform);
         currentTurnDisplayName.text = currentCombatant.name;
     }
@@ -372,7 +370,7 @@ public class BattleState : MonoBehaviour
     public void updateConditionUI()
     {
         //Update condition effect duractions for current combatant
-        Combatable currentCombatant = turnController.currentCombatant;
+        Combatant currentCombatant = turnController.currentCombatant;
         List<int> removedConditions = currentCombatant.updateConditionDurations();
         if (removedConditions.Count > 0)
         {
@@ -547,7 +545,7 @@ public class BattleState : MonoBehaviour
                     {
                         if(message.targets.ContainsKey(target.id))
                         {
-                            Combatable allyPlayer = Game.getPlayerById(target.id).playerClass;
+                            Combatant allyPlayer = Game.getPlayerById(target.id).playerClass;
 
                         }
                     }
@@ -555,12 +553,12 @@ public class BattleState : MonoBehaviour
             }
             else if (message.abilityTargeting == TargetingType.ENEMY)
             {
-                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
+                Combatant caster = Game.getPlayerById(message.clientId).playerClass;
                 Debug.Log("Caster = " + caster.name);
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
                 foreach (var target in message.targets)
                 {
-                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);
@@ -568,13 +566,13 @@ public class BattleState : MonoBehaviour
             }
             else if(message.abilityTargeting == TargetingType.AUTO)
             {
-                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
+                Combatant caster = Game.getPlayerById(message.clientId).playerClass;
                 Debug.Log("Caster = "+caster.name);
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
 
                 foreach (var target in message.targets)
                 {
-                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);

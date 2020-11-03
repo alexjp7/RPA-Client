@@ -136,7 +136,7 @@ namespace Assets.Scripts.Util
                 Sprite sprite = Resources.Load<Sprite>(path);
                 if(sprite == null)
                 {
-                    Debug.LogError($"AssetNotFound- Loading asset '{key}' at path 'Assets/Resources/{path}' failed. Chcek in Assets/Resources directory for missing or missmatched asset path {new System.Diagnostics.StackFrame().ToString()}") ;
+                    Debug.LogError($"AssetNotFound - Loading asset '{key}' at path 'Assets/Resources/{path}' failed. Chcek in Assets/Resources directory for missing or missmatched asset path {new System.Diagnostics.StackFrame().ToString()}") ;
                 }
 
                 spriteMap.Add(key, sprite);

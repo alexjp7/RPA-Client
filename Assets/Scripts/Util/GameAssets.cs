@@ -31,6 +31,7 @@ namespace Assets.Scripts.Util
         public Transform turnChevron;
         public Transform combatSpritePrefab;
         public Transform abilityButtonPrefab;
+        public Transform buffBarPrefab;
         //Charactear creation
         public Transform playerPanelPrefab;
     }

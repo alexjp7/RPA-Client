@@ -3,13 +3,11 @@ using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Monsters;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
-using Assets.Scripts.RPA_Messages;
 using Assets.Scripts.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assets.Scripts.UI;
 using UnityEngine;
 
 namespace Assets.Scripts.GameStates
@@ -20,8 +18,8 @@ namespace Assets.Scripts.GameStates
         public int turnCount { get; private set; }
         public Adventurer clientAdventurer { get =>  Game.clientSidePlayer.playerClass; }
         //Combatants
-        public Combatable currentCombatant { get; private set;}
-        public List<Combatable> targets { get; private set; }
+        public Combatant currentCombatant { get; private set;}
+        public List<Combatant> targets { get; private set; }
         public List<Monster> monsterParty;
         public List<Adventurer> playerParty => Game.players.Select(player => player.playerClass).ToList();
         public Ability lastAbilityUsed { get; set;}
@@ -44,7 +42,7 @@ namespace Assets.Scripts.GameStates
             currentMonster = 0;
             currentPlayer = 0;
 
-            targets = new List<Combatable>();
+            targets = new List<Combatant>();
             hasValidTarget = false;
         }
 
