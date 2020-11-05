@@ -97,7 +97,7 @@ namespace Assets.Scripts.Util
             }
 
             //@Test Data
-            Game.addPlayer("Alexjp", PlayerClasses.CLERIC);
+            Game.addPlayer("Alexjp", PlayerClasses.ROGUE);
             /*
              Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
              Game.addPlayer("Kozza", PlayerClasses.WARRIOR);

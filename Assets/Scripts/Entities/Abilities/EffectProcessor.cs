@@ -195,7 +195,7 @@ namespace Assets.Scripts.Entities.Abilities
                     break;
 
                 case StatusEffect.REFLECT_DAMAGE:
-                    value = $"dmg {potency}% Damage";
+                    value = $"Reflect {potency}% Damage";
                     break;
 
                 case StatusEffect.DAMAGE_TAKEN_UP:

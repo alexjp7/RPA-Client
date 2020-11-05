@@ -12,9 +12,12 @@ using UnityEngine.UI;
 public class Tooltip : MonoBehaviour
 {
     public static Tooltip instance;
-
     [SerializeField]
     public Camera uiCamera;
+
+    private static float xOffSet;
+    private static float yOffset;
+    private static float transparency;
 
     private Text tooltipText;
     private RectTransform tooltipTransform;
@@ -41,8 +44,8 @@ public class Tooltip : MonoBehaviour
     {
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.GetComponent<RectTransform>(), Input.mousePosition, uiCamera, out localPoint);
-        localPoint.x += 50;
-        localPoint.y += 50;
+        localPoint.x += xOffSet;
+        localPoint.y += yOffset;
         transform.localPosition = localPoint;
     }
 
@@ -53,6 +56,10 @@ public class Tooltip : MonoBehaviour
     private void showTooltip(string tooltipString)
     {
         gameObject.SetActive(true);
+        Color toolTipColor = tooltipTransform.GetComponent<Image>().color;
+        toolTipColor.a = transparency;
+        tooltipTransform.GetComponent<Image>().color = toolTipColor;
+
         tooltipText.text = tooltipString;
     }
 
@@ -69,8 +76,12 @@ public class Tooltip : MonoBehaviour
     * public interface method for showing the tooltip.
     @parm - tooltipString: the text wanting to be displayed in tooltip.
     **************************************************************/
-    public static void show(string tooltipString)
+    public static void show(string tooltipString, float _xOffset = 50, float _yOffset = 50, float _transparency = 255)
     {
+        xOffSet = _xOffset;
+        yOffset = _yOffset;
+        transparency = _transparency;
+
         instance.showTooltip(tooltipString);
     }
 
