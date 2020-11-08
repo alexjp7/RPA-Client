@@ -28,7 +28,7 @@ namespace Assets.Scripts.Util
         }
         //BattleState
         public Transform damagePopupPrefab;
-        public Transform turnChevron;
+        public Transform turnChevronPrefab;
         public Transform combatSpritePrefab;
         public Transform abilityButtonPrefab;
         public Transform buffBarPrefab;

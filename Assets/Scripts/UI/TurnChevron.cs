@@ -12,26 +12,52 @@ using UnityEngine;
 
 public class TurnChevron : MonoBehaviour
 {
-    private static SpriteRenderer chevronSprite;
-    private static Transform instance;
+    private SpriteRenderer chevronSprite;
+    private Transform chevronTransform;
 
-    private static TurnController turnController => StateManager.battleState.turnController;
+    private static TurnChevron currentChevron;
+    private static TurnChevron nextChevron;
 
-    /***************************************************************
-    * The position of the chevron.
-    **************************************************************/
-    private static Transform chevronTransform
+
+    private static TurnChevron create(in Transform combatant)
     {
-        get
+        Transform chevronTransform = Instantiate(GameAssets.INSTANCE.turnChevronPrefab, Vector2.zero, Quaternion.identity);
+        TurnChevron chevron = chevronTransform.GetComponent<TurnChevron>();
+        return chevron;
+    }
+
+    public static void updateTurnChevrons(in Transform currentCombant, in Transform nextcombatant, bool isPlayerTurn)
+    {
+        if (currentChevron == null)
         {
-            if (instance == null) instance = Instantiate(GameAssets.INSTANCE.turnChevron, Vector3.zero, Quaternion.identity);
-            return instance;
+            currentChevron = create(currentCombant);
         }
+
+        if (nextChevron == null)
+        {
+            nextChevron = create(nextcombatant);
+        }
+
+        if (isPlayerTurn)
+        {
+            currentChevron.chevronSprite.color = Color.green;
+            nextChevron.chevronSprite.color = Color.red;
+        }
+        else
+        {
+            currentChevron.chevronSprite.color = Color.red;
+            nextChevron.chevronSprite.color = Color.green;
+        }
+
+        currentChevron.setPosition(currentCombant);
+        nextChevron.setPosition(nextcombatant);
+
     }
 
     void Awake()
     {
         chevronSprite = gameObject.GetComponent<SpriteRenderer>();
+        chevronTransform = gameObject.transform;
     }
     /***************************************************************
     * Updates the position of the chevron to reflect the next
@@ -40,21 +66,11 @@ public class TurnChevron : MonoBehaviour
      @param  - position: The new position that the chevron
      transform will be updated to.
     **************************************************************/
-    public static void setPosition(Transform position)
+    public void setPosition(Transform position)
     {
         Vector3 localPoint = position.position;
         localPoint.y += 150;
         chevronTransform.SetParent(position.transform);
         chevronTransform.position = localPoint;
-
-        if(turnController.turnCount % 2 == 0)
-        {
-            chevronSprite.color = Color.red;
-        }
-        else
-        {
-            chevronSprite.color = Color.green;
-        }
-
     }
 }

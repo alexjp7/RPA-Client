@@ -41,7 +41,7 @@ public class BattleState : MonoBehaviour
     //Client Player Alias
     private Player clientPlayer { get => Game.clientSidePlayer; }
     //Combat Controllers
-    public TurnController turnController { get; private set;}
+    public TurnController turnController { get; private set; }
 
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS
@@ -86,6 +86,8 @@ public class BattleState : MonoBehaviour
     {
         if (Game.isSinglePlayer)
         {
+            turnController.initTurnOrder();
+            turnController.initMonsterParty(4);
             initBattleField(); // UI initialisation
         }
         else //Handle Multiplayer session communication
@@ -94,7 +96,7 @@ public class BattleState : MonoBehaviour
             {
                 turnController.initTurnOrder();
                 turnController.initMonsterParty(4);
-                await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)) );
+                await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)));
                 initBattleField();
             }
             else
@@ -109,7 +111,7 @@ public class BattleState : MonoBehaviour
     {
         //Wait for party leader to send combat oder/monster party data
         BattleMessage message = await Task.Run(() => awaitCombatInit());
-        
+
         turnController.initTurnOrder(message.turnOrder);
         turnController.initMonsterParty(message.monsters);
     }
@@ -149,7 +151,7 @@ public class BattleState : MonoBehaviour
         generateCombatantSprites();
         initPlayerUI();
     }
-    
+
 
     /***************************************************************f
     * Generates the monster and player party sprites to screen.
@@ -274,9 +276,9 @@ public class BattleState : MonoBehaviour
             attackTarget(caster, (int)damage);
         }
 
-        if(caster.conditions.ContainsKey((int) StatusEffect.POISON_WEAPON) )
+        if (caster.conditions.ContainsKey((int)StatusEffect.POISON_WEAPON))
         {
-            affectTarget(target, (int) StatusEffect.POISON, 6, 3);
+            affectTarget(target, (int)StatusEffect.POISON, 6, 3);
         }
 
 
@@ -287,7 +289,7 @@ public class BattleState : MonoBehaviour
         else
         {
             //Remove Sleep if exists
-            if (target.conditions.ContainsKey((int)StatusEffect.SLEEP) ) 
+            if (target.conditions.ContainsKey((int)StatusEffect.SLEEP))
             {
                 target.conditions.Remove((int)StatusEffect.SLEEP);
             }
@@ -363,7 +365,9 @@ public class BattleState : MonoBehaviour
     public void updateTurnUi()
     {
         Combatant currentCombatant = turnController.currentCombatant;
-        TurnChevron.setPosition(currentCombatant.combatSprite.transform);
+        Combatant nextCombatant = turnController.nextCombatant;
+
+        TurnChevron.updateTurnChevrons(currentCombatant.combatSprite.transform, nextCombatant.combatSprite.transform, turnController.isPlayerTurn);
         currentTurnDisplayName.text = currentCombatant.name;
     }
 
@@ -475,12 +479,19 @@ public class BattleState : MonoBehaviour
         updateTurnUi();
         updateCooldownUI();
 
-        if(turnController.turnCount > 1)
+        if (turnController.turnCount > 1)
         {
             updateConditionUI();
+        }
+
+        turnController.hasNextTurn = false;
+
+        if (turnController.currentCombatant.isImpaired)
+        {
+            FloatingPopup.create(turnController.currentCombatant.combatSprite.transform.position, "Turn skipped", Color.black);
+            turnController.takeTurn();
 
         }
-        turnController.hasNextTurn = false;
     }
 
 
@@ -523,7 +534,7 @@ public class BattleState : MonoBehaviour
                 break;
             case BattleInstruction.TURN_ACTION:
                 processTurnAction(ref message);
-              
+
                 break;
 
             default:
@@ -534,16 +545,16 @@ public class BattleState : MonoBehaviour
     private void processTurnAction(ref BattleMessage message)
     {
         //Apply ability on player turn
-        if(turnController.isPlayerTurn)
+        if (turnController.isPlayerTurn)
         {
             //Buff/heal ally
             if (message.abilityTargeting == TargetingType.ALLIED)
             {
                 foreach (var target in turnController.playerParty)
                 {
-                    if(target.isAlive())
+                    if (target.isAlive())
                     {
-                        if(message.targets.ContainsKey(target.id))
+                        if (message.targets.ContainsKey(target.id))
                         {
                             Combatant allyPlayer = Game.getPlayerById(target.id).playerClass;
 
@@ -564,10 +575,10 @@ public class BattleState : MonoBehaviour
                     attackTarget(enemyMonster, damageDealt);
                 }
             }
-            else if(message.abilityTargeting == TargetingType.AUTO)
+            else if (message.abilityTargeting == TargetingType.AUTO)
             {
                 Combatant caster = Game.getPlayerById(message.clientId).playerClass;
-                Debug.Log("Caster = "+caster.name);
+                Debug.Log("Caster = " + caster.name);
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
 
                 foreach (var target in message.targets)

@@ -89,6 +89,8 @@ namespace Assets.Scripts.Util
                 return;
             }
 
+            Game.isSinglePlayer = true;
+
             Game.players = new List<Player>();
 
             for (int i = 0; i < Game.PARTY_LIMIT; i++)
@@ -96,8 +98,9 @@ namespace Assets.Scripts.Util
                 Game.players.Add(new Player());
             }
 
+
             //@Test Data
-            Game.addPlayer("Alexjp", PlayerClasses.ROGUE);
+            Game.addPlayer("Alexjp", PlayerClasses.WIZARD);
             /*
              Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
              Game.addPlayer("Kozza", PlayerClasses.WARRIOR);
