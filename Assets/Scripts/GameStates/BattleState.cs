@@ -27,7 +27,6 @@ using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.RPA_Messages;
 using System.Threading.Tasks;
-using System.Threading;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -42,7 +41,7 @@ public class BattleState : MonoBehaviour
     //Client Player Alias
     private Player clientPlayer { get => Game.clientSidePlayer; }
     //Combat Controllers
-    public TurnController turnController { get; private set;}
+    public TurnController turnController { get; private set; }
 
     /*---------------------------------------------------------------
                        GAME STATE INIATIALISATIONS
@@ -87,6 +86,8 @@ public class BattleState : MonoBehaviour
     {
         if (Game.isSinglePlayer)
         {
+            turnController.initTurnOrder();
+            turnController.initMonsterParty(4);
             initBattleField(); // UI initialisation
         }
         else //Handle Multiplayer session communication
@@ -95,7 +96,7 @@ public class BattleState : MonoBehaviour
             {
                 turnController.initTurnOrder();
                 turnController.initMonsterParty(4);
-                await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)) );
+                await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)));
                 initBattleField();
             }
             else
@@ -110,7 +111,7 @@ public class BattleState : MonoBehaviour
     {
         //Wait for party leader to send combat oder/monster party data
         BattleMessage message = await Task.Run(() => awaitCombatInit());
-        
+
         turnController.initTurnOrder(message.turnOrder);
         turnController.initMonsterParty(message.monsters);
     }
@@ -146,12 +147,11 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initBattleField()
     {
-        Debug.Log("in initBattleField()");
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
         generateCombatantSprites();
         initPlayerUI();
     }
-    
+
 
     /***************************************************************f
     * Generates the monster and player party sprites to screen.
@@ -215,7 +215,7 @@ public class BattleState : MonoBehaviour
     * Client side processing of any status-effects (buffs/debuffs)
       that require exeucting at the start of a turn
     **************************************************************/
-    public void applyBeforeEffects(in Combatable combatant)
+    public void applyBeforeEffects(in Combatant combatant)
     {
         //Select All the precondition effects
         List<Condition> preConditions = new List<Condition>();
@@ -265,7 +265,7 @@ public class BattleState : MonoBehaviour
       @param - maxDamage: The upper bound of the damage being applied
       that is used to calculate the actual amount dealt.
     **************************************************************/
-    public void attackTarget(in Combatable target, in Combatable caster, int minDamage, int maxDamage)
+    public void attackTarget(in Combatant target, in Combatant caster, int minDamage, int maxDamage)
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
 
@@ -276,9 +276,9 @@ public class BattleState : MonoBehaviour
             attackTarget(caster, (int)damage);
         }
 
-        if(caster.conditions.ContainsKey((int) StatusEffect.POISON_WEAPON) )
+        if (caster.conditions.ContainsKey((int)StatusEffect.POISON_WEAPON))
         {
-            affectTarget(target, (int) StatusEffect.POISON, 6, 3);
+            affectTarget(target, (int)StatusEffect.POISON, 6, 3);
         }
 
 
@@ -289,7 +289,7 @@ public class BattleState : MonoBehaviour
         else
         {
             //Remove Sleep if exists
-            if (target.conditions.ContainsKey((int)StatusEffect.SLEEP) ) 
+            if (target.conditions.ContainsKey((int)StatusEffect.SLEEP))
             {
                 target.conditions.Remove((int)StatusEffect.SLEEP);
             }
@@ -306,7 +306,7 @@ public class BattleState : MonoBehaviour
     @Overload - Allows for precalculated damage to be done to a target
     in special combat conditions.
     **************************************************************/
-    public void attackTarget(in Combatable target, int damage, string prefix = "")
+    public void attackTarget(in Combatant target, int damage, string prefix = "")
     {
         int damageDealt = target.applyDamage(damage);
         if (!target.isAlive())
@@ -332,7 +332,7 @@ public class BattleState : MonoBehaviour
     @param - potency: The strength or duration if applicable of the 
     status effect
     **************************************************************/
-    public void affectTarget(Combatable target, int statusEffect, int potency, int turnsApplied)
+    public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
     {
         target.applyEffect(statusEffect, potency, turnsApplied);
         FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect, potency), Color.blue);
@@ -348,7 +348,7 @@ public class BattleState : MonoBehaviour
       @param - maxHealing: The upper bound of the healing being applied
       that is used to calculate the actual amount healed.
     **************************************************************/
-    public void healTarget(in Combatable target, int minHealing, int maxHealing)
+    public void healTarget(in Combatant target, int minHealing, int maxHealing)
     {
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
@@ -364,15 +364,17 @@ public class BattleState : MonoBehaviour
    **************************************************************/
     public void updateTurnUi()
     {
-        Combatable currentCombatant = turnController.currentCombatant;
-        TurnChevron.setPosition(currentCombatant.combatSprite.transform);
+        Combatant currentCombatant = turnController.currentCombatant;
+        Combatant nextCombatant = turnController.nextCombatant;
+
+        TurnChevron.updateTurnChevrons(currentCombatant.combatSprite.transform, nextCombatant.combatSprite.transform, turnController.isPlayerTurn);
         currentTurnDisplayName.text = currentCombatant.name;
     }
 
     public void updateConditionUI()
     {
         //Update condition effect duractions for current combatant
-        Combatable currentCombatant = turnController.currentCombatant;
+        Combatant currentCombatant = turnController.currentCombatant;
         List<int> removedConditions = currentCombatant.updateConditionDurations();
         if (removedConditions.Count > 0)
         {
@@ -477,12 +479,19 @@ public class BattleState : MonoBehaviour
         updateTurnUi();
         updateCooldownUI();
 
-        if(turnController.turnCount > 1)
+        if (turnController.turnCount > 1)
         {
             updateConditionUI();
+        }
+
+        turnController.hasNextTurn = false;
+
+        if (turnController.currentCombatant.isImpaired)
+        {
+            FloatingPopup.create(turnController.currentCombatant.combatSprite.transform.position, "Turn skipped", Color.black);
+            turnController.takeTurn();
 
         }
-        turnController.hasNextTurn = false;
     }
 
 
@@ -525,7 +534,7 @@ public class BattleState : MonoBehaviour
                 break;
             case BattleInstruction.TURN_ACTION:
                 processTurnAction(ref message);
-              
+
                 break;
 
             default:
@@ -536,18 +545,18 @@ public class BattleState : MonoBehaviour
     private void processTurnAction(ref BattleMessage message)
     {
         //Apply ability on player turn
-        if(turnController.isPlayerTurn)
+        if (turnController.isPlayerTurn)
         {
             //Buff/heal ally
             if (message.abilityTargeting == TargetingType.ALLIED)
             {
                 foreach (var target in turnController.playerParty)
                 {
-                    if(target.isAlive())
+                    if (target.isAlive())
                     {
-                        if(message.targets.ContainsKey(target.id))
+                        if (message.targets.ContainsKey(target.id))
                         {
-                            Combatable allyPlayer = Game.getPlayerById(target.id).playerClass;
+                            Combatant allyPlayer = Game.getPlayerById(target.id).playerClass;
 
                         }
                     }
@@ -555,26 +564,26 @@ public class BattleState : MonoBehaviour
             }
             else if (message.abilityTargeting == TargetingType.ENEMY)
             {
-                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
+                Combatant caster = Game.getPlayerById(message.clientId).playerClass;
                 Debug.Log("Caster = " + caster.name);
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
                 foreach (var target in message.targets)
                 {
-                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);
                 }
             }
-            else if(message.abilityTargeting == TargetingType.AUTO)
+            else if (message.abilityTargeting == TargetingType.AUTO)
             {
-                Combatable caster = Game.getPlayerById(message.clientId).playerClass;
-                Debug.Log("Caster = "+caster.name);
+                Combatant caster = Game.getPlayerById(message.clientId).playerClass;
+                Debug.Log("Caster = " + caster.name);
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
 
                 foreach (var target in message.targets)
                 {
-                    Combatable enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);

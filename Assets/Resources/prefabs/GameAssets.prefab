@@ -45,11 +45,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damagePopupPrefab: {fileID: 2841765125602886754, guid: 8909f9e2a2a0cfa4888e676fa36183ce,
     type: 3}
-  turnChevron: {fileID: 3604465751754792280, guid: b65d7cc975af7fb47a28d4da3ae78b75,
+  turnChevronPrefab: {fileID: 3604465751754792280, guid: b65d7cc975af7fb47a28d4da3ae78b75,
     type: 3}
   combatSpritePrefab: {fileID: 7741480382821625824, guid: eb0e6f4974a10854bb7fbb08dd29aff1,
     type: 3}
   abilityButtonPrefab: {fileID: 7335571441777240958, guid: 333d5975a14bab948a862e55980a2404,
+    type: 3}
+  buffBarPrefab: {fileID: 211644435778765050, guid: 8dfa6cc1deb17fa4ba44c8386aa68780,
     type: 3}
   playerPanelPrefab: {fileID: 3433355326149984283, guid: 87ba1ea3cb96f714d9ada7f5e593ad06,
     type: 3}

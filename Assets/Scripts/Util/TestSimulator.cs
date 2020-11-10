@@ -1,7 +1,7 @@
 ﻿/*---------------------------------------------------------------
                 TEST-SIMULATOR(Debug/Development Only)
  ---------------------------------------------------------------*/
-//#define REQUIRE_TEST_DATA //Uncomment to generate test data
+#define REQUIRE_TEST_DATA //Uncomment to generate test data
 
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
@@ -18,21 +18,20 @@ namespace Assets.Scripts.Util
         {
             get
             {
-            #if REQUIRE_TEST_DATA
+#if REQUIRE_TEST_DATA
                 return true;
-            #else
+#else
                 return false;
-            #endif
-}
+#endif
+            }
         }
-
 
         private static TestSimulator _instance;
         public static TestSimulator INSTANCE
         {
             get
             {
-                if(_instance == null)
+                if (_instance == null)
                 {
                     _instance = new TestSimulator();
                 }
@@ -83,24 +82,45 @@ namespace Assets.Scripts.Util
         *  Creates a list of players for testing/debuggin purposes.
         **************************************************************/
         private void createTestPlayers()
-        {   //Multiple game states can run tests, we only need to make player party once
-            if (Game.players != null) return;
+        {
+            //Multiple game states can run tests, we only need to make player party once
+            if (Game.players != null)
+            {
+                return;
+            }
+
+            Game.isSinglePlayer = true;
 
             Game.players = new List<Player>();
 
-            for(int i = 0; i < Game.PARTY_LIMIT; i++)
+            for (int i = 0; i < Game.PARTY_LIMIT; i++)
             {
                 Game.players.Add(new Player());
             }
 
+
             //@Test Data
             Game.addPlayer("Alexjp", PlayerClasses.WIZARD);
-            Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
-            Game.addPlayer("Kozza", PlayerClasses.WARRIOR);
-            Game.addPlayer("Wizzledonker", PlayerClasses.CLERIC);
-
+            /*
+             Game.addPlayer("Frictionburn", PlayerClasses.ROGUE);
+             Game.addPlayer("Kozza", PlayerClasses.WARRIOR);
+             Game.addPlayer("Wizzledonker", PlayerClasses.CLERIC);
+            */
             Game.partyLeaderId = Game.players[0].id;
-            foreach (Player player in Game.players) player.applyClass();
+
+            // Resize Players list to remove unitialised player objets
+            int connectedPlayers = Game.connectedPlayers;
+
+            if (connectedPlayers != Game.PARTY_LIMIT)
+            {
+                Game.players.RemoveRange(connectedPlayers, Game.PARTY_LIMIT - connectedPlayers);
+            }
+
+            foreach (Player player in Game.players)
+            {
+                player.applyClass();
+            }
+
             Game.players[0].isClientPlayer = true;
         }
 

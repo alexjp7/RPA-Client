@@ -2,7 +2,7 @@
                        COMBATABLE
  ---------------------------------------------------------------*/
 /***************************************************************
-*  The Combatable type contains fields relating to combat
+*  The Combatant type contains fields relating to combat
    including; turn order, health properties (Damageable), abilities
    and the base logic for applying damage, healing and status 
    effects to these types of objects. The combatable base
@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
 using System.Linq;
-using UnityEngine;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -25,21 +24,20 @@ namespace Assets.Scripts.Entities.Components
         MONSTER
     }
 
-    public abstract class Combatable
+    public abstract class Combatant
     {
         private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
 
         public int id { get; set; }
-        public string name { get; set;}
-        public CombatantType type { get; protected set;}
+        public string name { get; set; }
+        public CombatantType type { get; protected set; }
         protected string assetPath { get; set; }
 
         //Components
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
         public List<Ability> abilities { get; protected set; }
-        public Dictionary<int,Condition> conditions { get; set; }
-        private CombatSprite _combatSprite; //Instance holder
+        public Dictionary<int, Condition> conditions { get; set; }
 
         public CombatSprite combatSprite
         {
@@ -52,15 +50,16 @@ namespace Assets.Scripts.Entities.Components
                 return _combatSprite;
             }
         }
+        private CombatSprite _combatSprite; //Instance holder
 
         //Determines if combatant is able to complete a turn
         public bool isImpaired
         {
             get
             {
-                foreach(var condition in conditions)
+                foreach (var condition in conditions)
                 {
-                    if(EffectProcessor.ImpairingEffects.Contains( (StatusEffect)condition.Key) )
+                    if (EffectProcessor.ImpairingEffects.Contains((StatusEffect)condition.Key))
                     {
                         return true;
                     }
@@ -69,9 +68,9 @@ namespace Assets.Scripts.Entities.Components
                 return false;
             }
         }
-    
+
         //Default Constructor
-        public Combatable()
+        public Combatant()
         {
             assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();
@@ -106,9 +105,9 @@ namespace Assets.Scripts.Entities.Components
             float damageAmped = 0;
             float damageAbsorbed = 0;
 
-            if(conditions.Count > 0)
+            if (conditions.Count > 0)
             {
-                if(conditions.ContainsKey((int)StatusEffect.DAMAGE_TAKEN_UP) )
+                if (conditions.ContainsKey((int)StatusEffect.DAMAGE_TAKEN_UP))
                 {
                     damageAmped = conditions[(int)StatusEffect.DAMAGE_TAKEN_UP].potency;
                 }
@@ -122,18 +121,18 @@ namespace Assets.Scripts.Entities.Components
             totalDamageModifier = damageAmped + damageAbsorbed;
 
             //Apply Damage Modifiers
-            if(totalDamageModifier < 0)
+            if (totalDamageModifier < 0)
             {
                 damageDealt = damageDealt * (1 - Math.Abs(totalDamageModifier) / 100);
             }
-            else if(totalDamageModifier > 0)
+            else if (totalDamageModifier > 0)
             {
                 damageDealt = damageDealt * (1 + Math.Abs(totalDamageModifier) / 100);
             }
 
             healthProperties.currentHealth -= damageDealt;
 
-            return (int) damageDealt;
+            return (int)damageDealt;
         }
 
         /***************************************************************
@@ -157,12 +156,12 @@ namespace Assets.Scripts.Entities.Components
 
         @return  - The healing result.
         **************************************************************/
-        public virtual int  applyHealing(int minValue, int maxValue)
+        public virtual int applyHealing(int minValue, int maxValue)
         {
             float damageHealed = Util.Random.getInt(minValue, maxValue);
             healthProperties.currentHealth += damageHealed;
             healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
-            return (int) damageHealed;
+            return (int)damageHealed;
         }
 
         /***************************************************************
@@ -175,7 +174,7 @@ namespace Assets.Scripts.Entities.Components
         public virtual void applyEffect(int statusEffect, int potency, int turnsApplied)
         {
             EffectProcessor.getInstance().applyEffect(this, statusEffect, potency, turnsApplied);
-        }   
+        }
 
         /***************************************************************
          * Updates cooldown counters for each ability.
@@ -185,7 +184,7 @@ namespace Assets.Scripts.Entities.Components
         **************************************************************/
         public virtual void updateAbilityCooldowns()
         {
-            foreach(Ability ability in abilities)
+            foreach (Ability ability in abilities)
             {
                 ability.updateCooldown();
             }
@@ -201,7 +200,7 @@ namespace Assets.Scripts.Entities.Components
         {
             List<int> removedConditions = new List<int>();
 
-            foreach (var condition in conditions) 
+            foreach (var condition in conditions)
             {
                 int effectDuraction = condition.Value.reduceEffect(1);
                 if (effectDuraction <= 0)
@@ -217,19 +216,19 @@ namespace Assets.Scripts.Entities.Components
         /***************************************************************
         @return  - The value of the Combatables MAX health.
         **************************************************************/
-        public float getMaxHp() { return healthProperties.maxHealth;}
+        public float getMaxHp() { return healthProperties.maxHealth; }
 
         /***************************************************************
         @return  - The value of the Combatables CURRENT health.
         **************************************************************/
-        public float getCurrentHp() { return healthProperties.currentHealth;}
+        public float getCurrentHp() { return healthProperties.currentHealth; }
 
         /***************************************************************
         @return  - true: this combatable is alive
                    false: this comtable is dead, and is now ready to be
                    removed from combat.
         **************************************************************/
-        public bool isAlive() { return healthProperties.currentHealth > 0;}
+        public bool isAlive() { return healthProperties.currentHealth > 0; }
 
         /***************************************************************
         * Helper function used to determine the fill amount of a player

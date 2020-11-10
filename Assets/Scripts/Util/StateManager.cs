@@ -34,7 +34,8 @@ namespace Assets.Scripts.Util
                 GameObject parent = GameObject.Find("UI");
                 battleState = parent.GetComponent<BattleState>();
             }
-
+                
+            Debug.Log("Loading state: " + currentState.ToString());
         }
 
         //Game State refernces
