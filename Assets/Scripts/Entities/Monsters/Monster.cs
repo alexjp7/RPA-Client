@@ -5,7 +5,7 @@
 * The Monster class provides a base class that all monster
   types inherit from.
 
-* All Monster types inherit the Combatant base, allowing
+* All Monster types inherit the Combatable base, allowing
   for polymorphic collections to exist between monsters and
   player adventuring classes.
 
@@ -54,7 +54,7 @@ namespace Assets.Scripts.Entities.Monsters
         SUPPORTIVE = 2
     }
 
-    public abstract class Monster : Combatant
+    public abstract class Monster : Combatable
     {
         //Used to send to other clients to communicate targeting information
         public static int monsterCount = 0;
@@ -129,15 +129,15 @@ namespace Assets.Scripts.Entities.Monsters
 
 
 
-        public virtual List<Combatant> getTargets(out Ability abilityUsed, in List<Monster> monsterParty,  List<Adventurer> playerParty)
+        public virtual List<Combatable> getTargets(out Ability abilityUsed, in List<Monster> monsterParty,  List<Adventurer> playerParty)
         {
-            List<Combatant> targets = new List<Combatant>();
+            List<Combatable> targets = new List<Combatable>();
             abilityUsed = selectAbility(monsterParty, playerParty, ref targets);
 
             return targets;
         }
 
-        private Ability selectAbility(List<Monster> monsterParty, List<Adventurer> playerParty, ref List<Combatant> targets)
+        private Ability selectAbility(List<Monster> monsterParty, List<Adventurer> playerParty, ref List<Combatable> targets)
         {
             /*AVAILABLE METHODS FOR COMBATABLES*/
             //Current Health

@@ -22,7 +22,7 @@ namespace Assets.Scripts.RPA_Messages
         public int gameId;
         //Game state ID
         public int stateId;
-        //NetworkClient who is sending/recieving a message
+        //Client who is sending/recieving a message
         public int clientId;
         //JSON message
         public string message;
@@ -72,7 +72,7 @@ namespace Assets.Scripts.RPA_Messages
 
         /***************************************************************
         * Transform game data into a JSON string which is sent by the 
-          NetworkClient's TCPClient instance which is then communicated to 
+          Client's TCPClient instance which is then communicated to 
           the server - virtual method is provided to allow for
           statId and gameId operations to remain consistent.
         **************************************************************/
@@ -86,7 +86,7 @@ namespace Assets.Scripts.RPA_Messages
 
         /***************************************************************
         * Transform game data into a JSON string which is sent by the 
-          NetworkClient's TCPClient instance which is then communicated to 
+          Client's TCPClient instance which is then communicated to 
           the server - Serialisation doesn't not offer the same level
           of re-useability from a top-level perspective, as each
           game state must be responsible its own instruction types.

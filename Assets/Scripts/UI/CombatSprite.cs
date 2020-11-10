@@ -25,7 +25,7 @@ namespace Assets.Scripts.UI
     {
         public int popupCount { get; set; } // Have independant tracking of text-popups to make it more readable
         public static bool hasValidTarget;
-        public Combatant combatantRef;
+        public Combatable combatantRef;
         public SpriteRenderer sprite { get; private set;}
         public Transform buffBar { get; private set;}
         public Text displayName { get; private set; }
@@ -46,7 +46,7 @@ namespace Assets.Scripts.UI
         @return - A combat sprite reflecting that of the passed in
         combatant.
         **************************************************************/
-        public static CombatSprite create(in Combatant combatant)
+        public static CombatSprite create(in Combatable combatant)
         {
             Transform spriteTransform = Instantiate(GameAssets.INSTANCE.combatSpritePrefab, Vector2.zero, Quaternion.identity);
             CombatSprite cbSprite = spriteTransform.GetComponent<CombatSprite>();
@@ -72,7 +72,7 @@ namespace Assets.Scripts.UI
         
         @param - combatant: The monster or player that is to be displayed
         **************************************************************/
-        private void setData(in Combatant combatant)
+        private void setData(in Combatable combatant)
         {
             popupCount = 0;
             combatantRef = combatant;
@@ -157,7 +157,7 @@ namespace Assets.Scripts.UI
         0-monsterParty.count() which represents the sprite that was 
         hovered over. 
         **************************************************************/
-        public void onSpriteEnter(in Combatant combatant)
+        public void onSpriteEnter(in Combatable combatant)
         {
             if (!turnController.isClientPlayerTurn) return;
             //Check ability selected
@@ -203,7 +203,7 @@ namespace Assets.Scripts.UI
         0-monsterParty.count() which represents the sprite that was 
         hovered over. 
         **************************************************************/
-        public void onSpriteExit(in Combatant combatant)
+        public void onSpriteExit(in Combatable combatant)
         {
             if (!turnController.isClientPlayerTurn) return;
             //Check ability selected
@@ -244,7 +244,7 @@ namespace Assets.Scripts.UI
           0-monsterParty.count() which represents the sprite that was 
           hovered over. 
         **************************************************************/
-        public void onSpriteClicked(in Combatant combatant)
+        public void onSpriteClicked(in Combatable combatant)
         {
             if (!turnController.isClientPlayerTurn) return;
             if (AbilityButton.selectedAbilityIndex == -1) return;

@@ -2,7 +2,7 @@
                        COMBATABLE
  ---------------------------------------------------------------*/
 /***************************************************************
-*  The Combatant type contains fields relating to combat
+*  The Combatable type contains fields relating to combat
    including; turn order, health properties (Damageable), abilities
    and the base logic for applying damage, healing and status 
    effects to these types of objects. The combatable base
@@ -25,7 +25,7 @@ namespace Assets.Scripts.Entities.Components
         MONSTER
     }
 
-    public abstract class Combatant
+    public abstract class Combatable
     {
         private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
 
@@ -71,7 +71,7 @@ namespace Assets.Scripts.Entities.Components
         }
     
         //Default Constructor
-        public Combatant()
+        public Combatable()
         {
             assetPath = BASE_SPRITE_PATH;
             assetData = new Renderable();

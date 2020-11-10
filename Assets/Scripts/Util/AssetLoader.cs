@@ -21,11 +21,7 @@ namespace Assets.Scripts.Util
 
         public static void loadStaticAssets(GameState gameState)
         {
-            if (gameState == activeState)
-            {
-                return;
-            }
-
+            if (gameState == activeState) return;
             dumpPreviousResources();
             activeState = gameState;
             loadGeneralAssets();

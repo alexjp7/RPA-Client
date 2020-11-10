@@ -95,7 +95,7 @@ namespace Assets.Scripts.RPA_Messages
 
         /***************************************************************
         * Transform game data into a JSON string which is sent by the 
-          NetworkClient's TCPClient instance which is then communicated to 
+          Client's TCPClient instance which is then communicated to 
           the server
         **************************************************************/
         protected override void serialize()

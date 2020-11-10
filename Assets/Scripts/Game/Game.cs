@@ -9,7 +9,7 @@
 * The Game class collates any of the data that needs to be maintained
   throughout the life-time of the application, including
   the; Game ID provided from the server, the list of players
-  and the TCP NetworkClient instance.
+  and the TCP Client instance.
 **************************************************************/
 
 using System.Collections.Generic;
@@ -42,7 +42,7 @@ namespace Assets.Scripts.RPA_Game
         private static bool isNewGame;
         private static bool isStarted;
 
-        public static NetworkClient gameClient = NetworkClient.getInstance();
+        public static Client gameClient = Client.getInstance();
 
 
         /*---------------------------------------------------------------
@@ -52,7 +52,7 @@ namespace Assets.Scripts.RPA_Game
         * Calls the initialisation functions in order to being a game 
           session.
 
-        @param - playerName: Name of the NetworkClient side player as chosen when 
+        @param - playerName: Name of the Client side player as chosen when 
         prompted by main-menu dialogue.
         @param - _isNewGame: flag for determining whether the player has
         selected a New game, or is joining a current game.
@@ -105,7 +105,7 @@ namespace Assets.Scripts.RPA_Game
         * init() also sets the isStarted flag, which is returned back
           to the MainMenu state to communicate any errors in connection.
 
-        @param - playerName: Name of the NetworkClient side player as chosen 
+        @param - playerName: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
         **************************************************************/
          private async static void init(string playerName)
@@ -145,7 +145,7 @@ namespace Assets.Scripts.RPA_Game
         * Asynchronously waits for the server reply with a gameId
           or a dissconection packet.
 
-        @param - playerName: Name of the NetworkClient side player as chosen 
+        @param - playerName: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
 
         @return - The asyncronous Task containing the Game ID from the 
@@ -186,7 +186,7 @@ namespace Assets.Scripts.RPA_Game
         * Called from CharacterCreationState when an inbound connection
           message is recieved by client.
 
-        @param - name: Name of the NetworkClient side player as chosen 
+        @param - name: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
         @param - id: player ID that is set by the server.
         **************************************************************/
@@ -213,7 +213,7 @@ namespace Assets.Scripts.RPA_Game
         * Called from CharacterCreationMessage after joining a new game
           and the existing player data is sent to the client
 
-        @param - name: Name of the NetworkClient side player as chosen 
+        @param - name: Name of the Client side player as chosen 
         when prompted by main-menu dialogue.
         @param - id: Unique ID for a player that is set by the server.
         @param - adventuringClass: The current class selection of 

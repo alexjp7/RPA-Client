@@ -11,7 +11,7 @@
   player instance hierachy:
     A Player has an: 
         - Adventurer instance, which is a sub-class
-          of Combatant.
+          of Combatable.
 
         - Combatables are the top-level object which both
           monsters and Adventurer types inherit from.
