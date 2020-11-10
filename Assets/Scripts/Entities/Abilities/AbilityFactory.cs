@@ -254,9 +254,7 @@ namespace Assets.Scripts.Entities.Abilities
             {
                 abilityStrength.min = abilityJson[potencyProperty][skillLevel][0].AsInt;
                 abilityStrength.max = abilityJson[potencyProperty][skillLevel][1].AsInt;
-
             }
-
 
             return abilityStrength;
         }
@@ -345,8 +343,6 @@ namespace Assets.Scripts.Entities.Abilities
             else if (metaType == MetaType.EFFECT)
             {
                 abilityPotency = abilityJson[potencyProperty][skillLevel].AsInt.ToString();
-
-
             }
 
             //Interpolate damage

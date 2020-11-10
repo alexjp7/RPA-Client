@@ -55,7 +55,7 @@ namespace Assets.Scripts.Entities.Abilities
 
         /***************************************************************
         * Primary implementation for status effects. Either adds
-          the effect to the conditions list of a Combatable or directly
+          the effect to the conditions list of a Combatant or directly
           applies the effect to a target/state of the combat.
          
         @param - target: The target who the effect is being applied to
@@ -64,7 +64,7 @@ namespace Assets.Scripts.Entities.Abilities
         @potency - strength of the effect (optional)
         @turnsApplied - The duration of the effect.
         ***************************************************************/
-        public void applyEffect(in Combatable target, int effectId, int potency, int turnsApplied)
+        public void applyEffect(in Combatant target, int effectId, int potency, int turnsApplied)
        {
             switch((StatusEffect)effectId)
             {
@@ -144,7 +144,7 @@ namespace Assets.Scripts.Entities.Abilities
         @potency - strength of the effect (optional)
         @turnsApplied - The duration of the effect.
         ***************************************************************/
-        private void applyDamageModifer(in Combatable target, int effectId ,int potency, int turnsApplied)
+        private void applyDamageModifer(in Combatant target, int effectId ,int potency, int turnsApplied)
         {
             bool isExtending = false;
 
