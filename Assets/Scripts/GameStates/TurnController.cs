@@ -9,12 +9,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.UI;
 using UnityEngine;
+using log4net;
 
 namespace Assets.Scripts.GameStates
 {
     public class TurnController
     {
-
+        private static readonly ILog log = LogManager.GetLogger(typeof(TurnController));
         public int turnCount { get; private set; }
         public Adventurer clientAdventurer { get => Game.clientSidePlayer.playerClass; }
         //Combatants
@@ -104,7 +105,25 @@ namespace Assets.Scripts.GameStates
         **************************************************************/
         public void startCombat()
         {
+            logBattleStartup();
             takeTurn();
+        }
+
+        private void logBattleStartup()
+        {
+            log.Debug("Players:");
+            foreach (Player player in Game.players)
+            {
+                log.Debug(player.ToString());
+            }
+
+            log.Debug("Monsters:");
+            foreach (Monster monster in monsterParty)
+            {
+                log.Debug(monster.ToString());
+            }
+
+            log.Debug("Combat begin!");
         }
 
 
@@ -131,15 +150,17 @@ namespace Assets.Scripts.GameStates
                 currentCombatant = isPlayerTurn ? currentCombatant = playerParty[currentcombatantIndex]
                                                 : currentCombatant = monsterParty[currentcombatantIndex];
 
-                nextCombatant = !isPlayerTurn ? (Combatant) playerParty[nextCombatantindex]
+                nextCombatant = !isPlayerTurn ? (Combatant)playerParty[nextCombatantindex]
                                 : monsterParty[nextCombatantindex];
 
+                log.Debug($"Current Turn: {currentCombatant.id}:\"{currentCombatant.name}\"");
 
                 currentCombatant.updateAbilityCooldowns();
                 StateManager.battleState.applyBeforeEffects(currentCombatant);
                 //Check for turn imparing status effects
                 if (currentCombatant.isImpaired)
                 {
+                    log.Debug($" ID:{currentCombatant.id} name:{currentCombatant.name} is impared. Turn Skipped!");
                     return;
                 }
 

@@ -229,15 +229,27 @@ namespace Assets.Scripts.UI
         **************************************************************/
         public void onSpriteClicked(in Combatant combatant)
         {
-            if (!turnController.isClientPlayerTurn) return;
-            if (AbilityButton.selectedAbilityIndex == -1) return;
+            if (!turnController.isClientPlayerTurn)
+            {
+                return;
+            }
+            if (AbilityButton.selectedAbilityIndex == -1)
+            {
+                return;
+            }
 
             Ability abilityUsed = turnController.clientAdventurer.abilities[AbilityButton.selectedAbilityIndex];
             //If A monster is hoeverd over with an ally target ability 
-            if (isMonster && abilityUsed.targetingType == TargetingType.ALLIED) return;
-            
+            if (isMonster && abilityUsed.targetingType == TargetingType.ALLIED)
+            {
+                return;
+            }
+
             //If A PLAYER is hoeverd over with an enemy target ability
-            if (!isMonster  && abilityUsed.targetingType == TargetingType.ENEMY) return;
+            if (!isMonster && abilityUsed.targetingType == TargetingType.ENEMY)
+            {
+                return;
+            }
 
             //Auto target abilities automatically allow for valid targets
             if (!turnController.hasValidTarget)

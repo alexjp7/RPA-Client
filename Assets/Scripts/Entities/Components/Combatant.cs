@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using Assets.Scripts.Entities.Abilities;
 using Assets.Scripts.UI;
 using System.Linq;
+using SimpleJSON;
+using Assets.Scripts.Entities.Players;
 
 namespace Assets.Scripts.Entities.Components
 {
@@ -240,5 +242,27 @@ namespace Assets.Scripts.Entities.Components
         @return  - The health value as a decimal value (0-1).
         **************************************************************/
         public float getHealthPercent() { return healthProperties.getHealthPercentage(); }
+
+        public override string ToString()
+        {
+            JSONObject json = new JSONObject();
+            json.Add("type", this.type.ToString());
+            json.Add("id", this.id);
+            json.Add("name", this.name);
+
+            if(type == CombatantType.PLAYER)
+            {
+                json.Add("class", ((this) as Adventurer).classId.ToString());
+
+            }
+
+            JSONObject healthProps = new JSONObject();
+            healthProps.Add("maxHP", healthProperties.maxHealth);
+            healthProps.Add("currentHP", healthProperties.currentHealth);
+
+            json.Add("healthProperties", healthProps);
+            return json.ToString();
+        }
+
     }
 }

@@ -18,11 +18,14 @@ using UnityEngine;
 
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Messages;
+using log4net;
 
 namespace Assets.Scripts.RPA_Game
 {
     public class Game
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Game));
+
         //Game Constants
         public static bool isSinglePlayer;
         public static readonly bool NEW_GAME = true;
@@ -94,6 +97,7 @@ namespace Assets.Scripts.RPA_Game
            
             connectedPlayers = 1;
             players.Add(player);
+            log.Info("Offline game started");
 
         }
 
@@ -122,7 +126,7 @@ namespace Assets.Scripts.RPA_Game
             gameClient.connect();
 
             //Wait for return message of game creation/joining
-            if(gameClient.isConnected())
+            if (gameClient.isConnected())
             {
 
                 Message.send(new ConnectionMessage(playerName, ConnectionMessageType.OUTBOUND));
@@ -132,13 +136,19 @@ namespace Assets.Scripts.RPA_Game
                 if (gameId == -1)
                 {
                     gameMessage = "Game is either full OR doesn't exist yet";
+                    log.Error(gameMessage);
                 }
                 else
                 {
                     isStarted = true;
                 }
             }
-            else gameMessage = "Server Connection failed! Check server status";
+            else
+            {
+                gameMessage = "Server Connection failed! Check server status";
+                log.Error(gameMessage);
+            }
+
         }
 
         /***************************************************************
@@ -171,6 +181,7 @@ namespace Assets.Scripts.RPA_Game
                         ConnectionMessage message = new ConnectionMessage(serverMessage, ConnectionMessageType.INBOUND);
                         result = message.gameId;
                         hasGameId = true;
+                        log.Info($"Succesful connection to a game session with game ID: {result}");
                     }
                 } 
             }
