@@ -14,7 +14,6 @@ namespace Assets.Scripts.GameStates
 {
     public class TurnController
     {
-
         public int turnCount { get; private set; }
         public Adventurer clientAdventurer { get => Game.clientSidePlayer.playerClass; }
         //Combatants
