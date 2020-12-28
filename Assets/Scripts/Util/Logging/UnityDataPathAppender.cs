@@ -9,15 +9,19 @@ using UnityEngine;
 
 public class UnityDataPathAppender : AppenderSkeleton
 {
+    private static readonly String STATE_ID = "STATE_ID";
+    private static readonly String LOG_FILE = "Logs/RPA_Log.log";
+    private static readonly String MARKDOWN_REGEX = "<.*?>";
+
     protected override void Append(LoggingEvent loggingEvent)
     {
         //Add state ID to any 
-        MDC.Set("StateID", StateManager.currentState.ToString());
+        MDC.Set(STATE_ID, StateManager.currentState.ToString());
 
         //Remove rich text for file logging
-        string logMessage = Regex.Replace(RenderLoggingEvent(loggingEvent), "<.*?>", String.Empty);
+        string logMessage = Regex.Replace(RenderLoggingEvent(loggingEvent), MARKDOWN_REGEX, String.Empty);
 
-        File.AppendAllText("Logs/RPA_Log.log", logMessage);
+        File.AppendAllText(LOG_FILE, logMessage);
 
         MDC.Clear();
     }
