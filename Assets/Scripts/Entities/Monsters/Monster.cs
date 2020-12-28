@@ -22,6 +22,7 @@ using Assets.Scripts.Util;
 using System;
 using Assets.Scripts.Entities.Players;
 using UnityEngine;
+using SimpleJSON;
 
 #pragma warning disable 1234
 namespace Assets.Scripts.Entities.Monsters

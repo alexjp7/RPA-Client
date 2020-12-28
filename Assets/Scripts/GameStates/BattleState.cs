@@ -27,6 +27,7 @@ using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.RPA_Messages;
 using System.Threading.Tasks;
+using log4net;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -38,6 +39,8 @@ public class BattleState : MonoBehaviour
     [SerializeField] private Text currentTurnDisplayName;
     private List<AbilityButton> abilityButtons;
 
+    private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
+
     //Client Player Alias
     private Player clientPlayer { get => Game.clientSidePlayer; }
     //Combat Controllers
@@ -48,11 +51,11 @@ public class BattleState : MonoBehaviour
      ---------------------------------------------------------------
     * Called on Scene initialization
     **************************************************************/
-    void Awake()
+    async void Awake()
     {
         initEnvironment(); // Updates static references
         initControllers(); // Constructs turn controller - party leader sends to server 
-        initCombat(); // Sends/Requests combat data to other clients     
+        await initCombat(); // Sends/Requests combat data to other clients     
     }
 
 
@@ -152,7 +155,6 @@ public class BattleState : MonoBehaviour
         initPlayerUI();
     }
 
-
     /***************************************************************f
     * Generates the monster and player party sprites to screen.
     **************************************************************/
@@ -198,7 +200,10 @@ public class BattleState : MonoBehaviour
                 abilityButtons.Add(button);
             }
         }
-        catch (NotImplementedException e) { Debug.Log("ERROR:" + e.Message); }
+        catch (NotImplementedException e) 
+        { 
+            log.Error(e.Message); 
+        }
 
     }
 
@@ -269,6 +274,8 @@ public class BattleState : MonoBehaviour
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
 
+        log.Debug($"<b><color=red>[ATTACK]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" attacks {target.id}:\"{target.name}\" with \"{turnController.lastAbilityUsed.name}\" for <color=red><b>{damageDealt}</b></color>");
+
         //Reflect damage is applies
         if (target.conditions.ContainsKey((int)StatusEffect.REFLECT_DAMAGE))
         {
@@ -309,6 +316,9 @@ public class BattleState : MonoBehaviour
     public void attackTarget(in Combatant target, int damage, string prefix = "")
     {
         int damageDealt = target.applyDamage(damage);
+
+        log.Debug($"<b><color=red>[ATTACK]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" attacks {target.id}:\"{target.name}\"  for <color=red><b>{damageDealt}</b></color>");
+
         if (!target.isAlive())
         {
             Destroy(target.combatSprite.gameObject);
@@ -334,8 +344,11 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
     {
+        String conditionLabel = EffectProcessor.getEffectLabel(statusEffect, potency);
+        log.Debug($"<b><color=blue>[CONDITION]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" affects {target.id}:\"{target.name}\" with <color=blue><b>{conditionLabel}</b></color>");
+
         target.applyEffect(statusEffect, potency, turnsApplied);
-        FloatingPopup.create(target.combatSprite.transform.position, EffectProcessor.getEffectLabel(statusEffect, potency), Color.blue);
+        FloatingPopup.create(target.combatSprite.transform.position, conditionLabel, Color.blue);
     }
 
     /***************************************************************
@@ -351,6 +364,7 @@ public class BattleState : MonoBehaviour
     public void healTarget(in Combatant target, int minHealing, int maxHealing)
     {
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
+        log.Debug($"<b><color=green>[HEAL]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" heals {target.id}:\"{target.name}\" with \"{turnController.lastAbilityUsed.name}\" for <color=green><b>{healingAmount}</b></color>");
         target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
         target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
         FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), new Color(0, 100, 0));

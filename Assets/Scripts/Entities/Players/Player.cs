@@ -33,6 +33,7 @@
 **************************************************************/
 
 using Assets.Scripts.RPA_Game;
+using SimpleJSON;
 using System;
 using UnityEngine;
 
@@ -162,5 +163,12 @@ namespace Assets.Scripts.Entities.Players
         {
             return "id: " + this.id + " name: " + this.name + " class: " + this.adventuringClass + " ready:" + ready;
         }
+
+
+        public override string ToString()
+        {
+            return playerClass.ToString();
+        }
+
     }
 }

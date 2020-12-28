@@ -33,7 +33,7 @@ namespace Assets.Scripts.RPA_Messages
         * The States enum is used to indicate what game state is currently
           being operated on and is shared between client and server.
         **************************************************************/
-        public enum State: int
+        public enum State : int
         {
             CONNECTION = 0,
             CHARACTER_CREATION = 1,
@@ -42,7 +42,10 @@ namespace Assets.Scripts.RPA_Messages
 
         public static void send(Message gameMessage)
         {
-            Game.gameClient.send(gameMessage.message);
+            if (!Game.isSinglePlayer)
+            {
+                Game.gameClient.send(gameMessage.message);
+            }
         }
 
         /***************************************************************

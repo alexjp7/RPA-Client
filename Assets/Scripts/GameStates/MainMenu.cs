@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Util;
+using log4net;
 
 public class MainMenu : MonoBehaviour
 {
@@ -25,6 +26,14 @@ public class MainMenu : MonoBehaviour
     public Text gameIdField;
     public Text notificationMessage;
 
+    private static readonly ILog log = LogManager.GetLogger(typeof(MainMenu));
+
+
+    private void Start()
+    {
+        StateManager.currentState = GameState.MAIN_MENU;
+        log.Info("Main menu startup complete.");
+    }
     /*---------------------------------------------------------------
                         CLIENT EVENT HANDLERS
      ---------------------------------------------------------------*/
@@ -70,10 +79,13 @@ public class MainMenu : MonoBehaviour
             int gameIdEntered = -1;
             if (!Int32.TryParse(gameIdField.text, out gameIdEntered))
             {
+                log.Info("Non-integer value provided for gameID");
                 notificationMessage.text = "Game ID must be a number.";
                 togglePanel(notificationPanel);
+
                 return;
             }
+     
 
             if (Game.start(name2.text, Game.JOINED_GAME, gameIdEntered))
             {
@@ -108,7 +120,7 @@ public class MainMenu : MonoBehaviour
     /***************************************************************
     * Exits the application.
     **************************************************************/
-    private void exitClicked()
+    public void exitClicked()
     {
         Application.Quit();
     }

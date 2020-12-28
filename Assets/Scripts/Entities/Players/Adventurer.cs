@@ -54,6 +54,7 @@ namespace Assets.Scripts.Entities.Players
             abilities = new List<Ability>();
         }
 
+
         public Adventurer(string name)
         {
             this.name = name;
@@ -89,7 +90,11 @@ namespace Assets.Scripts.Entities.Players
         **************************************************************/
         public void loadAbilities(string path, bool isInitialLoad)
         {
-            if (path == "") return;
+            if (path == "")
+            {
+                return;
+            }
+
             int skillLevel = 0;
             string abilityText = File.ReadAllText(path);
             JSONNode json = JSON.Parse(abilityText);
@@ -101,6 +106,7 @@ namespace Assets.Scripts.Entities.Players
                 abilities.Add(AbilityFactory.constructPlayerAbility(abilityJson[i], entityName, skillLevel));
             }
         }
+        
 
         /*---------------------------------------------------------------
                             STATIC INITIALIZERS
@@ -168,6 +174,7 @@ namespace Assets.Scripts.Entities.Players
             }
             return classSprite;
         }
+
 
 
         /***************************************************************
@@ -255,4 +262,5 @@ namespace Assets.Scripts.Entities.Players
             return result;
         }
     }
+
 }

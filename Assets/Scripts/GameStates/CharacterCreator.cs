@@ -108,7 +108,10 @@ public class CharacterCreator : MonoBehaviour
             readyText.text = "Cancel Ready";
             readyButton.interactable = true;
         }
-        else readyText.text = " Ready Up!";
+        else
+        {
+            readyText.text = " Ready Up!";
+        }
 
     }
 
@@ -149,8 +152,15 @@ public class CharacterCreator : MonoBehaviour
     public void readyClicked()
     {
         Game.players[0].ready = !Game.players[0].ready;
-        if(Game.players[0].ready) readyText.text = "Cancel Ready";
-        else readyText.text = " Ready Up!";
+
+        if (Game.players[0].ready)
+        {
+            readyText.text = "Cancel Ready";
+        }
+        else
+        {
+            readyText.text = " Ready Up!";
+        }
 
         renderReadyState(0);
         //Send server ready change
@@ -169,9 +179,20 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     public void classClicked(int classChosen)
     {
-        if (classChosen == Game.players[0].adventuringClass) { return; }
-        if (!selectClass(classChosen, 0)) { return; }
-        if (!readyButton.interactable) readyButton.interactable = true;
+        if (classChosen == Game.players[0].adventuringClass) 
+        { 
+            return; 
+        }
+
+        if (!selectClass(classChosen, 0)) 
+        { 
+            return; 
+        }
+
+        if (!readyButton.interactable)
+        {
+            readyButton.interactable = true;
+        }
 
         classDescription.text = classDescriptions[classChosen];
         classChoice.text = classNames[classChosen];
@@ -201,7 +222,11 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private bool selectClass(int classChosen, int playerIndex)
     {
-        if (classChosen < 0 || classChosen > 3) { return false; }
+        if (classChosen < 0 || classChosen > 3) 
+        { 
+            return false; 
+        }
+
         Game.players[playerIndex].adventuringClass = classChosen;
         partyPanels[playerIndex].setClass(classChosen);
         return true;
@@ -287,7 +312,11 @@ public class CharacterCreator : MonoBehaviour
     **************************************************************/
     private void processServerInstructions(string instructions)
     {
-        if (instructions == "" || instructions[0] == 'a') { return; }
+        if (instructions == "" || instructions[0] == 'a') 
+        { 
+            return; 
+        }
+
         CharacterCreationMessage message = new CharacterCreationMessage(instructions);
         Player player = message.instructionType == 2 || message.instructionType == 3 ? Game.players[Game.connectedPlayers - 1] : null;
         switch ((CreationInstruction)message.instructionType)
