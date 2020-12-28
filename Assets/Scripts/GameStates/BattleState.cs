@@ -37,7 +37,11 @@ public class BattleState : MonoBehaviour
     [SerializeField] private GameObject monster_horizontalLayout;
     [SerializeField] private GameObject abilityBarLayout;
     [SerializeField] private Text currentTurnDisplayName;
-    private List<AbilityButton> abilityButtons;
+    [SerializeField] private GameObject notificationPanel;
+
+
+
+    private List<AbilityButton> abilityButtons = new List<AbilityButton>();
 
     private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
 
@@ -85,7 +89,7 @@ public class BattleState : MonoBehaviour
         turnController = new TurnController();
     }
 
-    private async Task initCombat()
+    public async Task initCombat()
     {
         if (Game.isSinglePlayer)
         {
@@ -177,7 +181,10 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     private void initPlayerUI()
     {
-        abilityButtons = new List<AbilityButton>();
+        if(abilityButtons.Any())
+        {
+            return;
+        }
 
         //Load static assets (namely the lock for default ability icon image)
         try
@@ -200,9 +207,9 @@ public class BattleState : MonoBehaviour
                 abilityButtons.Add(button);
             }
         }
-        catch (NotImplementedException e) 
-        { 
-            log.Error(e.Message); 
+        catch (NotImplementedException e)
+        {
+            log.Error(e.Message);
         }
 
     }
@@ -516,6 +523,7 @@ public class BattleState : MonoBehaviour
     **************************************************************/
     void Update()
     {
+        // Multiplayer server/client communication instruction checks
         if (!Game.isSinglePlayer)
         {
             if (Game.gameClient.ready())
@@ -524,10 +532,48 @@ public class BattleState : MonoBehaviour
             }
         }
 
-        if (turnController.hasNextTurn)
+        // No combat round has started
+        if (!turnController.hasCombat)
         {
-            updateUI();
+            return;
         }
+
+        //Combat is over
+        if (!turnController.hasNextCombatant)
+        {
+            processEndOfCombat();
+        }
+        else
+        {
+            // Next turn can be taken
+            if (turnController.hasNextTurn)
+            {
+                updateUI();
+            }
+        }
+    }
+
+    private void processEndOfCombat()
+    {
+        String panelHeading = "";
+        String panelDescription = "Game will reset in:";
+
+        if (turnController.hasPlayerTeamWon)
+        {
+            panelHeading = "Victory";
+        }
+        else
+        {
+            panelHeading = "Defeat";
+        }
+
+        turnController.hasNextCombatant = true;
+        turnController.hasCombat = false;
+
+        TimerCallBack callBack = initCombat;
+
+        TimedPanel endOfCombatPanel = TimedPanel.create(5,callBack, panelHeading, panelDescription);
+        endOfCombatPanel.transform.SetParent(notificationPanel.transform);
     }
 
     private void processServerInstructions(string instructions)

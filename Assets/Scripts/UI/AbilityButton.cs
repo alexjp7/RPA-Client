@@ -51,6 +51,7 @@ public class AbilityButton : MonoBehaviour
         keyText = gameObject.transform.Find("text_key").GetComponent<Text>();
         icon = button.GetComponent<Image>();
         cooldownText = gameObject.transform.Find("text_cooldown").GetComponent<Text>();
+        cooldownText.color = Color.yellow;
     }
 
     /***************************************************************

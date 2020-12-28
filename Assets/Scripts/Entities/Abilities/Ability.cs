@@ -103,7 +103,7 @@ namespace Assets.Scripts.Entities.Abilities
         /// <summary>
         /// Location on disk where the ability data can be found.
         /// </summary>
-        public static readonly string MONSTER_ABILITY_DATA_PATH = "Assets/Resources/data/ability_data/monster";
+        public static readonly string MONSTER_ABILITY_DATA_PATH = "Assets/Resources/data/ability_data/monsters/";
 
         /// <summary>
         /// Location on disk where ability icon's can be found.

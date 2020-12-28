@@ -28,18 +28,26 @@ namespace Assets.Scripts.GameStates
         public Ability lastAbilityUsed { get; set; }
         public string currentTurnNameDisplay { get => currentCombatant.name; }
         //Flags
+
+        public bool hasCombat { get; set; }
         public bool hasNextTurn { get; set; }
         public bool isClientPlayerTurn { get; private set; }
         public bool isPlayerTurn { get => turnCount % 2 == 1; }
         public bool hasValidTarget { get; set; }
-        private bool hasNextCombatant = true;
+        public bool hasNextCombatant = true;
+        
+        /// <summary>
+        /// Flags whether the player or monster team has won in combat;
+        /// </summary>
+        public bool hasPlayerTeamWon { get; private set; }
 
 
         private bool _hasNextTurn;
         private int currentMonster;
         private int currentPlayer;
 
-        public TurnController()
+        
+        private void resetCombat()
         {
             turnCount = 0;
             currentMonster = 0;
@@ -47,6 +55,7 @@ namespace Assets.Scripts.GameStates
 
             targets = new List<Combatant>();
             hasValidTarget = false;
+            hasCombat = true;
         }
 
         /***************************************************************
@@ -59,6 +68,7 @@ namespace Assets.Scripts.GameStates
         **************************************************************/
         public void initTurnOrder()
         {
+            resetCombat();
             //Set Turn order for players
             System.Random rand = new System.Random();
             Game.players = Game.players.OrderBy(player => rand.Next()).ToList();
@@ -178,6 +188,45 @@ namespace Assets.Scripts.GameStates
                 }
 
             }
+            else
+            {
+                processEndOfCombat();
+            }
+        }
+
+        /// <summary>
+        /// Determines who has won the combat round.
+        /// </summary>
+        private void processEndOfCombat()
+        {
+            bool hasVictor = false;
+
+            foreach(Combatant player in playerParty)
+            {
+                if(player.isAlive())
+                {
+                    hasPlayerTeamWon = true;
+                    hasVictor = true;
+                    break;
+                }
+            }
+
+            if(!hasVictor)
+            {
+                foreach(Combatant monster in monsterParty)
+                {
+                    if(monster.isAlive())
+                    {
+                        hasPlayerTeamWon = false;
+                    }
+                }
+            }
+
+            if(!hasVictor)
+            {
+                hasPlayerTeamWon = false;
+            }
+
         }
 
         /***************************************************************

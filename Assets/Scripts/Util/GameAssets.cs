@@ -26,6 +26,10 @@ namespace Assets.Scripts.Util
                 return _instance;
             }
         }
+
+        //General
+        public Transform timedPanelPrefab;
+
         //BattleState
         public Transform damagePopupPrefab;
         public Transform turnChevronPrefab;
