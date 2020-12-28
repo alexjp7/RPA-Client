@@ -15,7 +15,10 @@ namespace Assets.Scripts.GameStates
 {
     public class TurnController
     {
+<<<<<<< HEAD
         private static readonly ILog log = LogManager.GetLogger(typeof(TurnController));
+=======
+>>>>>>> 53bc9733f2fe1112910281e7b68ecbc389b740a2
         public int turnCount { get; private set; }
         public Adventurer clientAdventurer { get => Game.clientSidePlayer.playerClass; }
         //Combatants

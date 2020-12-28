@@ -7,18 +7,27 @@
     visual component to the player's UI.
 **************************************************************/
 
-using Assets.Scripts.Util;
-using UnityEngine;
-
 namespace Assets.Scripts.Entities.Components
 {
+    using Assets.Scripts.Util;
+    using UnityEngine;
+
     public class Renderable
     {
+        /// <summary>
+        /// The name of the asset that is used as the key in a key-value map that uniquely identifies an asset.
+        /// </summary>
         public string name { get; set; }
+
+        /// <summary>
+        /// The sprite's location on disk (should be within solution project structure).
+        /// </summary>
         public string path { get; set; }
 
-        private Sprite _sprite;
-        //Loaded sprite from file, if not found returns null.
+        /// <summary>
+        /// The underlying Unity <see cref="UnityEngine.Sprite"/> object. Accessing this member will instantiate the sprite if the instance
+        /// holder is <c>null</c>.
+        /// </summary>
         public Sprite sprite
         {
             get
@@ -27,7 +36,6 @@ namespace Assets.Scripts.Entities.Components
                 {
                     _sprite = AssetLoader.getSprite(name, path);
                 }
-
                 return _sprite;
             }
             private set
@@ -36,10 +44,20 @@ namespace Assets.Scripts.Entities.Components
             }
         }
 
-        public Renderable(string _name, string _path)
+        /// <summary>
+        /// Instance holder for sprite
+        /// </summary>
+        private Sprite _sprite;
+
+        /// <summary>
+        /// Sets the renderable component's path and name.
+        /// </summary>
+        /// <param name="name">The name of the asset that is used as the key in a key-value map that uniquely identifies an asset. </param>
+        /// <param name="path">The sprite's location on disk (should be within solution project structure).</param>
+        public Renderable(string name, string path)
         {
-            name = _name;
-            path = _path;
+            this.name = name;
+            this.path = path;
         }
 
         public Renderable()

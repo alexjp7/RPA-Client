@@ -10,16 +10,18 @@
    of both player and monster types.
 **************************************************************/
 
-using System;
-using System.Collections.Generic;
-using Assets.Scripts.Entities.Abilities;
-using Assets.Scripts.UI;
-using System.Linq;
-using SimpleJSON;
-using Assets.Scripts.Entities.Players;
-
 namespace Assets.Scripts.Entities.Components
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Assets.Scripts.Entities.Abilities;
+    using Assets.Scripts.UI;
+
+    /// <summary>
+    /// Combatant types used to be able
+    /// to determine child object type from parent.
+    /// </summary>
     public enum CombatantType
     {
         PLAYER,
@@ -28,7 +30,10 @@ namespace Assets.Scripts.Entities.Components
 
     public abstract class Combatant
     {
-        private readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
+        /// <summary>
+        /// The root location of sprite textures, relative from the /Assets/Data directory 
+        /// </summary>
+        private static readonly string BASE_SPRITE_PATH = "textures/sprite_textures/";
 
         public int id { get; set; }
         public string name { get; set; }
@@ -41,6 +46,13 @@ namespace Assets.Scripts.Entities.Components
         public List<Ability> abilities { get; protected set; }
         public Dictionary<int, Condition> conditions { get; set; }
 
+        /// <summary>
+        /// Accessing this member will instantiate a combatables
+        /// combat sprite if it is <c>null</c>.
+        /// </summary>
+        /// <returns>
+        /// Returns the combat sprite for a combatable.
+        /// </returns>
         public CombatSprite combatSprite
         {
             get
@@ -52,26 +64,42 @@ namespace Assets.Scripts.Entities.Components
                 return _combatSprite;
             }
         }
-        private CombatSprite _combatSprite; //Instance holder
+        /// <summary>
+        /// Instance holder for combat sprite
+        /// </summary>
+        private CombatSprite _combatSprite;
 
-        //Determines if combatant is able to complete a turn
+        /// <summary>
+        /// Checks if combatant has an impairing status effect which will prevent them from taking their turn.
+        /// </summary>
+        /// <returns>
+        /// <list type="bullet">
+        /// <item>
+        /// true - the combatable has an impairing effect on their status bar, which prevents them from taking their turn.
+        /// </item>
+        /// <item>
+        /// false - the combatant is <b>not</b> currently affected by an imparing effect and can perform their turn as normal.
+        /// </item>
+        /// </list>
+        /// </returns>
         public bool isImpaired
         {
             get
             {
-                foreach (var condition in conditions)
+                foreach (var condition in this.conditions)
                 {
                     if (EffectProcessor.ImpairingEffects.Contains((StatusEffect)condition.Key))
                     {
                         return true;
                     }
                 }
-
                 return false;
             }
         }
 
-        //Default Constructor
+        /// <summary>
+        /// Instantaites a combatants renderable asset data, and empty status effect map.
+        /// </summary>
         public Combatant()
         {
             assetPath = BASE_SPRITE_PATH;
@@ -79,27 +107,24 @@ namespace Assets.Scripts.Entities.Components
             conditions = new Dictionary<int, Condition>();
         }
 
-        /***************************************************************
-        * sets the path to load/retrieve the asset of this combatable.
-         
-        @param - spriteName: The toString() value of the player/monster
-        enum.
-        **************************************************************/
+        /// <summary>
+        /// <para>
+        /// Sets the path to load/retrieve the asset of this combatable.
+        /// </para>
+        /// Sprite asset path's are donated by the monster's name appended onto the base asset directory location
+        /// </summary>
+        /// <param name="spriteName"> The <c>toString()</c> value of the player/monster enum.</param>
         protected void setSpritePath(string spriteName)
         {
             assetData.path = assetPath + spriteName;
         }
 
-        /***************************************************************
-        * Provides the base logic for dealing damage.
-         
-        @param - minDamage: The lower bound of the damage being applied
-        that is used to calculate the actual amount dealt.
-        @param - maxDamage: The upper bound of the damage being applied
-        that is used to calculate the actual amount dealt.
-
-        @return  - The damage result.
-        **************************************************************/
+        /// <summary>
+        /// Provides the base logic for dealing damage.
+        /// </summary>
+        /// <param name="minDamage">The lower bound of the damage being applied that is used to calculate the actual amount dealt.</param>
+        /// <param name="maxDamage">The upper bound of the damage being applied that is used to calculate the actual amount dealt.</param>
+        /// <returns>The actual damage dealt.</returns>
         public virtual int applyDamage(int minDamage, int maxDamage)
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
@@ -137,27 +162,24 @@ namespace Assets.Scripts.Entities.Components
             return (int)damageDealt;
         }
 
-        /***************************************************************
-        @Overload - For applying a non-variable amoount of damage
-        @param - damage; the precalculated damage to be dealt
-        @return  - The damage result.
-        **************************************************************/
+
+        /// <summary>
+        /// For applying a fixed amoount of damage
+        /// </summary>
+        /// <param name="damage">the precalculated damage to be dealt</param>
+        /// <returns>The actaul damage dealt</returns>
         public virtual int applyDamage(int damage)
         {
             healthProperties.currentHealth -= damage;
             return (int)damage;
         }
-        /***************************************************************
-        * Provides the base logic for applying a hp recovery/healing
-          effect to a sprite.
 
-        @param - minHealing: The lower bound of the healing being applied
-        that is used to calculate the actual amount healed.
-        @param - maxHealing: The upper bound of the healing being applied
-        that is used to calculate the actual amount healed.
-
-        @return  - The healing result.
-        **************************************************************/
+        /// <summary>
+        /// Provides the base logic for applying a hp recovery/healing effect to a combatant.
+        /// </summary>
+        /// <param name="minValue">The lower bound of the healing being applied that is used to calculate the actual amount healed. </param>
+        /// <param name="maxValue">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
+        /// <returns></returns>
         public virtual int applyHealing(int minValue, int maxValue)
         {
             float damageHealed = Util.Random.getInt(minValue, maxValue);
@@ -166,24 +188,23 @@ namespace Assets.Scripts.Entities.Components
             return (int)damageHealed;
         }
 
-        /***************************************************************
-        * Applies the status effect to this combatable.
-        @param - statusEffect: numeric ID for an ability status effect.
-        see EffectProcess.cs.
-        @param - potency: The strength or duration if applicable of the 
-        status effect.
-        **************************************************************/
+        /// <summary>
+        /// <para>
+        /// Applies the status effect to this combatable.
+        /// </para>
+        /// See the <see cref="Assets.Scripts.Entities.Abilities.EffectProcessor"/> class for effect processing logic.
+        /// </summary>
+        /// <param name="statusEffect">ID for an ability status effect. see EffectProcess.cs.</param>
+        /// <param name="potency">The strength or duration if applicable of the status effect</param>
+        /// <param name="turnsApplied">The amount of combat turns the affect will be applied for.</param>
         public virtual void applyEffect(int statusEffect, int potency, int turnsApplied)
         {
             EffectProcessor.getInstance().applyEffect(this, statusEffect, potency, turnsApplied);
         }
 
-        /***************************************************************
-         * Updates cooldown counters for each ability.
-       
-        @param - effectiveTurnCount: the amount turns taken
-        by a combatable.
-        **************************************************************/
+        /// <summary>
+        /// Updates cooldown counters for each ability.
+        /// </summary>
         public virtual void updateAbilityCooldowns()
         {
             foreach (Ability ability in abilities)
@@ -192,12 +213,10 @@ namespace Assets.Scripts.Entities.Components
             }
         }
 
-        /***************************************************************
-         * Updates cooldown counters for each ability.
-       
-        @param - effectiveTurnCount: the amount turns taken
-        by a combatable.
-        **************************************************************/
+        /// <summary>
+        /// Updates cooldown counters for each ability, and return the list of removed conditions to UI layer. 
+        /// </summary>
+        /// <returns> The list of conditions that have been removed. </returns>
         public List<int> updateConditionDurations()
         {
             List<int> removedConditions = new List<int>();
@@ -215,54 +234,49 @@ namespace Assets.Scripts.Entities.Components
             return removedConditions;
         }
 
-        /***************************************************************
-        @return  - The value of the Combatables MAX health.
-        **************************************************************/
-        public float getMaxHp() { return healthProperties.maxHealth; }
-
-        /***************************************************************
-        @return  - The value of the Combatables CURRENT health.
-        **************************************************************/
-        public float getCurrentHp() { return healthProperties.currentHealth; }
-
-        /***************************************************************
-        @return  - true: this combatable is alive
-                   false: this comtable is dead, and is now ready to be
-                   removed from combat.
-        **************************************************************/
-        public bool isAlive() { return healthProperties.currentHealth > 0; }
-
-        /***************************************************************
-        * Helper function used to determine the fill amount of a player
-           or monsters HP bar.
-        
-        * This function call delegates the processing of the current entities 
-          health percentage to a Damageable component.
-       
-        @return  - The health value as a decimal value (0-1).
-        **************************************************************/
-        public float getHealthPercent() { return healthProperties.getHealthPercentage(); }
-
-        public override string ToString()
+        /// <summary>
+        /// Provides the combatants Max HP.
+        /// </summary>
+        /// <returns>The value of the Combatables <b>MAX</b> health.</returns>
+        public float getMaxHp()
         {
-            JSONObject json = new JSONObject();
-            json.Add("type", this.type.ToString());
-            json.Add("id", this.id);
-            json.Add("name", this.name);
-
-            if(type == CombatantType.PLAYER)
-            {
-                json.Add("class", ((this) as Adventurer).classId.ToString());
-
-            }
-
-            JSONObject healthProps = new JSONObject();
-            healthProps.Add("maxHP", healthProperties.maxHealth);
-            healthProps.Add("currentHP", healthProperties.currentHealth);
-
-            json.Add("healthProperties", healthProps);
-            return json.ToString();
+            return healthProperties.maxHealth;
         }
 
+        /// <summary>
+        /// Provides teh combatants current HP.
+        /// </summary>
+        /// <returns>The value fo the combatnts <b>CURRENT</b> health.</returns>
+        public float getCurrentHp()
+        {
+            return healthProperties.currentHealth;
+        }
+
+        /// <summary>
+        /// Checks to see if the combatant is still alive.
+        /// </summary>
+        /// <returns>
+        /// <list type="bullet">
+        /// <item>
+        /// true - The combatant's current health points if greater then <value>0</value>
+        /// </item>
+        /// <item>
+        /// false - The combatant's current health points has fallen below <value>0</value>, and should be removed from the battle.
+        /// </item>
+        ///</list>
+        /// </returns>
+        public bool isAlive()
+        {
+            return healthProperties.currentHealth > 0;
+        }
+
+        /// <summary>
+        /// Helper function used to calculate the combatant's health as a percentage.
+        /// </summary>
+        /// <returns> the health precentage as a value between <value> 0 - 1</value></returns>
+        public float getHealthPercent()
+        {
+            return healthProperties.getHealthPercentage();
+        }
     }
 }
