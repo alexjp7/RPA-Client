@@ -130,7 +130,7 @@ namespace Assets.Scripts.Entities.Monsters
 
 
 
-        public virtual List<Combatant> getTargets(out Ability abilityUsed, in List<Monster> monsterParty,  List<Adventurer> playerParty)
+        public virtual List<Combatant> getTargets(out Ability abilityUsed, in List<Combatant> monsterParty,  List<Combatant> playerParty)
         {
             List<Combatant> targets = new List<Combatant>();
             abilityUsed = selectAbility(monsterParty, playerParty, ref targets);
@@ -138,7 +138,7 @@ namespace Assets.Scripts.Entities.Monsters
             return targets;
         }
 
-        private Ability selectAbility(List<Monster> monsterParty, List<Adventurer> playerParty, ref List<Combatant> targets)
+        private Ability selectAbility(List<Combatant> monsterParty, List<Combatant> playerParty, ref List<Combatant> targets)
         {
             /*AVAILABLE METHODS FOR COMBATABLES*/
             //Current Health
@@ -147,13 +147,6 @@ namespace Assets.Scripts.Entities.Monsters
             float playerMaxHealth = playerParty[0].healthProperties.maxHealth;
             //Health percent
             float healthPercent = playerParty[0].getHealthPercent();
-
-            //Enemy (player) types
-            PlayerClasses adventuringClass = playerParty[0].classId;
-            if (adventuringClass == PlayerClasses.WARRIOR) ;
-            else if (adventuringClass == PlayerClasses.WIZARD) ;
-            else if (adventuringClass == PlayerClasses.ROGUE) ;
-            else if (adventuringClass == PlayerClasses.CLERIC) ;
 
             //To See what conditions a combatant has - Map status effect id -> condition object
             Dictionary<int, Condition> playerConditions = playerParty[0].conditions; 

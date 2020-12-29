@@ -17,6 +17,7 @@ namespace Assets.Scripts.Entities.Components
     using System.Linq;
     using Assets.Scripts.Entities.Abilities;
     using Assets.Scripts.UI;
+    using SimpleJSON;
 
     /// <summary>
     /// Combatant types used to be able
@@ -214,6 +215,17 @@ namespace Assets.Scripts.Entities.Components
         }
 
         /// <summary>
+        /// Resets all abilities cooldowns, so they can be used for a new encounter.
+        /// </summary>
+        public virtual void resetAbilityCooldowns()
+        {
+            foreach (Ability ability in abilities)
+            {
+                ability.resetCooldown();
+            }
+        }
+
+        /// <summary>
         /// Updates cooldown counters for each ability, and return the list of removed conditions to UI layer. 
         /// </summary>
         /// <returns> The list of conditions that have been removed. </returns>
@@ -277,6 +289,32 @@ namespace Assets.Scripts.Entities.Components
         public float getHealthPercent()
         {
             return healthProperties.getHealthPercentage();
+        }
+
+        /// <summary>
+        /// Resets the combatants health and cooldowns.
+        /// </summary>
+        public void reset()
+        {
+            healthProperties.currentHealth = healthProperties.maxHealth;
+            resetAbilityCooldowns();
+        }
+
+        public JSONObject toJson()
+        {
+            JSONObject json = new JSONObject();
+
+            json.Add("id", id);
+            json.Add("name", name);
+            json.Add("type", type.ToString());
+            json.Add("maxHp", healthProperties.maxHealth);
+
+            return json;
+        }
+
+        public override string ToString()
+        {
+            return toJson().ToString();
         }
     }
 }

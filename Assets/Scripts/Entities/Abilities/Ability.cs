@@ -190,15 +190,15 @@ namespace Assets.Scripts.Entities.Abilities
         /// </summary>
         public void updateCooldown()
         {
-            isOnCooldown = false;
-
             if (lastTurnUsed == -1) return;
+
+            //Don't put abilities with 1 turn CD on cooldown.
             if (cooldown > 1)
             {
                 cooldownTracker --;
                 if ((cooldown) - cooldownTracker > cooldown)
                 {
-                    cooldownTracker = cooldown;
+                    resetCooldown();
                 }
                 else
                 {
@@ -206,7 +206,18 @@ namespace Assets.Scripts.Entities.Abilities
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Resets the cooldown of the ability to its initial value;
+        /// </summary>
+        public void resetCooldown()
+        {
+            isOnCooldown = false;
+            cooldownTracker = cooldown;
+            lastTurnUsed = -1;
+
+        }
+
         /// <summary>
         /// <para>
         /// When an abilities is used, we want to keep track of the turn count of when it was last used.

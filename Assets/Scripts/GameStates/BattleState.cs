@@ -39,8 +39,6 @@ public class BattleState : MonoBehaviour
     [SerializeField] private Text currentTurnDisplayName;
     [SerializeField] private GameObject notificationPanel;
 
-
-
     private List<AbilityButton> abilityButtons = new List<AbilityButton>();
 
     private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
@@ -50,24 +48,22 @@ public class BattleState : MonoBehaviour
     //Combat Controllers
     public TurnController turnController { get; private set; }
 
-    /*---------------------------------------------------------------
-                       GAME STATE INIATIALISATIONS
-     ---------------------------------------------------------------
-    * Called on Scene initialization
-    **************************************************************/
-    async void Awake()
+     void Awake()
     {
         initEnvironment(); // Updates static references
         initControllers(); // Constructs turn controller - party leader sends to server 
-        await initCombat(); // Sends/Requests combat data to other clients     
+        startCombat(); 
     }
 
+    private async void startCombat()
+    {
+        await initCombat(); // Sends/Requests combat data to other clients     
+        turnController.startCombat();
+    }
 
-    /**************************************************************
-    * Sets this script as the current active state script, 
-      allowing for static acces to callback/ui handlers and
-      TurnController.
-    **************************************************************/
+    /// <summary>
+    /// Sets this script as the current active state script, allowing for static acces to callback/ui handlers and TurnController.
+    /// </summary>
     private void initEnvironment()
     {
         if (TestSimulator.isDeveloping) //Flaggged by REQUIRE_TEST_DATA directive in TestSimulaotr
@@ -79,21 +75,25 @@ public class BattleState : MonoBehaviour
         StateManager.setStateScript();
     }
 
-    /**************************************************************
-    * Initialises controller responsible for delegating and enforcing
-      the turn based logic for combat rounds.
-    **************************************************************/
+
+    /// <summary>
+    /// Initialises controller responsible for delegating and enforcing the turn based logic for combat rounds.
+    /// </summary>
     private void initControllers()
     {
-        //Combat-wide controllers....
         turnController = new TurnController();
     }
 
+    /// <summary>
+    /// Initializes combat order, monster party and handles any server/client communication
+    /// </summary>
+    /// <returns>The initialisation task which awaits the return of any server communication.</returns>
     public async Task initCombat()
     {
         if (Game.isSinglePlayer)
         {
-            turnController.initTurnOrder();
+            turnController.resetCombat();
+            turnController.generateTurnOrder();
             turnController.initMonsterParty(4);
             initBattleField(); // UI initialisation
         }
@@ -101,7 +101,7 @@ public class BattleState : MonoBehaviour
         {
             if (clientPlayer.isPartyLeader)
             {
-                turnController.initTurnOrder();
+                turnController.generateTurnOrder();
                 turnController.initMonsterParty(4);
                 await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)));
                 initBattleField();
@@ -114,15 +114,23 @@ public class BattleState : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializes turnorder and monster party based on server response
+    /// </summary>
+    /// <returns>A task containing the battle state and data</returns>
     private async Task requestBattleData()
     {
         //Wait for party leader to send combat oder/monster party data
         BattleMessage message = await Task.Run(() => awaitCombatInit());
 
-        turnController.initTurnOrder(message.turnOrder);
+        turnController.generateTurnOrder(message.turnOrder);
         turnController.initMonsterParty(message.monsters);
     }
 
+    /// <summary>
+    /// Waits for server to reply with a battle message that will be used to initialzie combat.
+    /// </summary>
+    /// <returns>The battlemessage containing the list of monsters and their turn order.</returns>
     private BattleMessage awaitCombatInit()
     {
         bool hasData = false;
@@ -148,10 +156,10 @@ public class BattleState : MonoBehaviour
 
     /*---------------------------------------------------------------
                         UI-INIATIALISATIONS
-    ---------------------------------------------------------------
-    /**************************************************************
-    * Initializes any UI components
-    **************************************************************/
+    ---------------------------------------------------------------*/
+    /// <summary>
+    /// Initializes any UI components
+    /// </summary>
     private void initBattleField()
     {
         AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
@@ -159,29 +167,28 @@ public class BattleState : MonoBehaviour
         initPlayerUI();
     }
 
-    /***************************************************************f
-    * Generates the monster and player party sprites to screen.
-    **************************************************************/
+    /// <summary>
+    /// Generates the monster and player party sprites to screen
+    /// </summary>
     private void generateCombatantSprites()
     {
-        foreach (Monster monster in turnController.monsterParty)
+        foreach (Monster monster in turnController.monsterParty.asList())
         {
             monster.combatSprite.transform.SetParent(monster_horizontalLayout.transform);
         }
 
-        foreach (Adventurer player in turnController.playerParty)
+        foreach (Adventurer player in turnController.playerParty.asList())
         {
             player.combatSprite.transform.SetParent(player_horizontalLayout.transform);
         }
     }
 
-    /***************************************************************
-    * initPlayerUI() calls a load function to retrieve the ability
-      icon textures from disk.
-    **************************************************************/
+    /// <summary>
+    /// Calls a load function to retrieve the ability icon textures from disk.
+    /// </summary>
     private void initPlayerUI()
     {
-        if(abilityButtons.Any())
+        if (abilityButtons.Any())
         {
             return;
         }
@@ -214,19 +221,13 @@ public class BattleState : MonoBehaviour
 
     }
 
-    void Start()
-    {
-        turnController.startCombat();
-    }
-
     /*---------------------------------------------------------------
                     BATTLE-STATE CONTROL FLOWS
      ---------------------------------------------------------------*/
-    //START OF TURN
-    /***************************************************************
-    * Client side processing of any status-effects (buffs/debuffs)
-      that require exeucting at the start of a turn
-    **************************************************************/
+    /// <summary>
+    /// Client side processing of any status-effects(buffs/debuffs) that require exeucting at the start of a turn
+    /// </summary>
+    /// <param name="combatant"> The combatant whos turn it is.</param>
     public void applyBeforeEffects(in Combatant combatant)
     {
         //Select All the precondition effects
@@ -247,11 +248,10 @@ public class BattleState : MonoBehaviour
         }
     }
 
-    //END OF TURN
-    /***************************************************************
-    * Client side processing of any special-case scenarios
-      when applying certian status effects. 
-    **************************************************************/
+    /// <summary>
+    /// Client side processing of any special-case scenarios when applying certian status effects
+    /// </summary>
+    /// <param name="ability">The ability which was used on a turn.</param>
     public void applyAfterEffect(ref Ability ability)
     {
         switch ((StatusEffect)ability.statusEffect)
@@ -264,19 +264,16 @@ public class BattleState : MonoBehaviour
 
 
     //DURING TURN
-    /***************************************************************
-    * Performs a damaging action on a target; updates new hp value
-      to the HP bar fill-amount and text value.
-    
-    * Additionaly, if the damage applied to a target causes their hp
-      to fall below 0, the combat sprite is destroyed.
-
-      @param - target: The combatant of which the ability is applied too.
-      @param - minDamage: The lower bound of the damage being applied
-      that is used to calculate the actual amount dealt.
-      @param - maxDamage: The upper bound of the damage being applied
-      that is used to calculate the actual amount dealt.
-    **************************************************************/
+    /// <summary>
+    /// <para>
+    /// Performs a damaging action on a target; updates new hp value to the HP bar fill-amount and text value.
+    /// </para>
+    /// Additionaly, if the damage applied to a target causes their hp  to fall below 0, the combat sprite is destroyed.
+    /// </summary>
+    /// <param name="target">The combatant of which the ability is applied too.</param>
+    /// <param name="caster">The combatant which used the ability on the target.</param>
+    /// <param name="minDamage">The lower bound of the damage being applied that is used to calculate the actual amount dealt.</param>
+    /// <param name="maxDamage">The upper bound of the damage being applied that is used to calculate the actual amount dealt.</param>
     public void attackTarget(in Combatant target, in Combatant caster, int minDamage, int maxDamage)
     {
         int damageDealt = target.applyDamage(minDamage, maxDamage);
@@ -316,10 +313,12 @@ public class BattleState : MonoBehaviour
     }
 
 
-    /***************************************************************
-    @Overload - Allows for precalculated damage to be done to a target
-    in special combat conditions.
-    **************************************************************/
+    /// <summary>
+    /// Allows for precalculated damage to be done to a target in special combat conditions.
+    /// </summary>
+    /// <param name="target">The combatant of which the ability is applied too.</param>
+    /// <param name="damage">The amount of damage dealt to the target</param>
+    /// <param name="prefix">The text prefix that will be displayed alongside the damage number</param>
     public void attackTarget(in Combatant target, int damage, string prefix = "")
     {
         int damageDealt = target.applyDamage(damage);
@@ -338,17 +337,14 @@ public class BattleState : MonoBehaviour
 
         FloatingPopup.create(target.combatSprite.transform.position, $"{prefix}  {damageDealt.ToString()}", Color.red);
     }
-    /***************************************************************
-    * Applies a combat status-effect to a target and displays
-      text to user to indicate the abilitiy's effects.
 
-
-    @param - target: The combatant of which the ability is applied too
-    @param - statusEffect: numeric ID for an ability status effect.
-    see EffectProcess.cs.
-    @param - potency: The strength or duration if applicable of the 
-    status effect
-    **************************************************************/
+    /// <summary>
+    /// Applies a combat status-effect to a target and displays text to user to indicate the abilitiy's effects.
+    /// </summary>
+    /// <param name="target">The combatant of which the ability is applied too</param>
+    /// <param name="statusEffect">ID for an ability status effect. <see cref="Assets.Scripts.Entities.Abilities.EffectProcessor">EffectProcessor</see></param>
+    /// <param name="potency">The strength or duration if applicable of the status effect</param>
+    /// <param name="turnsApplied"></param>
     public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
     {
         String conditionLabel = EffectProcessor.getEffectLabel(statusEffect, potency);
@@ -358,16 +354,13 @@ public class BattleState : MonoBehaviour
         FloatingPopup.create(target.combatSprite.transform.position, conditionLabel, Color.blue);
     }
 
-    /***************************************************************
-    * Performs a healing action on a target; updates new hp value
-      to the HP bar fill-amount and text value.
 
-      @param - target: The combatant of which the ability is applied too
-      @param - minHealing: The lower bound of the healing being applied
-      that is used to calculate the actual amount healed.
-      @param - maxHealing: The upper bound of the healing being applied
-      that is used to calculate the actual amount healed.
-    **************************************************************/
+    /// <summary>
+    /// Performs a healing action on a target; updates new hp value to the HP bar fill-amount and text value.
+    /// </summary>
+    /// <param name="target">The combatant of which the ability is applied too</param>
+    /// <param name="minHealing">The lower bound of the healing being applied that is used to calculate the actual amount healed.</param>
+    /// <param name="maxHealing">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
     public void healTarget(in Combatant target, int minHealing, int maxHealing)
     {
         int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
@@ -379,10 +372,10 @@ public class BattleState : MonoBehaviour
 
     /*---------------------------------------------------------------
                        UI-CALLBACKS 
-     ---------------------------------------------------------------
-   * The combatant with an active turn has their green turn
-     chevron indicator enabled, name dispalyed in bottom left
-   **************************************************************/
+     ---------------------------------------------------------------*/
+    /// <summary>
+    /// The combatant with an active turn has their green turn chevron indicator enabled, name dispalyed in bottom left
+    /// </summary>
     public void updateTurnUi()
     {
         Combatant currentCombatant = turnController.currentCombatant;
@@ -392,9 +385,11 @@ public class BattleState : MonoBehaviour
         currentTurnDisplayName.text = currentCombatant.name;
     }
 
+    /// <summary>
+    /// Update condition effect duractions for current combatant and redraw changes.
+    /// </summary>
     public void updateConditionUI()
     {
-        //Update condition effect duractions for current combatant
         Combatant currentCombatant = turnController.currentCombatant;
         List<int> removedConditions = currentCombatant.updateConditionDurations();
         if (removedConditions.Count > 0)
@@ -405,24 +400,20 @@ public class BattleState : MonoBehaviour
             }
         }
 
-        //Redraw conditions for all Combatants
-        foreach (var players in turnController.playerParty.FindAll(player => player.isAlive()))
+        foreach (var players in turnController.playerParty.asList().FindAll(player => player.isAlive()))
         {
             players.combatSprite.updateConditions();
         }
 
-        foreach (var monsters in turnController.monsterParty.FindAll(monster => monster.isAlive()))
+        foreach (var monsters in turnController.monsterParty.asList().FindAll(monster => monster.isAlive()))
         {
             monsters.combatSprite.updateConditions();
         }
     }
 
-    /***************************************************************
-    *  Calls for cooldown trackers to be updated
-
-    @param - isPlayerTurn - passed in to setCooldownUI to determine
-    what colors and values to update the coodlown UI with.
-    **************************************************************/
+    /// <summary>
+    /// Calls for cooldown trackers to be updated 
+    /// </summary>
     private void updateCooldownUI()
     {
         for (int i = 0; i < clientPlayer.playerClass.abilities.Count; i++)
@@ -431,14 +422,10 @@ public class BattleState : MonoBehaviour
         }
     }
 
-    /***************************************************************
-    * Updates the UI components to reflect the current ability
-      cooldowns in progres
-
-    @param - isPlayerTurn - if true, all non-cooldowned abilities
-    will become visually active - if false the  ability panel
-    will be visually disabled.
-    **************************************************************/
+    /// <summary>
+    /// Updates the UI components to reflect the current ability cooldowns in progres 
+    /// </summary>
+    /// <param name="abilityIndex">The index of the ability that was used on a combatant's turn.</param>
     public void setCooldownUI(int abilityIndex)
     {
         bool isPlayerTurn = turnController.isClientPlayerTurn;
@@ -461,7 +448,6 @@ public class BattleState : MonoBehaviour
             {
                 color.a = 1f;
                 abilityButton.cooldownText.text = "";
-                ability.setLastTurnUsed(-1);
             }
         }
         else
@@ -482,19 +468,22 @@ public class BattleState : MonoBehaviour
     /*---------------------------------------------------------------
                         TEST/DEBUG FUNCTION
     /***************************************************************
-    * Used to 'skip'/progress the turn order to next combatant
-     is used as an event handler for End Turn button,
-     and should only be used during debug/development.
     **************************************************************/
+    /// <summary>
+    /// Used to 'skip'/progress the turn order to next combatant is used as an event handler for End Turn button.
+    /// </summary>
+    /// <remarks> 
+    /// This should only be used during <b>debug/development</b>.
+    /// </remarks>
     public void skipTurn()
     {
         turnController.takeTurn();
     }
 
 
-    /***************************************************************
-    * Updates The UI to reflect a new turn in the combat order.
-    **************************************************************/
+    /// <summary>
+    /// Updates The UI to reflect a new turn in the combat order. 
+    /// </summary>
     private void updateUI()
     {
         updateTurnUi();
@@ -515,12 +504,9 @@ public class BattleState : MonoBehaviour
         }
     }
 
-
-
-    /***************************************************************
-    * Checks for a new turn comamnd to be isused by the TurnController
-     and executes various callbacks to reflect the current turn.
-    **************************************************************/
+    /// <summary>
+    /// Checks for a new turn comamnd to be isused by the TurnController and executes various callbacks to reflect the current turn. 
+    /// </summary>
     void Update()
     {
         // Multiplayer server/client communication instruction checks
@@ -539,7 +525,7 @@ public class BattleState : MonoBehaviour
         }
 
         //Combat is over
-        if (!turnController.hasNextCombatant)
+        if (turnController.hasCombatEnded)
         {
             processEndOfCombat();
         }
@@ -553,10 +539,13 @@ public class BattleState : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Displays victory/defeat panel and resets the combat encounter
+    /// </summary>
     private void processEndOfCombat()
     {
-        String panelHeading = "";
-        String panelDescription = "Game will reset in:";
+        string panelHeading = "";
+        string panelDescription = "Game will reset in:";
 
         if (turnController.hasPlayerTeamWon)
         {
@@ -567,12 +556,12 @@ public class BattleState : MonoBehaviour
             panelHeading = "Defeat";
         }
 
-        turnController.hasNextCombatant = true;
+        turnController.hasCombatEnded = true;
         turnController.hasCombat = false;
 
-        TimerCallBack callBack = initCombat;
+        TimerCallBack callBack = startCombat;
 
-        TimedPanel endOfCombatPanel = TimedPanel.create(5,callBack, panelHeading, panelDescription);
+        TimedPanel endOfCombatPanel = TimedPanel.create(5, callBack, panelHeading, panelDescription);
         endOfCombatPanel.transform.SetParent(notificationPanel.transform);
     }
 
@@ -610,7 +599,7 @@ public class BattleState : MonoBehaviour
             //Buff/heal ally
             if (message.abilityTargeting == TargetingType.ALLIED)
             {
-                foreach (var target in turnController.playerParty)
+                foreach (var target in turnController.playerParty.asList())
                 {
                     if (target.isAlive())
                     {
@@ -629,7 +618,7 @@ public class BattleState : MonoBehaviour
                 FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
                 foreach (var target in message.targets)
                 {
-                    Combatant enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty.asList()[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);
@@ -643,7 +632,7 @@ public class BattleState : MonoBehaviour
 
                 foreach (var target in message.targets)
                 {
-                    Combatant enemyMonster = turnController.monsterParty[target.Key];
+                    Combatant enemyMonster = turnController.monsterParty.asList()[target.Key];
                     //Calculate damage taken as this clients value for the mosnter's hp - the new value
                     int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
                     attackTarget(enemyMonster, damageDealt);

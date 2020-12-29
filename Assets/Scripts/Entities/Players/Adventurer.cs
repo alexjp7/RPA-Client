@@ -261,6 +261,13 @@ namespace Assets.Scripts.Entities.Players
             }
             return result;
         }
+
+        public override string ToString()
+        {
+            JSONObject parentJSON = toJson();
+            parentJSON.Add("class", classId.ToString());
+            return parentJSON.ToString();
+        }
     }
 
 }

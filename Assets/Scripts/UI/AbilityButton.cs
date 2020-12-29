@@ -161,7 +161,7 @@ public class AbilityButton : MonoBehaviour
             //Multi Target 
             case AbilityTypes.MULTI_DAMAGE:
             case AbilityTypes.MULTI_DEBUFF:
-                turnController.monsterParty //Update monster sprite colors 
+                turnController.monsterParty.asList()//Update monster sprite colors 
                 .FindAll(monster => monster.isAlive())
                 .ForEach(monster => {
                     monster.combatSprite.sprite.color = Color.red;
@@ -171,7 +171,7 @@ public class AbilityButton : MonoBehaviour
 
             case AbilityTypes.MULTI_HEAL:
             case AbilityTypes.MULTI_BUFF:
-                turnController.playerParty //Update Player sprite colors
+                turnController.playerParty.asList() //Update Player sprite colors
                 .FindAll(player => player.isAlive())
                 .ForEach(player => {
                     player.combatSprite.sprite.color = Color.green;
