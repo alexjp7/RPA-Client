@@ -18,6 +18,7 @@ namespace Assets.Scripts.Entities.Components
     using Assets.Scripts.Entities.Abilities;
     using Assets.Scripts.UI;
     using SimpleJSON;
+    using Assets.Scripts.Entities.Containers;
 
     /// <summary>
     /// Combatant types used to be able
@@ -44,7 +45,9 @@ namespace Assets.Scripts.Entities.Components
         //Components
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
-        public List<Ability> abilities { get; protected set; }
+
+        public Abilities abilities { get; protected set; }
+
         public Dictionary<int, Condition> conditions { get; set; }
 
         /// <summary>
@@ -208,10 +211,7 @@ namespace Assets.Scripts.Entities.Components
         /// </summary>
         public virtual void updateAbilityCooldowns()
         {
-            foreach (Ability ability in abilities)
-            {
-                ability.updateCooldown();
-            }
+            abilities.updateCooldowns();
         }
 
         /// <summary>
@@ -219,10 +219,7 @@ namespace Assets.Scripts.Entities.Components
         /// </summary>
         public virtual void resetAbilityCooldowns()
         {
-            foreach (Ability ability in abilities)
-            {
-                ability.resetCooldown();
-            }
+            abilities.resetCooldowns();
         }
 
         /// <summary>

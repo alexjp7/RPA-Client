@@ -60,7 +60,6 @@ namespace Assets.Scripts.Util
             if (!hasTestData)
             {
                 StateManager.currentState = gameState;
-                createTestPlayers();
 
                 switch (gameState)
                 {
@@ -72,6 +71,8 @@ namespace Assets.Scripts.Util
 
                     case GameState.BATTLE_STATE:
                         initClassData();
+                        createTestPlayers();
+
                         break;
 
                     default:

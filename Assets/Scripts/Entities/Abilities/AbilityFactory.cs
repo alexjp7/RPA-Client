@@ -96,6 +96,7 @@ namespace Assets.Scripts.Entities.Abilities
 
     class AbilityFactory
     {
+
         /***************************************************************
         * Targeting Classifications/Groupings for ability Selection
         **************************************************************/

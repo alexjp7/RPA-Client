@@ -51,8 +51,8 @@ namespace Assets.Scripts.Util
         {
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.GetComponent<RectTransform>(), Input.mousePosition, uiCamera, out localPoint);
-            localPoint.x += 150;
-            localPoint.y += 150;
+            localPoint.x += 220;
+            localPoint.y += 220;
             transform.localPosition = localPoint;
         }
 

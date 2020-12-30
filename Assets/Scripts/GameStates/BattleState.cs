@@ -196,7 +196,6 @@ public class BattleState : MonoBehaviour
         //Load static assets (namely the lock for default ability icon image)
         try
         {
-            clientPlayer.playerClass.loadAbilities(Adventurer.getAbilityPath(clientPlayer.playerClass.classId), true);
             for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
             {
                 AbilityButton button;
@@ -376,7 +375,7 @@ public class BattleState : MonoBehaviour
     /// <summary>
     /// The combatant with an active turn has their green turn chevron indicator enabled, name dispalyed in bottom left
     /// </summary>
-    public void updateTurnUi()
+    public void updateTurnUI()
     {
         Combatant currentCombatant = turnController.currentCombatant;
         Combatant nextCombatant = turnController.nextCombatant;
@@ -486,7 +485,7 @@ public class BattleState : MonoBehaviour
     /// </summary>
     private void updateUI()
     {
-        updateTurnUi();
+        updateTurnUI();
         updateCooldownUI();
 
         if (turnController.turnCount > 1)

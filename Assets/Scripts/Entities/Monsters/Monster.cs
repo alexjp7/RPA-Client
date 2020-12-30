@@ -75,7 +75,6 @@ namespace Assets.Scripts.Entities.Monsters
             id = monsterCount++;
             assetPath += "monster_textures/";
             name = getNamePrefix();
-            abilities = new List<Ability>();
             healthProperties = new Damageable();
             type = CombatantType.MONSTER;
         }
