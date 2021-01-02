@@ -11,7 +11,7 @@ using UnityEngine;
 using System;
 
 
-namespace Assets.Scripts.Entities.Abilities
+namespace Assets.Scripts.Entities.Combat
 {
     /// <summary>
     /// Status effect types
@@ -71,7 +71,7 @@ namespace Assets.Scripts.Entities.Abilities
             {
                 /******IMEDIATE EFFECT*******/
                 case StatusEffect.COOLDOWN_CHANGE:
-                    target.abilities.ForEach(ability => ability.cooldownTracker += potency);
+                    target.abilities.getAll().ForEach(ability => ability.cooldownTracker += potency);
                     break;
 
                 case StatusEffect.REFLECT_DAMAGE: //Add new effect, or extend effect if exists

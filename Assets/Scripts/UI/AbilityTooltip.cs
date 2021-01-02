@@ -8,7 +8,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 
 namespace Assets.Scripts.Util
 {
@@ -51,8 +51,8 @@ namespace Assets.Scripts.Util
         {
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.GetComponent<RectTransform>(), Input.mousePosition, uiCamera, out localPoint);
-            localPoint.x += 150;
-            localPoint.y += 150;
+            localPoint.x += 220;
+            localPoint.y += 220;
             transform.localPosition = localPoint;
         }
 
@@ -90,7 +90,7 @@ namespace Assets.Scripts.Util
         private string constructTypeString(int[] ids)
         {
             string result = "";
-            string[] typeStrings = AbilityFactory.getAbilityTypeLabel(ids);
+            string[] typeStrings = AbilityUtils.getAbilityTypeLabel(ids);
             for(int i = 0; i < typeStrings.Length; i++)
             {
                 result += typeStrings[i] + " ";

@@ -9,7 +9,7 @@
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
 **************************************************************/
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.Util;
@@ -126,7 +126,7 @@ namespace Assets.Scripts.RPA_Messages
                 turnOrder.Add(JSON.Parse(player.ToString()));
             }
 
-            foreach (var monster in turnController.monsterParty)
+            foreach (var monster in turnController.monsterParty.asList())
             {
                 JSONObject monsterObject = new JSONObject();
                 monsterObject.Add("type", monster.assetData.name);

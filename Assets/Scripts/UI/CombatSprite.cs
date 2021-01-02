@@ -7,7 +7,7 @@
 
  * This script is attached to the CombaSprite prefab.
 **************************************************************/
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
@@ -266,7 +266,7 @@ namespace Assets.Scripts.UI
             {
                 foreach (int abilityType in abilityUsed.typeIds)
                 {
-                    MetaType metaType = AbilityFactory.getMetaType(abilityType);
+                    MetaType metaType = AbilityUtils.getMetaType(abilityType);
                     if (target.combatSprite.isMonster)
                     {
                         if (metaType == MetaType.DAMAGE)

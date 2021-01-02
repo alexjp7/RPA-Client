@@ -15,8 +15,10 @@ namespace Assets.Scripts.Entities.Components
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Assets.Scripts.Entities.Abilities;
+    using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.UI;
+    using SimpleJSON;
+    using Assets.Scripts.Entities.Containers;
 
     /// <summary>
     /// Combatant types used to be able
@@ -43,7 +45,9 @@ namespace Assets.Scripts.Entities.Components
         //Components
         public Renderable assetData { get; set; }
         public Damageable healthProperties { get; protected set; }
-        public List<Ability> abilities { get; protected set; }
+
+        public Abilities abilities { get; protected set; }
+
         public Dictionary<int, Condition> conditions { get; set; }
 
         /// <summary>
@@ -192,7 +196,7 @@ namespace Assets.Scripts.Entities.Components
         /// <para>
         /// Applies the status effect to this combatable.
         /// </para>
-        /// See the <see cref="Assets.Scripts.Entities.Abilities.EffectProcessor"/> class for effect processing logic.
+        /// See the <see cref="Assets.Scripts.Entities.Combat.EffectProcessor"/> class for effect processing logic.
         /// </summary>
         /// <param name="statusEffect">ID for an ability status effect. see EffectProcess.cs.</param>
         /// <param name="potency">The strength or duration if applicable of the status effect</param>
@@ -207,10 +211,15 @@ namespace Assets.Scripts.Entities.Components
         /// </summary>
         public virtual void updateAbilityCooldowns()
         {
-            foreach (Ability ability in abilities)
-            {
-                ability.updateCooldown();
-            }
+            abilities.updateCooldowns();
+        }
+
+        /// <summary>
+        /// Resets all abilities cooldowns, so they can be used for a new encounter.
+        /// </summary>
+        public virtual void resetAbilityCooldowns()
+        {
+            abilities.resetCooldowns();
         }
 
         /// <summary>
@@ -277,6 +286,32 @@ namespace Assets.Scripts.Entities.Components
         public float getHealthPercent()
         {
             return healthProperties.getHealthPercentage();
+        }
+
+        /// <summary>
+        /// Resets the combatants health and cooldowns.
+        /// </summary>
+        public void reset()
+        {
+            healthProperties.currentHealth = healthProperties.maxHealth;
+            resetAbilityCooldowns();
+        }
+
+        public JSONObject toJson()
+        {
+            JSONObject json = new JSONObject();
+
+            json.Add("id", id);
+            json.Add("name", name);
+            json.Add("type", type.ToString());
+            json.Add("maxHp", healthProperties.maxHealth);
+
+            return json;
+        }
+
+        public override string ToString()
+        {
+            return toJson().ToString();
         }
     }
 }

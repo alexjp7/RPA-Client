@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
+using Assets.Scripts.Entities.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,12 @@ namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
     class FuzzBall : Monster
     {
-        private static List<Ability> abilityList = AbilityFactory.constructMonsterAbilities(typeof(FuzzBall).Name);
-
+        private static Containers.Abilities harpyabilities = new Containers.Abilities(Ability.MONSTER_ABILITY_DATA_PATH + typeof(FuzzBall).Name, CombatantType.MONSTER);
         public FuzzBall()
         {
             name += " FuzzBall";
             setSpriteData(GetType().Name.ToString());
-            abilities = new List<Ability>(abilityList);
+            abilities = new Containers.Abilities(harpyabilities);
             healthProperties.setHealthValues(20);
         }
 

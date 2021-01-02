@@ -33,7 +33,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Warrior(string name, int id) : base (name, id)
         {
-            this.setId(PlayerClasses.WARRIOR);
+            this.setCommonData(PlayerClasses.WARRIOR);
         }
     }
 }

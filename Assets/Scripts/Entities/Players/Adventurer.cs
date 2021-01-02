@@ -21,13 +21,13 @@ using System.IO;
 
 using UnityEngine;
 using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Abilities;
-
+using Assets.Scripts.Entities.Combat;
+using Assets.Scripts.Entities.Containers;
 using SimpleJSON;
 
 namespace Assets.Scripts.Entities.Players
 {
-    public enum PlayerClasses: int
+    public enum PlayerClasses : int
     {
         WARRIOR = 0,
         WIZARD = 1,
@@ -51,7 +51,6 @@ namespace Assets.Scripts.Entities.Players
             assetPath += PLAYER_SPRITE_PATH;
             name = _name;
             type = CombatantType.PLAYER;
-            abilities = new List<Ability>();
         }
 
 
@@ -72,41 +71,14 @@ namespace Assets.Scripts.Entities.Players
         @param - classId: The sub-classes adventuring class type
         (Warrior, Wizard, Rogue or Cleric). 
         **************************************************************/
-        protected void setId(PlayerClasses classId)
+        protected void setCommonData(PlayerClasses classId)
         {
             this.classId = classId;
+            abilities = new Abilities(getAbilityPath(classId), type, true);
             healthProperties = new Damageable(classId);
             assetData.name = classId.ToString();
             setSpritePath(classId.ToString());
         }
-
-        /***************************************************************
-        * Loads and constructs the abilities from disk for the 
-          client side player.
-
-        @param: isInitialLoad  - flags whetther initial ability pool 
-        should be  loaded or an ability list reflective of the current 
-        progress in a game session.
-        **************************************************************/
-        public void loadAbilities(string path, bool isInitialLoad)
-        {
-            if (path == "")
-            {
-                return;
-            }
-
-            int skillLevel = 0;
-            string abilityText = File.ReadAllText(path);
-            JSONNode json = JSON.Parse(abilityText);
-            JSONArray abilityJson = isInitialLoad ? json["starting_abilities"].AsArray : json["abilities"].AsArray;
-            string entityName = json["entity"];
-            //Construct abilities
-            for (int i = 0; i < abilityJson.Count; i++)
-            {
-                abilities.Add(AbilityFactory.constructPlayerAbility(abilityJson[i], entityName, skillLevel));
-            }
-        }
-        
 
         /*---------------------------------------------------------------
                             STATIC INITIALIZERS
@@ -175,60 +147,6 @@ namespace Assets.Scripts.Entities.Players
             return classSprite;
         }
 
-
-
-        /***************************************************************
-        * Creates a unique list of classIds and loads unique assets once.
-            e.g. The player party is 2  Wizards and 2 Rogues,
-                 the Wizard and Rogue models are only loaded once.
-
-        @param - players: the list of players in the game, used
-        to iterate over and generate a unique class Id set.
-        **************************************************************/
-        public static void setClassSprites(in List<Player> players)
-        {
-            /*
-            Sprite[] playerTextures = Resources.LoadAll<Sprite>("Textures/class_icons/playerClasses");
-            HashSet<int> classSet = new HashSet<int>();
-            players.ForEach(player => classSet.Add(player.adventuringClass));
-
-            string abilityPath = "";
-            foreach (int playerClass in classSet)
-            {
-                Sprite sprite = playerTextures.Where(texture => texture.name == playerClass.ToString()).First<Sprite>();
-                switch ((PlayerClasses)playerClass)
-                {
-                    case PlayerClasses.WARRIOR:
-                        Warrior.staticAssets = new Renderable();
-                        Warrior.staticAssets.model = sprite;
-                        abilityPath = Warrior.abilityPath;
-                        break;
-
-                    case PlayerClasses.WIZARD:
-                        Wizard.staticAssets = new Renderable();
-                        Wizard.staticAssets.model = sprite;
-                        abilityPath = Wizard.abilityPath;
-                        break;
-
-                    case PlayerClasses.ROGUE:
-                        Rogue.staticAssets = new Renderable();
-                        Rogue.staticAssets.model = sprite;
-                        abilityPath = Rogue.abilityPath;
-                        break;
-
-                    case PlayerClasses.CLERIC:
-                        Cleric.staticAssets = new Renderable();
-                        Cleric.staticAssets.model = sprite;
-                        abilityPath = Cleric.abilityPath;
-                        break;
-                    default:
-                        throw new NotImplementedException("Class Doesn't Exist");
-                }
-            }
-            */
-        }
-
-
         /***************************************************************
         @param - classId: The sub-class's adventuring class type
         (Warrior, Wizard, Rogue or Cleric). 
@@ -261,6 +179,12 @@ namespace Assets.Scripts.Entities.Players
             }
             return result;
         }
-    }
 
+        public override string ToString()
+        {
+            JSONObject parentJSON = toJson();
+            parentJSON.Add("class", classId.ToString());
+            return parentJSON.ToString();
+        }
+    }
 }

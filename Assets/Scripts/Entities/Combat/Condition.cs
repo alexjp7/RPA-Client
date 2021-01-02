@@ -6,7 +6,7 @@
   how long it lasts for (in turns) and how strong is the effect is.
 ***************************************************************/
 
-namespace Assets.Scripts.Entities.Abilities
+namespace Assets.Scripts.Entities.Combat
 {
 
     public class Condition

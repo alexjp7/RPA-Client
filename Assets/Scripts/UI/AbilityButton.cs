@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
+using Assets.Scripts.Entities.Containers;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
@@ -10,13 +11,19 @@ using UnityEngine.UI;
 public class AbilityButton : MonoBehaviour
 {
     public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y };
+
+    public static int lastSelected = -1;
     public static int selectedAbilityIndex { get; set; }
+    public int buttonCount;
+
     private static int keyIndex = 0;
     private static bool isStandardTooltip = false;
 
-    public int buttonCount;
-
     //Componenet Fields
+    public static Color selectedColor = Color.yellow;
+    public static Color unselectedColor = Color.clear;
+
+    public Image imageBkg;
     public Text keyText;
     public Button button { get; private set; }
     public Text cooldownText { get; private set; }
@@ -51,6 +58,8 @@ public class AbilityButton : MonoBehaviour
         keyText = gameObject.transform.Find("text_key").GetComponent<Text>();
         icon = button.GetComponent<Image>();
         cooldownText = gameObject.transform.Find("text_cooldown").GetComponent<Text>();
+        imageBkg = gameObject.GetComponent<Image>();
+        cooldownText.color = Color.yellow;
     }
 
     /***************************************************************
@@ -64,7 +73,7 @@ public class AbilityButton : MonoBehaviour
         buttonCount = keyIndex;
         keyText.text = keyCodes[buttonCount].ToString();
         abilityRef = ability;
-        icon.sprite = ability == null ? AssetLoader.getSprite("lock") :ability.assetData.sprite;
+        icon.sprite = ability == null ? AssetLoader.getSprite("lock") : ability.assetData.sprite;
         setEventHandlers();
     }
 
@@ -140,8 +149,10 @@ public class AbilityButton : MonoBehaviour
     public void onAbilityClicked(int abilitySelection)
     {
         if (Game.clientSidePlayer.playerClass.abilities[abilitySelection] == null) return;
-        if (!turnController.isClientPlayerTurn) return; 
+        if (!turnController.isClientPlayerTurn) return;
         if (Game.clientSidePlayer.playerClass.abilities[abilitySelection].isOnCooldown) return;
+
+        Abilities.setSelected(abilitySelection);
 
         //Reset TargetsS
         turnController.resetTargets();
@@ -160,9 +171,10 @@ public class AbilityButton : MonoBehaviour
             //Multi Target 
             case AbilityTypes.MULTI_DAMAGE:
             case AbilityTypes.MULTI_DEBUFF:
-                turnController.monsterParty //Update monster sprite colors 
+                turnController.monsterParty.asList()//Update monster sprite colors 
                 .FindAll(monster => monster.isAlive())
-                .ForEach(monster => {
+                .ForEach(monster =>
+                {
                     monster.combatSprite.sprite.color = Color.red;
                     turnController.targets.Add(monster);
                 });
@@ -170,9 +182,10 @@ public class AbilityButton : MonoBehaviour
 
             case AbilityTypes.MULTI_HEAL:
             case AbilityTypes.MULTI_BUFF:
-                turnController.playerParty //Update Player sprite colors
+                turnController.playerParty.asList() //Update Player sprite colors
                 .FindAll(player => player.isAlive())
-                .ForEach(player => {
+                .ForEach(player =>
+                {
                     player.combatSprite.sprite.color = Color.green;
                     turnController.targets.Add(player);
                 });
@@ -180,6 +193,18 @@ public class AbilityButton : MonoBehaviour
         }
     }
 
+    public void setSelected(bool isSelected)
+    {
+        if(isSelected)
+        {
+            imageBkg.color = selectedColor;
+        }
+        else
+        {
+            imageBkg.color = unselectedColor;
+        }
+
+    }
 
     private void OnDestroy()
     {
@@ -188,7 +213,7 @@ public class AbilityButton : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyDown(keyCodes[buttonCount]))
+        if (Input.GetKeyDown(keyCodes[buttonCount]))
         {
             onAbilityClicked(buttonCount);
         }

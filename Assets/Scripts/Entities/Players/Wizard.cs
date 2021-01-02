@@ -35,7 +35,7 @@ namespace Assets.Scripts.Entities.Players
             
         public Wizard(string name, int id) : base(name, id)
         {
-            this.setId(PlayerClasses.WIZARD);
+            this.setCommonData(PlayerClasses.WIZARD);
         }
     }
 }

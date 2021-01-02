@@ -39,7 +39,7 @@ namespace Assets.Scripts.Util
                 return _instance;
             }
         }
-
+        private static bool hasTestData = false;
 
         private TestSimulator() { }
 
@@ -57,24 +57,29 @@ namespace Assets.Scripts.Util
 
         private void runTest(GameState gameState)
         {
-            StateManager.currentState = gameState;
-            createTestPlayers();
-
-            switch (gameState)
+            if (!hasTestData)
             {
-                case GameState.MAIN_MENU:
+                StateManager.currentState = gameState;
 
-                    break;
+                switch (gameState)
+                {
+                    case GameState.MAIN_MENU:
+                        break;
 
-                case GameState.CHARACTER_CREATION:
-                    break;
+                    case GameState.CHARACTER_CREATION:
+                        break;
 
-                case GameState.BATTLE_STATE:
-                    initClassData();
-                    break;
+                    case GameState.BATTLE_STATE:
+                        initClassData();
+                        createTestPlayers();
 
-                default:
-                    break;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                hasTestData = true;
             }
         }
 
