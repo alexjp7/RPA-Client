@@ -15,7 +15,7 @@ namespace Assets.Scripts.Entities.Components
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Assets.Scripts.Entities.Abilities;
+    using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.UI;
     using SimpleJSON;
     using Assets.Scripts.Entities.Containers;
@@ -196,7 +196,7 @@ namespace Assets.Scripts.Entities.Components
         /// <para>
         /// Applies the status effect to this combatable.
         /// </para>
-        /// See the <see cref="Assets.Scripts.Entities.Abilities.EffectProcessor"/> class for effect processing logic.
+        /// See the <see cref="Assets.Scripts.Entities.Combat.EffectProcessor"/> class for effect processing logic.
         /// </summary>
         /// <param name="statusEffect">ID for an ability status effect. see EffectProcess.cs.</param>
         /// <param name="potency">The strength or duration if applicable of the status effect</param>

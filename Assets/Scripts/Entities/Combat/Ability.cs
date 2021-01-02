@@ -6,7 +6,7 @@
    monster combative abilities.
 **************************************************************/
 
-namespace Assets.Scripts.Entities.Abilities
+namespace Assets.Scripts.Entities.Combat
 {
     using Assets.Scripts.Entities.Components;
     using SimpleJSON;
@@ -18,7 +18,7 @@ namespace Assets.Scripts.Entities.Abilities
     /// ability data into the tooltip description for an ability.
     /// </para>
     /// These values are present in the reading of the JSON file that contains the data for each ability,
-    /// and is utilised during the <see cref="Assets.Scripts.Entities.Players.Adventurer.loadAbilities(string, bool)"/>.
+    /// and is utilised during the <see cref="Containers.Abilities.loadAbilityData(string, Components.CombatantType, bool)"/>.
     /// </summary>
     enum ToolTipTokens
     {
@@ -68,19 +68,19 @@ namespace Assets.Scripts.Entities.Abilities
         /// <summary>
         /// An ability that has an <b>AUTO</b> targeting type automatically will select the appropriate targets, without offering a targeting
         /// selection for the combatant. 
-        /// See <see cref="Assets.Scripts.Entities.Abilities.AbilityFactory.autoTargetingTypes">Auto types</see>
+        /// See <see cref="AbilityUtils.autoTargetingTypes">Auto types</see>
         /// </summary>
         AUTO = 0,
 
         /// <summary>
         /// An ability that has an <b>ENEMY</b> targeting type will offer a selection of available enemy combatants.
-        /// See <see cref="Assets.Scripts.Entities.Abilities.AbilityFactory.enemyTargetingTypes">Enemy types</see>
+        /// See <see cref="AbilityUtils.enemyTargetingTypes">Enemy types</see>
         /// </summary>
         ENEMY = 1,
 
         /// <summary>
         /// An ability that has an <b>ALLIED</b> targeting type will ofer a selection of availale ally combatants. 
-        /// See <see cref="Assets.Scripts.Entities.Abilities.AbilityFactory.allyTargetingTypes">Ally types</see>
+        /// See <see cref="AbilityUtils.allyTargetingTypes">Ally types</see>
         /// </summary>
         ALLIED = 2,
     }
@@ -171,15 +171,15 @@ namespace Assets.Scripts.Entities.Abilities
         /// </summary>
         public void setTargetingType()
         {
-            if (Array.Exists(AbilityFactory.enemyTargetingTypes, type => (int)type == typeIds[0]) ) 
+            if (Array.Exists(AbilityUtils.enemyTargetingTypes, type => (int)type == typeIds[0]) ) 
             {
                 targetingType = TargetingType.ENEMY;
             }
-            else if(Array.Exists(AbilityFactory.allyTargetingTypes, type => (int)type == typeIds[0]) )
+            else if(Array.Exists(AbilityUtils.allyTargetingTypes, type => (int)type == typeIds[0]) )
             {
                 targetingType = TargetingType.ALLIED;
             }
-            else if (Array.Exists(AbilityFactory.autoTargetingTypes, type => (int)type == typeIds[0]) )
+            else if (Array.Exists(AbilityUtils.autoTargetingTypes, type => (int)type == typeIds[0]) )
             {
                 targetingType = TargetingType.AUTO;
             }

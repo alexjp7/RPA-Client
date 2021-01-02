@@ -1,4 +1,5 @@
-﻿/*---------------------------------------------------------------
+﻿
+/*---------------------------------------------------------------
                             BATTLE-STATE
  ---------------------------------------------------------------*/
 /***************************************************************
@@ -21,13 +22,14 @@ using Assets.Scripts.Util;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.Entities.Monsters;
 using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.UI;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
 using Assets.Scripts.RPA_Messages;
 using System.Threading.Tasks;
 using log4net;
+using Assets.Scripts.Entities.Containers;
 #endregion IMPORTS
 
 #pragma warning disable 1234
@@ -38,8 +40,6 @@ public class BattleState : MonoBehaviour
     [SerializeField] private GameObject abilityBarLayout;
     [SerializeField] private Text currentTurnDisplayName;
     [SerializeField] private GameObject notificationPanel;
-
-    private List<AbilityButton> abilityButtons = new List<AbilityButton>();
 
     private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
 
@@ -188,36 +188,7 @@ public class BattleState : MonoBehaviour
     /// </summary>
     private void initPlayerUI()
     {
-        if (abilityButtons.Any())
-        {
-            return;
-        }
-
-        //Load static assets (namely the lock for default ability icon image)
-        try
-        {
-            for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
-            {
-                AbilityButton button;
-                if (i < clientPlayer.playerClass.abilities.Count)
-                {
-                    button = AbilityButton.create(clientPlayer.playerClass.abilities[i]);
-                    button.icon.sprite = clientPlayer.playerClass.abilities[i].assetData.sprite;
-                    button.transform.SetParent(abilityBarLayout.transform);
-                }
-                else
-                {
-                    button = AbilityButton.create(null);
-                    button.transform.SetParent(abilityBarLayout.transform);
-                }
-                abilityButtons.Add(button);
-            }
-        }
-        catch (NotImplementedException e)
-        {
-            log.Error(e.Message);
-        }
-
+        clientPlayer.playerClass.abilities.generateAbilityButtons(abilityBarLayout.transform);
     }
 
     /*---------------------------------------------------------------
@@ -341,7 +312,7 @@ public class BattleState : MonoBehaviour
     /// Applies a combat status-effect to a target and displays text to user to indicate the abilitiy's effects.
     /// </summary>
     /// <param name="target">The combatant of which the ability is applied too</param>
-    /// <param name="statusEffect">ID for an ability status effect. <see cref="Assets.Scripts.Entities.Abilities.EffectProcessor">EffectProcessor</see></param>
+    /// <param name="statusEffect">ID for an ability status effect. <see cref="Assets.Scripts.Entities.Combat.EffectProcessor">EffectProcessor</see></param>
     /// <param name="potency">The strength or duration if applicable of the status effect</param>
     /// <param name="turnsApplied"></param>
     public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
@@ -430,9 +401,9 @@ public class BattleState : MonoBehaviour
         bool isPlayerTurn = turnController.isClientPlayerTurn;
 
         Ability ability = clientPlayer.playerClass.abilities[abilityIndex];
-        AbilityButton abilityButton = abilityButtons[abilityIndex];
+        AbilityButton abilityButton = Abilities.buttons[abilityIndex];
         Color color = abilityButton.button.GetComponent<Image>().color;
-        Text cooldownText = abilityButtons[abilityIndex].cooldownText;
+        Text cooldownText = abilityButton.cooldownText;
         string cooldownValue = "";
 
         if (isPlayerTurn)

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
+using Assets.Scripts.Entities.Containers;
 using Assets.Scripts.Entities.Players;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.RPA_Game;
@@ -19,6 +20,9 @@ public class AbilityButton : MonoBehaviour
     private static bool isStandardTooltip = false;
 
     //Componenet Fields
+    public static Color selectedColor = Color.yellow;
+    public static Color unselectedColor = Color.clear;
+
     public Image imageBkg;
     public Text keyText;
     public Button button { get; private set; }
@@ -144,10 +148,11 @@ public class AbilityButton : MonoBehaviour
     **************************************************************/
     public void onAbilityClicked(int abilitySelection)
     {
-
         if (Game.clientSidePlayer.playerClass.abilities[abilitySelection] == null) return;
         if (!turnController.isClientPlayerTurn) return;
         if (Game.clientSidePlayer.playerClass.abilities[abilitySelection].isOnCooldown) return;
+
+        Abilities.setSelected(abilitySelection);
 
         //Reset TargetsS
         turnController.resetTargets();
@@ -188,6 +193,18 @@ public class AbilityButton : MonoBehaviour
         }
     }
 
+    public void setSelected(bool isSelected)
+    {
+        if(isSelected)
+        {
+            imageBkg.color = selectedColor;
+        }
+        else
+        {
+            imageBkg.color = unselectedColor;
+        }
+
+    }
 
     private void OnDestroy()
     {

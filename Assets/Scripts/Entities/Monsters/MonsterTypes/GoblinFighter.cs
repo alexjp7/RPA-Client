@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.Entities.Components;
 using System.Collections.Generic;
 

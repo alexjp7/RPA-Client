@@ -21,7 +21,7 @@ using System.IO;
 
 using UnityEngine;
 using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.Entities.Containers;
 using SimpleJSON;
 
@@ -71,9 +71,10 @@ namespace Assets.Scripts.Entities.Players
         @param - classId: The sub-classes adventuring class type
         (Warrior, Wizard, Rogue or Cleric). 
         **************************************************************/
-        protected void setId(PlayerClasses classId)
+        protected void setCommonData(PlayerClasses classId)
         {
             this.classId = classId;
+            abilities = new Abilities(getAbilityPath(classId), type, true);
             healthProperties = new Damageable(classId);
             assetData.name = classId.ToString();
             setSpritePath(classId.ToString());

@@ -11,7 +11,7 @@ using UnityEngine;
 using System;
 
 
-namespace Assets.Scripts.Entities.Abilities
+namespace Assets.Scripts.Entities.Combat
 {
     /// <summary>
     /// Status effect types

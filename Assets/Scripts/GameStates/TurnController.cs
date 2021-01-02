@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.Entities.Components;
 using Assets.Scripts.Entities.Monsters;
 using Assets.Scripts.Entities.Players;
@@ -315,7 +315,7 @@ namespace Assets.Scripts.GameStates
 
             try
             {
-                MetaType metaType = AbilityFactory.getMetaType(ability.typeIds[0]);
+                MetaType metaType = AbilityUtils.getMetaType(ability.typeIds[0]);
 
                 foreach (var target in targets)
                 {

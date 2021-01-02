@@ -1,5 +1,6 @@
-﻿using Assets.Scripts.Entities.Abilities;
+﻿using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.Entities.Components;
+using Assets.Scripts.Entities.Players;
 using Assets.Scripts.RPA_Game;
 using log4net;
 using SimpleJSON;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets.Scripts.Entities.Containers
 {
@@ -20,7 +22,6 @@ namespace Assets.Scripts.Entities.Containers
 
         private static readonly ILog log = LogManager.GetLogger(typeof(Abilities));
 
-
         public Ability this[int index]
         {
             get
@@ -29,6 +30,26 @@ namespace Assets.Scripts.Entities.Containers
             }
         }
 
+        public static List<AbilityButton> buttons = new List<AbilityButton>();
+
+        /// <summary>
+        /// Marks an ability as selected/clicked on.
+        /// </summary>
+        /// <param name="selected">The ability slot that was selected</param>
+        public static void setSelected(int selected)
+        {
+            if (lastSelected == -1)
+            {
+                lastSelected = selected;
+            }
+            else if (lastSelected != selected)
+            {
+                buttons[lastSelected].setSelected(false);
+                lastSelected = selected;
+            }
+
+            buttons[selected].setSelected(true);
+        }
 
         public int Count => abilities.Count;
 
@@ -40,7 +61,7 @@ namespace Assets.Scripts.Entities.Containers
         /// <summary>
         /// The abilitiy that was last clicked on, used for toggling UI indicators.
         /// </summary>
-        private int lastSelected;
+        private static int lastSelected = -1;
 
         /// <summary>
         /// For startup loading of abilties
@@ -50,7 +71,6 @@ namespace Assets.Scripts.Entities.Containers
         /// <param name="isInitialLoad">Determines whether to load a players starting abilities</param>
         public Abilities(string path, CombatantType type, bool isInitialLoad = false)
         {
-            this.lastSelected = -1;
             abilities = new List<Ability>();
             loadAbilityData(path, type, isInitialLoad);
         }
@@ -67,7 +87,7 @@ namespace Assets.Scripts.Entities.Containers
         /// pass in a reference that will be copied for each monster of the same type.
         /// </remarks>
         /// <param name="preLoaded"> The pre-loaded abilities from disk.</param>
-        public Abilities (Abilities preLoaded)
+        public Abilities(Abilities preLoaded)
         {
             this.abilities = new List<Ability>(preLoaded.abilities);
         }
@@ -117,21 +137,7 @@ namespace Assets.Scripts.Entities.Containers
             abilities.ForEach(ability => ability.updateCooldown());
         }
 
-        /// <summary>
-        /// Marks an ability as selected/clicked on.
-        /// </summary>
-        /// <param name="selected">The ability slot that was selected</param>
-        public void setSelected(int selected)
-        {
-            if (lastSelected == -1)
-            {
-                lastSelected = selected;
-            }
-            else if (lastSelected != selected)
-            {
-                lastSelected = selected;
-            }
-        }
+
 
         public List<Ability> getAll()
         {
@@ -145,9 +151,9 @@ namespace Assets.Scripts.Entities.Containers
         /// <param name="isInitialLoad">whether the loading proces should grab starting abiltiies or all abilities</param>
         private void loadAbilityData(string path, CombatantType type, bool isInitialLoad)
         {
-            string abilityText = File.ReadAllText(type == CombatantType.MONSTER? path += ".json":path);
+            string abilityText = File.ReadAllText(type == CombatantType.MONSTER ? path += ".json" : path);
             JSONNode json = JSON.Parse(abilityText);
-            string entityName= json["entity"];
+            string entityName = json["entity"];
 
             if (type == CombatantType.PLAYER)
             {
@@ -237,5 +243,40 @@ namespace Assets.Scripts.Entities.Containers
                     .build();
         }
 
+        /// <summary>
+        /// Generates <see cref="AbilityButton"/> UI components for each of client side players abilities.
+        /// </summary>
+        public void generateAbilityButtons(Transform abilityBar)
+        {
+            if (buttons.Any())
+            {
+                return;
+            }
+
+            try
+            {
+                for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
+                {
+                    AbilityButton button;
+                    if (i < abilities.Count)
+                    {
+                        button = AbilityButton.create(abilities[i]);
+                        button.icon.sprite = abilities[i].assetData.sprite;
+                        button.transform.SetParent(abilityBar);
+                    }
+                    else
+                    {
+                        button = AbilityButton.create(null);
+                        button.transform.SetParent(abilityBar);
+                    }
+                    buttons.Add(button);
+                }
+            }
+            catch (NotImplementedException e)
+            {
+                log.Error(e.Message);
+            }
+
+        }
     }
 }

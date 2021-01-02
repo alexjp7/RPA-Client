@@ -1,13 +1,48 @@
-﻿using Assets.Scripts.Entities.Components;
-using SimpleJSON;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*---------------------------------------------------------------
+                        ABILITY-BUILDER
+ ---------------------------------------------------------------*/
+/***************************************************************
+ * The current implementation for generating abilities involves
+   reading and parsing a JSON file on disk which contains
+   the name, type, potency, tooltip and status-effect/condition
+   of an ability. 
 
-namespace Assets.Scripts.Entities.Abilities
+   e.g.
+       Abilities: [
+       {
+          "id": 0,
+          "name": "Overhand Strike",
+          "icon_path": "warriorStarterSkills_0",
+          "tooltip": "Deliver a @ strike to an enemy dealing $ damage ",
+          "tooltip_vars":[["forceful","brutal","devestating"]],
+          "damage":[[5,8],[12,20],[25,40]],
+          "types": [[0]],
+          "cooldown":1,
+          "status":null
+        }]
+ * The above shows the fields which are used to create abilities.
+ 
+ * The ability data files can be found in the Assets/Resources/data 
+   folder. These are currently placeholder data files as the 
+   intention is to develop a persistent data solution without
+   having plain-text readable data files. JSON is an easier
+   to work with development 'hack'. 
+
+ * In the future, these files could be binary serialized into BSON
+   to allow for minimal changes to the implementation, and
+   remaing on a JSON format.
+**************************************************************/
+
+namespace Assets.Scripts.Entities.Combat
 {
+    using Assets.Scripts.Entities.Components;
+    using SimpleJSON;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
     class AbilityBuilder
     {
         private JSONNode jsonNode;
@@ -105,7 +140,7 @@ namespace Assets.Scripts.Entities.Abilities
                 results[i] = abilityTypeJson[_skillLevel][i].AsInt;
             }
 
-            _metaType = AbilityFactory.getMetaType(results[0], out _potencyProperty);
+            _metaType = AbilityUtils.getMetaType(results[0], out _potencyProperty);
 
             if (_potencyProperty == "" || _metaType == MetaType.UNIMPLEMENTED)
             {
@@ -158,8 +193,34 @@ namespace Assets.Scripts.Entities.Abilities
         }
 
         /// <summary>
-        /// The tooltip description of an ability
+        /// Constructs the tooltip string for an  ability.
         /// </summary>
+        /// <remarks>
+        /// This format supports variable tooltip descriptions that reflect the skill progression system of uprading an ability reflecting a more verbose ability description.
+        ///<example> 
+        ///<para>
+        ///For example:
+        ///</para>
+        /// <list type="bullet">
+        /// <item>
+        /// <b>base_tooltip</b>: "Deliver a @ strike to an enemy dealing $ damage ",
+        /// </item>
+        /// <item>
+        /// <b>tooltip_variables</b>: ["forceful","brutal","devestating"]
+        /// </item>
+        /// <item>
+        /// <b>damage:</b> [ [5,8], [12,20], [25,40]], //Min-max damage for each tier
+        /// </item>
+        /// <item>
+        /// <b>skillLevel</b>: 0
+        /// </item>
+        /// </list>
+        /// <para>
+        /// The @ character will be replaced with tooltip_variables[0] = "forceful". The # Character is used to replace the 2nd tooltip token (not used in this example) The $ character will be replaced with damage[0][0] = 5 as the minimun, and damage[0][1] = 8 as the maxiumun damage.
+        /// </para>
+        ///Creating the final tooltip string as: <b> "Deliver a forceful strike to an enemy dealing 5-8 damage ".</b>
+        /// </example>
+        /// </remarks>
         /// <returns></returns>
         public AbilityBuilder toolTip()
         {
@@ -228,7 +289,7 @@ namespace Assets.Scripts.Entities.Abilities
             string s = _tooltip;
             foreach (int type in _typeIds)
             {
-                if (AbilityFactory.effectTypes.Contains((AbilityTypes)type))
+                if (AbilityUtils.effectTypes.Contains((AbilityTypes)type))
                 {
                     _conditionStrength = new ConditionStrength();
                     _conditionStrength.turnsApplied = jsonNode["turns_applied"][_skillLevel].AsInt;

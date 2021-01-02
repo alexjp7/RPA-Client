@@ -31,7 +31,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Rogue(string name, int id) : base(name, id)
         {
-            this.setId(PlayerClasses.ROGUE);
+            this.setCommonData(PlayerClasses.ROGUE);
 
         }
     }

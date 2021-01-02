@@ -21,11 +21,11 @@
     - Utility: resurrection, wound recovery (post combat),
       divine guidance(higher chance to crit)
 **************************************************************/
-using Assets.Scripts.Entities.Components;
 
 
 namespace Assets.Scripts.Entities.Players
 {
+    using Assets.Scripts.Entities.Components;
     class Cleric : Adventurer
     {
         public static Renderable staticAssets { get; set; }
@@ -33,9 +33,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Cleric(string name, int id) : base(name, id)
         {
-            this.setId(PlayerClasses.CLERIC);
-            abilities = new Containers.Abilities(getAbilityPath(classId), type, true);
-
+            this.setCommonData(PlayerClasses.CLERIC);
         }
     }
 }

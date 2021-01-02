@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Abilities;
+using Assets.Scripts.Entities.Combat;
 using Assets.Scripts.GameStates;
 using Assets.Scripts.Util;
 using System;
@@ -157,7 +157,7 @@ namespace Assets.Scripts.Entities.Monsters
 
             //Ability Processing
             //MetaType = Damage, Healing, Effect
-            MetaType metaType = AbilityFactory.getMetaType(abilityUsed.typeIds[0]);
+            MetaType metaType = AbilityUtils.getMetaType(abilityUsed.typeIds[0]);
             AbilityTypes abilityType = (AbilityTypes)abilityUsed.typeIds[0];
 
             switch (abilityType)
