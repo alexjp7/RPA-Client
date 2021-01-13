@@ -1,13 +1,11 @@
-﻿using Assets.Scripts.Entities.Components;
-using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assets.Scripts.Entities.Containers
+﻿namespace Assets.Scripts.Entities.Containers
 {
+    using log4net;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Assets.Scripts.Entities.Components;
+
     /// <summary>
     /// Base class for combat party container types.
     /// </summary>

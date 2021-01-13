@@ -1,33 +1,37 @@
-﻿using Assets.Scripts.Util;
-using log4net;
-using log4net.Appender;
-using log4net.Core;
-using UnityEngine;
-
-public class UnityDebugAppender : AppenderSkeleton
+﻿namespace Assets.Scripts.Util.Logging
 {
-    protected override void Append(LoggingEvent loggingEvent)
+    using log4net;
+    using log4net.Appender;
+    using log4net.Core;
+    using UnityEngine;
+
+    using Assets.Scripts.Util;
+
+    public class UnityDebugAppender : AppenderSkeleton
     {
-        MDC.Set("StateID", StateManager.currentState.ToString());
-        var message = RenderLoggingEvent(loggingEvent);
-
-        switch (loggingEvent.Level.Name)
+        protected override void Append(LoggingEvent loggingEvent)
         {
-            case "DEBUG":
-            case "INFO":
-                Debug.Log(message);
-                break;
+            MDC.Set("StateID", StateManager.currentState.ToString());
+            var message = RenderLoggingEvent(loggingEvent);
 
-            case "WARN":
-                Debug.LogWarning(message);
-                break;
+            switch (loggingEvent.Level.Name)
+            {
+                case "DEBUG":
+                case "INFO":
+                    Debug.Log(message);
+                    break;
 
-            case "ERROR":
-                Debug.LogError(message);
-                break;
-            default:
-                break;
+                case "WARN":
+                    Debug.LogWarning(message);
+                    break;
+
+                case "ERROR":
+                    Debug.LogError(message);
+                    break;
+                default:
+                    break;
+            }
+            MDC.Clear();
         }
-        MDC.Clear();
     }
 }

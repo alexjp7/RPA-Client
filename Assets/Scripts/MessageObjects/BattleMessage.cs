@@ -9,25 +9,22 @@
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
 **************************************************************/
-using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.GameStates;
-using Assets.Scripts.RPA_Game;
-using Assets.Scripts.Util;
-using SimpleJSON;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Assets.Scripts.RPA_Messages
 {
+    using SimpleJSON;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.GameStates;
+    using Assets.Scripts.RPA_Game;
+    using Assets.Scripts.Util;
     public enum BattleInstruction
     {
         COMBAT_INIT = 0,
         TURN_PROGRESSED = 1,
         TURN_ACTION = 2
     }
-
-
     public class BattleMessage : Message
     {
         public int instructionType { get; private set; }
@@ -146,7 +143,6 @@ namespace Assets.Scripts.RPA_Messages
             return json.ToString();
         }
 
-
         /*---------------------------------------------------------------
                             DESERIALIZATION
          ---------------------------------------------------------------*/
@@ -155,7 +151,6 @@ namespace Assets.Scripts.RPA_Messages
             this.stateId = (int)State.BATTLE;
             deserialize(jsonString);
         }
-
         protected override void deserialize(string jsonString)
         {
             base.deserialize(jsonString);
@@ -182,7 +177,6 @@ namespace Assets.Scripts.RPA_Messages
                     break;
             }
         }
-
         private void deserializeTurnAction(JSONNode json)
         {
             abilityTypes = new List<int>();
@@ -206,10 +200,6 @@ namespace Assets.Scripts.RPA_Messages
             conditionStrength = new ConditionStrength();
 
             //conditionStrength.potency = json["ability_used"]
-
-
-
-
         }
 
         private void deserializeCombatInit(in JSONNode json)
@@ -230,8 +220,6 @@ namespace Assets.Scripts.RPA_Messages
                 monsters.Add(new KeyValuePair<string, string>(monster["type"], monster["name"]));
             }
         }
-
     }
-
 }
 

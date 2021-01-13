@@ -9,7 +9,6 @@
    inherently be able to have operations completed on max
    and current health points, including damageing and healing.
 **************************************************************/
-
 namespace Assets.Scripts.Entities.Components
 {
     using Assets.Scripts.Entities.Players;

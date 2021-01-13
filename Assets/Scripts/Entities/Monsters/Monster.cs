@@ -13,20 +13,15 @@
   subject to alot of change until a suitable playable state is 
   reached
 **************************************************************/
-
-using System.Collections.Generic;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.GameStates;
-using Assets.Scripts.Util;
-using System;
-using Assets.Scripts.Entities.Players;
-using UnityEngine;
-using SimpleJSON;
-
 #pragma warning disable 1234
 namespace Assets.Scripts.Entities.Monsters
 {
+    using UnityEngine;
+
+    using System.Collections.Generic;
+    using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Entities.Combat;
+
     /***************************************************************
     * The intention of the MonsterTypes enum is to provide generic
       and readable identification of monsters types and their sub-types. 
@@ -47,14 +42,12 @@ namespace Assets.Scripts.Entities.Monsters
       to enable a more customizable party creation base on the state
       of a running game.
     **************************************************************/
-
     public enum Personality
     {
         AGGRESSIVE = 0,
         CONSERVATIVE = 1,
         SUPPORTIVE = 2
     }
-
     public abstract class Monster : Combatant
     {
         //Used to send to other clients to communicate targeting information

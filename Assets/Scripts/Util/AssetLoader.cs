@@ -5,14 +5,11 @@
 * The Assetloader class provides the functionality for 
   loading and storing re-usable assets/sprite models.
 **************************************************************/
-
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
-using System;
-
 namespace Assets.Scripts.Util
 {
+    using System.Collections.Generic;
+    using UnityEngine;
+
     public class AssetLoader
     {
         private static Dictionary<string, Sprite> spriteMap = new Dictionary<string, Sprite>();

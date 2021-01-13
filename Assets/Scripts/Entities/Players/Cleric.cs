@@ -21,8 +21,6 @@
     - Utility: resurrection, wound recovery (post combat),
       divine guidance(higher chance to crit)
 **************************************************************/
-
-
 namespace Assets.Scripts.Entities.Players
 {
     using Assets.Scripts.Entities.Components;

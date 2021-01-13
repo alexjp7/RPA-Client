@@ -6,12 +6,15 @@
   information on mouse-hover.
 **************************************************************/
 
-using UnityEngine;
-using UnityEngine.UI;
-using Assets.Scripts.Entities.Combat;
+
 
 namespace Assets.Scripts.Util
 {
+    using UnityEngine;
+    using UnityEngine.UI;
+
+    using Assets.Scripts.Entities.Combat;
+
     public class AbilityTooltip : MonoBehaviour
     {
         public static AbilityTooltip instance;

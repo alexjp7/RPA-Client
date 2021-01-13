@@ -3,15 +3,17 @@
  ---------------------------------------------------------------*/
 #define REQUIRE_TEST_DATA //Uncomment to generate test data
 
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Game;
-using SimpleJSON;
-using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
-
 namespace Assets.Scripts.Util
 {
+
+    using SimpleJSON;
+    using System.Collections.Generic;
+    using System.IO;
+    using UnityEngine;
+
+    using Assets.Scripts.Entities.Players;
+    using Assets.Scripts.RPA_Game;
+
     public class TestSimulator
     {
         public static bool isDeveloping

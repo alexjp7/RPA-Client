@@ -21,11 +21,10 @@
     - Utility: morale boost, battle cries, taunts
 
 **************************************************************/
-
-using Assets.Scripts.Entities.Components;
-
 namespace Assets.Scripts.Entities.Players
 {
+    using Assets.Scripts.Entities.Components;
+
     public class Warrior : Adventurer
     {
         public static Renderable staticAssets { get; set; }

@@ -1,13 +1,8 @@
-﻿using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assets.Scripts.Common
+﻿namespace Assets.Scripts.Common
 {
+    using log4net;
+    using System;
+
     class InvalidPartyRoleException : Exception
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(InvalidPartyRoleException));

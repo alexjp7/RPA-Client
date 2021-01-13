@@ -5,12 +5,12 @@
 *  The ability class is the model that represents player and 
    monster combative abilities.
 **************************************************************/
-
 namespace Assets.Scripts.Entities.Combat
 {
-    using Assets.Scripts.Entities.Components;
     using SimpleJSON;
     using System;
+
+    using Assets.Scripts.Entities.Components;
 
     /// <summary>
     /// <para>

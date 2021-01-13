@@ -1,5 +1,4 @@
-﻿
-namespace Assets.Scripts.Util
+﻿namespace Assets.Scripts.Util
 {
     class Random
     {

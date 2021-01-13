@@ -1,14 +1,8 @@
-﻿
-
-namespace Assets.Scripts.UI
+﻿namespace Assets.Scripts.UI.Common
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using UnityEngine;
     using UnityEngine.UI;
+
     using Assets.Scripts.Util;
 
     public delegate void TimerCallBack();
@@ -37,12 +31,12 @@ namespace Assets.Scripts.UI
             paneldescription = transform.Find("text_description").GetComponent<Text>();
         }
 
-        private void setData(float countdownFrom, TimerCallBack callBack ,string heading, string description = "")
+        private void setData(float countdownFrom, TimerCallBack callBack, string heading, string description = "")
         {
             this.countdownFrom = countdownFrom;
             this.callBack = callBack;
 
-            countdownText.text =  countdownFrom.ToString();
+            countdownText.text = countdownFrom.ToString();
             panelHeading.text = heading;
             paneldescription.text = description;
         }

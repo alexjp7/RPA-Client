@@ -7,26 +7,28 @@
 
  * This script is attached to the CombaSprite prefab.
 **************************************************************/
-using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.GameStates;
-using Assets.Scripts.RPA_Game;
-using Assets.Scripts.RPA_Messages;
-using Assets.Scripts.Util;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-
-namespace Assets.Scripts.UI
+namespace Assets.Scripts.UI.Combat
 {
+    using System.Threading.Tasks;
+    using UnityEngine;
+    using UnityEngine.EventSystems;
+    using UnityEngine.UI;
+
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.GameStates;
+    using Assets.Scripts.RPA_Game;
+    using Assets.Scripts.RPA_Messages;
+    using Assets.Scripts.UI.Common;
+    using Assets.Scripts.Util;
+
+
     public class CombatSprite : MonoBehaviour
     {
         public int popupCount { get; set; } // Have independant tracking of text-popups to make it more readable
         public static bool hasValidTarget;
         public Combatant combatantRef;
-        public SpriteRenderer sprite { get; private set;}
+        public SpriteRenderer sprite { get; private set; }
         public Text displayName { get; private set; }
         public Text maxHealthValue { get; private set; }
         public Text currentHealthValue { get; private set; }
@@ -77,9 +79,9 @@ namespace Assets.Scripts.UI
             popupCount = 0;
             combatantRef = combatant;
             displayName.text = combatant.name;
-            sprite.sprite =  combatant.assetData.sprite;
-            currentHealthValue.text =  ( (int) combatant.healthProperties.currentHealth).ToString();
-            maxHealthValue.text = "/" +  (int )combatant.healthProperties.maxHealth;
+            sprite.sprite = combatant.assetData.sprite;
+            currentHealthValue.text = ((int)combatant.healthProperties.currentHealth).ToString();
+            maxHealthValue.text = "/" + (int)combatant.healthProperties.maxHealth;
             setEventHandlers();
 
             if (combatant.type == CombatantType.PLAYER) isMonster = false;
@@ -172,7 +174,7 @@ namespace Assets.Scripts.UI
                     turnController.hasValidTarget = true;
                     turnController.targets.Add(combatant);
                 }
- 
+
             }
         }
 
@@ -193,7 +195,7 @@ namespace Assets.Scripts.UI
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
             //Check if targeting type applies to manual target selection
-            if (TargetingType.AUTO  == turnController.clientAdventurer.abilities[abilityIndex].targetingType)
+            if (TargetingType.AUTO == turnController.clientAdventurer.abilities[abilityIndex].targetingType)
                 return;
 
             Ability abilitySelected = turnController.clientAdventurer.abilities[abilityIndex];
@@ -254,7 +256,7 @@ namespace Assets.Scripts.UI
             //Auto target abilities automatically allow for valid targets
             if (!turnController.hasValidTarget)
             {
-                 if(abilityUsed.targetingType != TargetingType.AUTO)
+                if (abilityUsed.targetingType != TargetingType.AUTO)
                     return;
             }
 
@@ -296,7 +298,7 @@ namespace Assets.Scripts.UI
             StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);
 
-            if(!Game.isSinglePlayer)
+            if (!Game.isSinglePlayer)
             {
                 //Send action performed to server, along with turn progression message
                 Task.Run(() =>
@@ -321,11 +323,11 @@ namespace Assets.Scripts.UI
         {
             Vector2 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             bool doesContain = sprite.bounds.Contains(position);
-            if(doesContain)
+            if (doesContain)
             {
                 onSpriteEnter(combatantRef);
             }
         }
     }
 
-}  
+}

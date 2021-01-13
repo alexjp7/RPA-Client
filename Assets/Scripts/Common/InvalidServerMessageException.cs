@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assets.Scripts
+﻿namespace Assets.Scripts
 {
-    class InvalidServerMessageException:Exception
+    using System;
+
+    class InvalidServerMessageException :Exception
     {
         public InvalidServerMessageException(string message) : base(message)
         {

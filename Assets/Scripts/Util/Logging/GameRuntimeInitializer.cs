@@ -1,13 +1,9 @@
-﻿using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-
+﻿
 namespace Assets.Scripts.Util.Logging
 {
+    using log4net;
+    using UnityEngine;
+
     /// <summary>
     /// Used for capturing and logging any relevant information during game startup.
     /// </summary>

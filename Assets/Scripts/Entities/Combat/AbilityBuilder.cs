@@ -32,16 +32,13 @@
    to allow for minimal changes to the implementation, and
    remaing on a JSON format.
 **************************************************************/
-
 namespace Assets.Scripts.Entities.Combat
 {
-    using Assets.Scripts.Entities.Components;
     using SimpleJSON;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+
+    using Assets.Scripts.Entities.Components;
 
     class AbilityBuilder
     {

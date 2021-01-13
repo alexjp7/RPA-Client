@@ -1,19 +1,19 @@
-﻿using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Game;
-using log4net;
-using SimpleJSON;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-
-namespace Assets.Scripts.Entities.Containers
+﻿namespace Assets.Scripts.Entities.Containers
 {
+    using log4net;
+    using SimpleJSON;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using UnityEngine;
+
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Entities.Players;
+    using Assets.Scripts.UI.Common;
+
+
     /// <summary>
     /// Container for accessing ability members and procedures
     /// </summary>
@@ -246,7 +246,7 @@ namespace Assets.Scripts.Entities.Containers
         /// <summary>
         /// Generates <see cref="AbilityButton"/> UI components for each of client side players abilities.
         /// </summary>
-        public void generateAbilityButtons(Transform abilityBar)
+        public void generateAbilityButtons(in Transform abilityBar)
         {
             if (buttons.Any())
             {

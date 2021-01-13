@@ -1,28 +1,29 @@
-using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using Assets.Scripts.Util;
-using log4net;
-using log4net.Appender;
-using log4net.Core;
-using UnityEngine;
-
-public class UnityDataPathAppender : AppenderSkeleton
+namespace Assets.Scripts.Util.Logging
 {
-    private static readonly String STATE_ID = "STATE_ID";
-    private static readonly String LOG_FILE = "Logs/RPA_Log.log";
-    private static readonly String MARKDOWN_REGEX = "<.*?>";
-
-    protected override void Append(LoggingEvent loggingEvent)
+    using System;
+    using System.IO;
+    using System.Text.RegularExpressions;
+    using Assets.Scripts.Util;
+    using log4net;
+    using log4net.Appender;
+    using log4net.Core;
+    public class UnityDataPathAppender : AppenderSkeleton
     {
-        //Add state ID to any 
-        MDC.Set(STATE_ID, StateManager.currentState.ToString());
+        private static readonly string STATE_ID = "STATE_ID";
+        private static readonly string LOG_FILE = "Logs/RPA_Log.log";
+        private static readonly string MARKDOWN_REGEX = "<.*?>";
 
-        //Remove rich text for file logging
-        string logMessage = Regex.Replace(RenderLoggingEvent(loggingEvent), MARKDOWN_REGEX, String.Empty);
+        protected override void Append(LoggingEvent loggingEvent)
+        {
+            //Add state ID to any 
+            MDC.Set(STATE_ID, StateManager.currentState.ToString());
 
-        File.AppendAllText(LOG_FILE, logMessage);
+            //Remove rich text for file logging
+            string logMessage = Regex.Replace(RenderLoggingEvent(loggingEvent), MARKDOWN_REGEX, String.Empty);
 
-        MDC.Clear();
+            File.AppendAllText(LOG_FILE, logMessage);
+
+            MDC.Clear();
+        }
     }
 }

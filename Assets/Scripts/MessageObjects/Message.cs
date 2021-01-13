@@ -8,14 +8,13 @@
 *   Objects that inherit the class will be provided with 
     overite methods for serialization and deserialziation.
 **************************************************************/
-using System;
-using SimpleJSON;
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Game;
-
-
 namespace Assets.Scripts.RPA_Messages
 {
+    using SimpleJSON;
+
+    using Assets.Scripts.Entities.Players;
+    using Assets.Scripts.RPA_Game;
+
     public abstract class Message
     {
         //Game ID

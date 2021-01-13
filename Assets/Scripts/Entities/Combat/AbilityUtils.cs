@@ -1,15 +1,4 @@
-﻿
-
-using System;
-using UnityEngine;
-
-using Assets.Scripts.Entities.Components;
-using SimpleJSON;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-
-namespace Assets.Scripts.Entities.Combat
+﻿namespace Assets.Scripts.Entities.Combat
 {
     /// <summary>
     /// <para>

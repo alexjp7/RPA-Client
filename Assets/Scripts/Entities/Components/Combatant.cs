@@ -9,16 +9,16 @@
    provides a abstract type to allow for generic handling
    of both player and monster types.
 **************************************************************/
-
 namespace Assets.Scripts.Entities.Components
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Assets.Scripts.Entities.Combat;
-    using Assets.Scripts.UI;
     using SimpleJSON;
+
+    using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.Entities.Containers;
+    using Assets.Scripts.UI.Combat;
 
     /// <summary>
     /// Combatant types used to be able

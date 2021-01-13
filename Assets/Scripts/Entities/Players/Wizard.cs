@@ -23,11 +23,9 @@
     - Utility: Time distortion (cooldown restoration), 
       illusions, sigils(toggles?)
 **************************************************************/
-
-using Assets.Scripts.Entities.Components;
-
 namespace Assets.Scripts.Entities.Players
 {
+    using Assets.Scripts.Entities.Components;
     class Wizard : Adventurer
     {
         public static Renderable staticAssets { get; set; }

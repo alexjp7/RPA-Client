@@ -1,10 +1,7 @@
-﻿using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using System.Collections.Generic;
-
-
-namespace Assets.Scripts.Entities.Monsters.MonsterTypes
+﻿namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Components;
     class GoblinFighter: Monster
     {
         private static Containers.Abilities harpyabilities = new Containers.Abilities(Ability.MONSTER_ABILITY_DATA_PATH + typeof(GoblinFighter).Name, CombatantType.MONSTER);

@@ -10,24 +10,19 @@
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
 **************************************************************/
-
-using Assets.Scripts.RPA_Game;
-using SimpleJSON;
-using UnityEngine;
-
 namespace Assets.Scripts.RPA_Messages
 {
+    using SimpleJSON;
+    using Assets.Scripts.RPA_Game;
+
     public enum ConnectionMessageType
     {
         OUTBOUND = 0,
         INBOUND = 1
     }
-
     class ConnectionMessage : Message
     {
         public string name;
-
-
 
         /***************************************************************
         * On Message consturction, based on the paramater/s used in construciton

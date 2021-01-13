@@ -1,12 +1,11 @@
-﻿
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Game;
-using Assets.Scripts.Util;
-using UnityEngine;
-using UnityEngine.UI;
-
-namespace Assets.Scripts.UI.CharacterCreation
+﻿namespace Assets.Scripts.UI.CharacterCreation
 {
+    using UnityEngine.UI;
+    using UnityEngine;
+
+    using Assets.Scripts.Util;
+    using Assets.Scripts.Entities.Players;
+
     public class PartyPanel : MonoBehaviour
     {
         private Text playerName { get; set; }
@@ -25,7 +24,7 @@ namespace Assets.Scripts.UI.CharacterCreation
 
         private void setData(Player player)
         {
-            if(player.isClientPlayer)
+            if (player.isClientPlayer)
             {
                 gameObject.GetComponent<Image>().color = new Color(255, 226, 0);
             }
@@ -46,7 +45,7 @@ namespace Assets.Scripts.UI.CharacterCreation
         public void setClass(int classChoice)
         {
             bool isValidChoice;
-            if (isValidChoice= classChoice > -1)
+            if (isValidChoice = classChoice > -1)
             {
                 classIcon.enabled = isValidChoice;
                 classIcon.sprite = AssetLoader.getSprite(((PlayerClasses)classChoice).ToString().ToLower() + "_icon", null, true);

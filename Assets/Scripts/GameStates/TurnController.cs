@@ -1,20 +1,24 @@
-﻿using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Monsters;
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Game;
-using Assets.Scripts.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Assets.Scripts.UI;
-using UnityEngine;
-using log4net;
-using Assets.Scripts.Common;
-using Assets.Scripts.Entities.Containers;
+﻿
 
 namespace Assets.Scripts.GameStates
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
+    using log4net;
+
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Entities.Monsters;
+    using Assets.Scripts.Entities.Players;
+    using Assets.Scripts.RPA_Game;
+    using Assets.Scripts.Util;
+    using Assets.Scripts.Common;
+    using Assets.Scripts.Entities.Containers;
+    using Assets.Scripts.UI.Common;
+    using Assets.Scripts.Combat;
+
     public class TurnController
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(TurnController));
@@ -114,7 +118,7 @@ namespace Assets.Scripts.GameStates
 
         public void resetCombat()
         {
-            if(turnCount > 0)
+            if (turnCount > 0)
             {
                 playerParty.reset(Game.players.Select(player => player.playerClass as Combatant).ToList());
             }

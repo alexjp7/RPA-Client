@@ -14,19 +14,14 @@
   this class inherits from the Combatant type, which supports
   polymorphic collections between players/monsters.
 **************************************************************/
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-using UnityEngine;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Containers;
-using SimpleJSON;
-
 namespace Assets.Scripts.Entities.Players
 {
+    using UnityEngine;
+    using SimpleJSON;
+
+    using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Entities.Containers;
+
     public enum PlayerClasses : int
     {
         WARRIOR = 0,
@@ -179,7 +174,6 @@ namespace Assets.Scripts.Entities.Players
             }
             return result;
         }
-
         public override string ToString()
         {
             JSONObject parentJSON = toJson();

@@ -1,13 +1,8 @@
-﻿using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Assets.Scripts.Entities.Monsters.MonsterTypes
+﻿namespace Assets.Scripts.Entities.Monsters.MonsterTypes
 {
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Components;
+
     class Harpy : Monster
     {
         private static Containers.Abilities harpyabilities = new Containers.Abilities(Ability.MONSTER_ABILITY_DATA_PATH + typeof(Harpy).Name,  CombatantType.MONSTER);

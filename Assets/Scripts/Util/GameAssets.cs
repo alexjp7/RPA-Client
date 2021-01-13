@@ -5,11 +5,10 @@
  *  Scriptable object for storing references to prefabs in
     the project
 **************************************************************/
-
-using UnityEngine;
-
 namespace Assets.Scripts.Util
 {
+    using UnityEngine;
+
     public class GameAssets: MonoBehaviour
     {
         private static GameAssets _instance;

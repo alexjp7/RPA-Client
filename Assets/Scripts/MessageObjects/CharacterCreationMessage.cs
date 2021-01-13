@@ -9,13 +9,11 @@
     the base functionality for serialisation and deserialisation,
     with any additional fields provided by the sub-class.
 **************************************************************/
-
-using System;
-using Assets.Scripts.RPA_Game;
-using SimpleJSON;
-
 namespace Assets.Scripts.RPA_Messages
 {
+    using SimpleJSON;
+    using Assets.Scripts.RPA_Game;
+
     public enum CreationInstruction: int
     {   //Connection and disconenction only on deserialization
         CONNECTION = 0,
@@ -24,7 +22,6 @@ namespace Assets.Scripts.RPA_Messages
         READY_UP = 3,
         GAME_START = 4
     }
-
     class CharacterCreationMessage : Message
     {
         public int instructionType;

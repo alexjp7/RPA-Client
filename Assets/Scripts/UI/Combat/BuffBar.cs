@@ -1,18 +1,16 @@
-﻿using Assets.Scripts.Entities.Combat;
-using Assets.Scripts.Entities.Components;
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.GameStates;
-using Assets.Scripts.RPA_Game;
-using Assets.Scripts.RPA_Messages;
-using Assets.Scripts.Util;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
+﻿
 
 namespace Assets.Scripts.UI
 {
+    using System.Collections.Generic;
+    using UnityEngine;
+    using UnityEngine.EventSystems;
+    using UnityEngine.UI;
+
+    using Assets.Scripts.Util;
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.UI.Common;
+
     public class BuffBar : MonoBehaviour
     {
 

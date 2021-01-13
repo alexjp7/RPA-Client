@@ -6,12 +6,10 @@
     or sprite related data needed to render the relevant
     visual component to the player's UI.
 **************************************************************/
-
 namespace Assets.Scripts.Entities.Components
 {
     using Assets.Scripts.Util;
     using UnityEngine;
-
     public class Renderable
     {
         /// <summary>
@@ -65,5 +63,4 @@ namespace Assets.Scripts.Entities.Components
 
         }
     }
-
 }

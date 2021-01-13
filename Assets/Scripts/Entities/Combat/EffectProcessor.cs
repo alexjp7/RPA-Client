@@ -6,13 +6,11 @@
  status effects to a target, and the specific implementation 
  for each effect.
 **************************************************************/
-using Assets.Scripts.Entities.Components;
-using UnityEngine;
-using System;
-
-
 namespace Assets.Scripts.Entities.Combat
 {
+    using System;
+    using Assets.Scripts.Entities.Components;
+
     /// <summary>
     /// Status effect types
     /// </summary>

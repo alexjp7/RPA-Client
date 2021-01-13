@@ -1,11 +1,12 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using log4net;
-
-
-namespace Assets.Scripts.Util
+﻿namespace Assets.Scripts.Util
 {
+    using System;
+    using UnityEngine;
+    using UnityEngine.SceneManagement;
+    using log4net;
+
+    using Assets.Scripts.GameStates;
+
     public enum GameState
     {
         MAIN_MENU = 0,

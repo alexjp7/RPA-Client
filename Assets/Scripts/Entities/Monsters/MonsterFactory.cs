@@ -15,16 +15,14 @@
   sub-type factory, or include private sub-type construction
   logic.
 **************************************************************/
-
-using Assets.Scripts.RPA_Game;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using UnityEngine;
-using System.Reflection;
-
 namespace Assets.Scripts.Entities.Monsters
 {
+    using System;
+    using System.Linq;
+    using System.Reflection;
+    using System.Collections.Generic;
+
+    using Assets.Scripts.RPA_Game;
     public class MonsterFactory
     {
         private static readonly string monsterTypesNameSpace = "Assets.Scripts.Entities.Monsters.MonsterTypes";
@@ -70,7 +68,6 @@ namespace Assets.Scripts.Entities.Monsters
 
             return classList;
         }
-
 
         private System.Random rand;
 
