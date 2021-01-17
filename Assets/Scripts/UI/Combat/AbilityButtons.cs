@@ -21,39 +21,31 @@
         public List<AbilityButton> buttons;
         public Abilities playerAbilities;
 
-        public static AbilityButtons create(in Abilities abilities, RectTransform parent)
+        public static AbilityButtons create(in Abilities abilities)
         {
             GameObject gameObject = new GameObject("ability_buttons");
             AbilityButtons buttons = gameObject.AddComponent<AbilityButtons>();
-            buttons.setData(abilities, parent);
+            buttons.setData(abilities);
 
             return buttons;
         }
 
         /// <summary>
-        /// Sets 
+        /// Sets horizontal layout group for abilitiy buttons.
         /// </summary>
         /// <param name="panel"></param>
-        private void setData(in Abilities abilities, RectTransform parent)
+        private void setData(in Abilities abilities)
         {
             this.playerAbilities = abilities;
             this.tabName = "Abilites";
 
             buttons = new List<AbilityButton>();
 
-            RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
             HorizontalLayoutGroup layoutGroup = gameObject.AddComponent<HorizontalLayoutGroup>();
-
             layoutGroup.childAlignment = TextAnchor.MiddleCenter;
             layoutGroup.childControlHeight = false;
             layoutGroup.childControlWidth = false;
             layoutGroup.spacing = 10;
-
-            gameObject.transform.SetParent(parent);
-            rectTransform.anchoredPosition = new Vector2(0, 0);
-
-            rectTransform.sizeDelta = new Vector2(parent.rect.width, parent.rect.height);
-            rectTransform.localScale = new Vector3(1, 1, 1);
 
             generateAbilityButtons();
         }

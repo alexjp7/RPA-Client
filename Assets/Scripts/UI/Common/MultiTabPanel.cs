@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.UI;
 
     /// <summary>
     /// Generic component for tabbed panels. Handles general logic.
@@ -45,6 +44,13 @@
             rectTransform.localScale = new Vector3(1, 1, 1);
         }
 
+        /// <summary>
+        /// Initializes the default behaviours and transform's dimensations of a MultiTabPanel.
+        /// <list type="bullet">
+        /// <item> All tabs are added to the panel</item>
+        /// <item> The default(first) tab is set to show, while all other tabs are hidden.</item>
+        /// </list>
+        /// </summary>
         protected void init()
         {
             tabs.ForEach(tab =>
@@ -54,7 +60,14 @@
             });
 
             tabs[0].gameObject.SetActive(true);
-            tabs[1].gameObject.AddComponent<Image>().color = Color.blue;
+            setTransformDimensions();
+        }
+
+        /// <summary>
+        /// Override to provide a specific implementation
+        /// </summary>
+        protected virtual void setTransformDimensions()
+        {
 
         }
 

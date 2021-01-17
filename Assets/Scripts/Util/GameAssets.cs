@@ -28,6 +28,7 @@ namespace Assets.Scripts.Util
 
         //General
         public Transform timedPanelPrefab;
+        public Transform inventorySlotPrefab;
 
         //BattleState
         public Transform damagePopupPrefab;

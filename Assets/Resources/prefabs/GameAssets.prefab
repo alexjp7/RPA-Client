@@ -45,6 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timedPanelPrefab: {fileID: 5124522072987844131, guid: ba18eb4009afbee41beff3b49945fa58,
     type: 3}
+  inventorySlotPrefab: {fileID: 3509984579027453511, guid: 5b5ce03289d0ebb44ab214bb84d2a4bd,
+    type: 3}
   damagePopupPrefab: {fileID: 2841765125602886754, guid: 8909f9e2a2a0cfa4888e676fa36183ce,
     type: 3}
   turnChevronPrefab: {fileID: 3604465751754792280, guid: b65d7cc975af7fb47a28d4da3ae78b75,

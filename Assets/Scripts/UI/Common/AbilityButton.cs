@@ -13,7 +13,7 @@ namespace Assets.Scripts.UI.Common
 
     public class AbilityButton : MonoBehaviour
     {
-        public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F };
+        public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T};
 
         public static int lastSelected = -1;
         public static int selectedAbilityIndex { get; set; }
@@ -35,15 +35,11 @@ namespace Assets.Scripts.UI.Common
 
         private static TurnController turnController => StateManager.battleState.turnController;
 
-        /***************************************************************
-        * instantiates and returns the an AbilityButton instance.
-
-        @param - ability: The ability which will be visuallly
-        represnted by this gameobject.
-
-        @return - An AbilityButton reflecting that of the passed in
-        ability.
-        **************************************************************/
+        /// <summary>
+        ///  Instantiates and returns the an AbilityButton instance.
+        /// </summary>
+        /// <param name="ability"> ability: The ability which will be visuallly represnted by this gameobject.</param>
+        /// <returns>  An AbilityButton reflecting that of the passed in ability.</returns>
         public static AbilityButton create(in Ability ability)
         {
             Transform buttonTransfrom = Instantiate(GameAssets.INSTANCE.abilityButtonPrefab, Vector2.zero, Quaternion.identity);
@@ -54,7 +50,9 @@ namespace Assets.Scripts.UI.Common
             return button;
         }
 
-        //Initialize Components
+        /// <summary>
+        /// Initialize  game object components
+        /// </summary>
         void Awake()
         {
             button = gameObject.transform.Find("button").GetComponent<Button>();
@@ -65,12 +63,11 @@ namespace Assets.Scripts.UI.Common
             cooldownText.color = Color.yellow;
         }
 
-        /***************************************************************
-        * Sets the values of each GameObject that makes the AbilityButton.
 
-        @param - ability: The ability which will be visuallly
-        represnted by this gameobject.
-        **************************************************************/
+        /// <summary>
+        /// Sets the values of each GameObject that makes the AbilityButton.
+        /// </summary>
+        /// <param name="ability">The ability which will be  represnted by this gameobject.</param>
         private void setData(Ability ability)
         {
             buttonCount = keyIndex;
@@ -80,10 +77,9 @@ namespace Assets.Scripts.UI.Common
             setEventHandlers();
         }
 
-        /***************************************************************
-        * Creates the event handlers for hovering and click events
-          for the ability buttons.
-        **************************************************************/
+        /// <summary>
+        /// Creates the event handlers for hovering and click events for the ability buttons.
+        /// </summary>
         private void setEventHandlers()
         {
             EventTrigger.Entry mouseEnterEvent;
@@ -110,19 +106,13 @@ namespace Assets.Scripts.UI.Common
         /*---------------------------------------------------------------
                             CLIENT SIDE EVENT-HANDLERS
          ---------------------------------------------------------------*/
-        /***************************************************************
-                            ABILITY-HANDLERS
-        *************************************************************** 
-        * On mouse hover over ability icons, the tooltip for that ability
-          is displayed.
-
-        * if an ability is locked or not loaded, the called function 
-          will throw an ArgumentOutOfRangeException which indicates
-          that a standard tooltip should be displayed.
-
-        @param - skillIndex: a value between 0-4 indicating which
-        ability from the ability bar is being hovered over.
-        **************************************************************/
+        /// <summary>
+        /// On mouse hover over ability icons, the tooltip for that ability is displayed.
+        /// </summary>
+        /// <remarks>
+        /// if an ability is locked or not loaded, the called function will throw an ArgumentOutOfRangeException which indicates that a standard tooltip should be displayed.
+        /// </remarks>
+        /// <param name="ability">a value between 0-4 indicating which ability from the ability bar is being hovered over.</param>
         public void onAbilityHoverEnter(in Ability ability)
         {
             isStandardTooltip = ability == null;
@@ -130,25 +120,24 @@ namespace Assets.Scripts.UI.Common
             else AbilityTooltip.show(ability);
         }
 
-        /***************************************************************
-        * Event handler for hiding the ability tooltips upon mouse exit.
-        **************************************************************/
+        /// <summary>
+        ///     * Event handler for hiding the ability tooltips upon mouse exit.
+        /// </summary>
         public void onAbilityHoverExit()
         {
             if (isStandardTooltip) Tooltip.hide();
             else AbilityTooltip.hide();
         }
 
-        /***************************************************************
-        * Event handler for click action in ability icon.
-
-        * Determines the ability type of the ability that was clicked
-          and provides appropriate operations for populating the targets
-          dictionary or otherwise displaying targeting information
-          through setting the tint of targeteable sprites.
-
-        @param - ability: The ability that was clicked
-        **************************************************************/
+        /// <summary>
+        /// Event handler for click action in ability icon.
+        /// <para>
+        /// Determines the ability type of the ability that was clicked, and provides appropriate operations 
+        /// for populating the targets dictionary or otherwise displaying 
+        /// targeting information through setting the tint of targeteable sprites.
+        /// </para>
+        /// </summary>
+        /// <param name="abilitySelection">The index of the ability that was clicked</param>
         public void onAbilityClicked(int abilitySelection)
         {
             if (abilitySelection >= Game.clientSidePlayer.playerClass.abilities.Count && abilitySelection != -1) return;
@@ -207,7 +196,6 @@ namespace Assets.Scripts.UI.Common
             {
                 imageBkg.color = unselectedColor;
             }
-
         }
 
         private void OnDestroy()

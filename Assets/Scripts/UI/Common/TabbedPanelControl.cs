@@ -2,9 +2,7 @@
 {
     using log4net;
     using System;
-    using System.Collections.Generic;
     using UnityEngine;
-    using UnityEngine.EventSystems;
 
     using Assets.Scripts.Util;
     using UnityEngine.UI;
@@ -34,7 +32,6 @@
 
             control.setData(panel, parent);
         }
-
         private void setData(MultiTabPanel panel, RectTransform parent)
         {
             this.panel = panel;
@@ -65,7 +62,7 @@
 
                 text.text = tabName;
                 button.onClick.AddListener(() => onClick(j));
-            }   
+            }
         }
 
         /// <summary>
@@ -74,7 +71,6 @@
         /// <param name="tabIndex"></param>
         public void onClick(int tabIndex)
         {
-            Debug.Log(tabIndex);
             panel.setActive(tabIndex);
         }
     }

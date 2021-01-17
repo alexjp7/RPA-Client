@@ -1,20 +1,20 @@
-﻿using Assets.Scripts.Entities.Items;
-using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-
+﻿
 namespace Assets.Scripts.Entities.Containers
 {
+    using log4net;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
+
+    using Assets.Scripts.Entities.Items;
+
     class Inventory
     {
         public static readonly int INVENTORY_CAPACITY = 5;
         private static readonly ILog log = LogManager.GetLogger(typeof(Inventory));
 
-        private List<Item> items = new List<Item>();
+        private List<Item> items;
         private int coins;
 
         public Item this[int index]
@@ -37,6 +37,11 @@ namespace Assets.Scripts.Entities.Containers
             return items[i];
         }
 
+
+        public Inventory()
+        {
+            items = new List<Item>();
+        }
 
         /// <summary>
         /// Add items to inventory.
@@ -82,19 +87,6 @@ namespace Assets.Scripts.Entities.Containers
 
 
             return true;
-        }
-
-        /// <summary>
-        /// Generates UI components for each item in an Adventurer's inventory.
-        /// </summary>
-        /// <param name="inventoryPanel">The UI container for inventory items.</param>
-        public static void generateInventoryUI(in Transform inventoryPanel)
-        {
-            int childs = inventoryPanel.childCount;
-            for (var i = childs - 1; i >= 0; i--)
-            {
-                GameObject.Destroy(inventoryPanel.GetChild(i).gameObject);
-            }
         }
     }
 }
