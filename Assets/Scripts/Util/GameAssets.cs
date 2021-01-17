@@ -35,6 +35,7 @@ namespace Assets.Scripts.Util
         public Transform combatSpritePrefab;
         public Transform abilityButtonPrefab;
         public Transform buffBarPrefab;
+        public Transform genericButtonPrefab;
         //Charactear creation
         public Transform playerPanelPrefab;
     }

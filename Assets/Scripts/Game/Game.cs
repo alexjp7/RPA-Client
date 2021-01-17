@@ -11,17 +11,15 @@
   the; Game ID provided from the server, the list of players
   and the TCP Client instance.
 **************************************************************/
-
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UnityEngine;
-
-using Assets.Scripts.Entities.Players;
-using Assets.Scripts.RPA_Messages;
-using log4net;
-
 namespace Assets.Scripts.RPA_Game
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using log4net;
+
+    using Assets.Scripts.Entities.Players;
+    using Assets.Scripts.RPA_Messages;
+
     public class Game
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Game));
@@ -325,5 +323,4 @@ namespace Assets.Scripts.RPA_Game
             return null;
         }
     }
-
 }

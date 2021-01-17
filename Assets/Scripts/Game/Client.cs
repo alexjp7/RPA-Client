@@ -11,14 +11,12 @@
   function for returning whether there is data available
   to be read.
 **************************************************************/
-
-using System;
-using System.IO;
-using System.Net.Sockets;
-
-
 namespace Assets.Scripts.RPA_Game
 {
+    using System;
+    using System.IO;
+    using System.Net.Sockets;
+
     public sealed class Client 
     {
         //Singleton instance

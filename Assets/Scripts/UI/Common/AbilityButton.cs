@@ -13,7 +13,7 @@ namespace Assets.Scripts.UI.Common
 
     public class AbilityButton : MonoBehaviour
     {
-        public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y };
+        public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F };
 
         public static int lastSelected = -1;
         public static int selectedAbilityIndex { get; set; }
@@ -151,7 +151,7 @@ namespace Assets.Scripts.UI.Common
         **************************************************************/
         public void onAbilityClicked(int abilitySelection)
         {
-            if (abilitySelection >= Game.clientSidePlayer.playerClass.abilities.Count) return;
+            if (abilitySelection >= Game.clientSidePlayer.playerClass.abilities.Count && abilitySelection != -1) return;
             if (Game.clientSidePlayer.playerClass.abilities[abilitySelection] == null) return;
             if (!turnController.isClientPlayerTurn) return;
             if (Game.clientSidePlayer.playerClass.abilities[abilitySelection].isOnCooldown) return;

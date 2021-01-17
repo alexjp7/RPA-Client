@@ -34,15 +34,17 @@ namespace Assets.Scripts.GameStates
     using Assets.Scripts.RPA_Messages;
     using Assets.Scripts.Entities.Containers;
     using Assets.Scripts.Combat;
+    using Assets.Scripts.UI.Combat;
     #endregion IMPORTS
 
     public class BattleState : MonoBehaviour
     {
         [SerializeField] private GameObject player_horizontalLayout;
         [SerializeField] private GameObject monster_horizontalLayout;
-        [SerializeField] private GameObject abilityBarLayout;
         [SerializeField] private Text currentTurnDisplayName;
         [SerializeField] private GameObject notificationPanel;
+        [SerializeField] private GameObject combatPanelLayout;
+        [SerializeField] private GameObject combatPanelButtons;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
 
@@ -192,7 +194,8 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void initPlayerUI()
         {
-            clientPlayer.playerClass.abilities.generateAbilityButtons(abilityBarLayout.transform);
+            CombatPanel combatPanel = CombatPanel.create(combatPanelLayout.GetComponent<RectTransform>());
+            TabbedPanelControl.create(combatPanel, combatPanelButtons.GetComponent<RectTransform>());
         }
 
         /*---------------------------------------------------------------
@@ -508,7 +511,7 @@ namespace Assets.Scripts.GameStates
                 // Next turn can be taken
                 if (turnController.hasNextTurn)
                 {
-                    updateUI();
+                  //  updateUI();
                 }
             }
         }

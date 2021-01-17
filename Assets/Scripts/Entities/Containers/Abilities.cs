@@ -38,6 +38,8 @@
         /// <param name="selected">The ability slot that was selected</param>
         public static void setSelected(int selected)
         {
+            Debug.Log(selected);
+
             if (lastSelected == -1)
             {
                 lastSelected = selected;
@@ -49,6 +51,15 @@
             }
 
             buttons[selected].setSelected(true);
+        }
+
+        /// <summary>
+        /// Pipes an action into underlying ability collection.
+        /// </summary>
+        /// <param name="action">Lambda expression which expresses the action to be completed over the collection</param>
+        public void ForEach(Action<Ability> action)
+        {
+            abilities.ForEach(action);
         }
 
         public int Count => abilities.Count;
@@ -243,40 +254,5 @@
                     .build();
         }
 
-        /// <summary>
-        /// Generates <see cref="AbilityButton"/> UI components for each of client side players abilities.
-        /// </summary>
-        public void generateAbilityButtons(in Transform abilityBar)
-        {
-            if (buttons.Any())
-            {
-                return;
-            }
-
-            try
-            {
-                for (int i = 0; i < Adventurer.ABILITY_LIMIT; i++)
-                {
-                    AbilityButton button;
-                    if (i < abilities.Count)
-                    {
-                        button = AbilityButton.create(abilities[i]);
-                        button.icon.sprite = abilities[i].assetData.sprite;
-                        button.transform.SetParent(abilityBar);
-                    }
-                    else
-                    {
-                        button = AbilityButton.create(null);
-                        button.transform.SetParent(abilityBar);
-                    }
-                    buttons.Add(button);
-                }
-            }
-            catch (NotImplementedException e)
-            {
-                log.Error(e.Message);
-            }
-
-        }
     }
 }
