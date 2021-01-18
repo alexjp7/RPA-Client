@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.Entities.Containers
+﻿
+namespace Assets.Scripts.Entities.Containers
 {
     using log4net;
     using SimpleJSON;
@@ -112,7 +113,8 @@
         {
             if (i >= abilities.Count())
             {
-                ArgumentOutOfRangeException exception = new ArgumentOutOfRangeException($"Index [{i}] exceeds container [Abilities] size of [{abilities.Count}]");
+                ArgumentOutOfRangeException exception =
+                    new ArgumentOutOfRangeException($"Index [{i}] exceeds container [Abilities] size of [{abilities.Count}]");
                 log.Error(exception.Message);
                 throw exception;
             }
