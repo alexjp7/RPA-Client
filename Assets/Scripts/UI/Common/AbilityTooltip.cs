@@ -5,9 +5,6 @@
 * UI Component for containerizing and displaying ability tooltip
   information on mouse-hover.
 **************************************************************/
-
-
-
 namespace Assets.Scripts.Util
 {
     using UnityEngine;
@@ -15,12 +12,14 @@ namespace Assets.Scripts.Util
 
     using Assets.Scripts.Entities.Combat;
 
+    /// <summary>
+    /// Tooltip that is shown when hovering over an ability button.
+    /// </summary>
     public class AbilityTooltip : MonoBehaviour
     {
         public static AbilityTooltip instance;
 
-        [SerializeField]
-        public Camera uiCamera;
+        [SerializeField] public Camera uiCamera;
 
         private Text abilityName;
         private Text abilityType;
@@ -29,10 +28,9 @@ namespace Assets.Scripts.Util
 
         private RectTransform tooltipTransform;
 
-        /***************************************************************
-        * Called on Scene initialization - assigns local variables
-          to components in the unity object hierachy.
-        **************************************************************/
+        /// <summary>
+        ///  Called on Scene initialization - assigns local variables to components in the unity object hierachy.
+        /// </summary>
         private void Awake()
         {
             instance = this;
@@ -44,12 +42,10 @@ namespace Assets.Scripts.Util
             gameObject.SetActive(false);
         }
 
-        /***************************************************************
-        * Updates the rect transform based on the mouse position.
-        * provides a local offset to stop mouse-hover jitter caused
-          by tooltip overlapping the ability skill icon region and 
-          cancling the tooltip display.
-        **************************************************************/
+        /// <summary>
+        /// Updates the rect transform based on the mouse position. Provides a local offset to stop mouse-hover
+        /// jitter caused by tooltip overlapping the ability skill icon region and cancling the tooltip display.
+        /// </summary>
         private void Update()
         {
             Vector2 localPoint;
@@ -59,10 +55,10 @@ namespace Assets.Scripts.Util
             transform.localPosition = localPoint;
         }
 
-        /***************************************************************
-        * Sets the ability fields to the tooltips text fields.
-        @in-parm - ability: The ability icon hovered over by player.
-        **************************************************************/
+        /// <summary>
+        /// Sets the ability fields to the tooltips text fields
+        /// </summary>
+        /// <param name="ability">ability: The ability icon hovered over by player.</param>
         private void showTooltip(in Ability ability)
         {
             abilityName.text = ability.name;
@@ -72,24 +68,22 @@ namespace Assets.Scripts.Util
             gameObject.SetActive(true);
         }
 
-        /***************************************************************
-        * Helper method to construct a more user friendly cooldown
-          description
-        @param - cooldown: The value for the amount of turns an ability
-        takes to recover before it is usable again.
-        **************************************************************/
+        /// <summary>
+        ///  Helper method to construct a more user friendly cooldown description
+        /// </summary>
+        /// <param name="cooldown">The value for the amount of turns an ability takes to recover before it is usable again.</param>
+        /// <returns>The completed string of "[x] turn/s"</returns>
         private string constructCooldownText(int cooldown)
         {
             string result = cooldown.ToString();
             return result += cooldown > 1 ? " Turns" : " Turn";
         }
 
-        /***************************************************************
-        * Helper method to construct a comma delimited ability type string
-          to include in the tooltip text field.
-
-        @param - ids: The list of ability type IDs that an ability has.
-        **************************************************************/
+        /// <summary>
+        /// Helper method to construct a comma delimited ability type string to include in the tooltip text field.
+        /// </summary>
+        /// <param name="ids"> The list of ability type IDs that an ability has.</param>
+        /// <returns>Concatented ability type labels</returns>
         private string constructTypeString(int[] ids)
         {
             string result = "";
@@ -101,27 +95,26 @@ namespace Assets.Scripts.Util
             return result;
         }
 
-        /***************************************************************
-        * Sets the active state of the tooltip to false, forcing it
-          to be invisible to the user.
-        **************************************************************/
+        /// <summary>
+        ///  Sets the active state of the tooltip to false, forcing it  to be invisible to the user.
+        /// </summary>
         private void hideTooltip()
         {
             gameObject.SetActive(false);
         }
 
-        /***************************************************************
-        * public interface method for showing the ability tooltip .
-        @in-parm - ability: The ability icon hovered over by player.
-        **************************************************************/
+        /// <summary>
+        /// public interface method for showing the ability tooltip.
+        /// </summary>
+        /// <param name="ability">ability: The ability icon hovered over by player.</param>
         public static void show(in Ability ability)
         {
             instance.showTooltip(ability);
         }
 
-        /***************************************************************
-        * public interface method for hiding the ability tooltip.
-        **************************************************************/
+        /// <summary>
+        /// public interface method for hiding the ability tooltip.
+        /// </summary>
         public static void hide()
         {
             instance.hideTooltip();

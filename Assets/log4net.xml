@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <log4net>
-    <appender name="UnityDebugAppender" type="UnityDebugAppender">
+    <appender name="UnityDebugAppender" type="Assets.Scripts.Util.Logging.UnityDebugAppender">
         <layout type="log4net.Layout.PatternLayout, log4net">
             <conversionPattern value="[%-5p] %date{dd MMM yyyy HH:mm:ss,fff} %c{1}:%L - %m%n"/>
         </layout>
     </appender>
-    <appender name="UnityDataPathAppender" type="UnityDataPathAppender">
+    <appender name="UnityDataPathAppender" type="Assets.Scripts.Util.Logging.UnityDataPathAppender">
         <layout type="log4net.Layout.PatternLayout, log4net">
             <conversionPattern value="[%-5p] %date{dd MMM yyyy HH:mm:ss,fff} %c{1}:%L - %m%n"/>
         </layout>

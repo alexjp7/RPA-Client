@@ -14,8 +14,15 @@ namespace Assets.Scripts.Util
     using Assets.Scripts.Entities.Players;
     using Assets.Scripts.RPA_Game;
 
+    /// <summary>
+    /// Testing/debug class for initialising test data.
+    /// </summary>
     public class TestSimulator
     {
+
+        /// <summary>
+        /// Control whether or not test data is loaded during scene initialiation.
+        /// </summary>
         public static bool isDeveloping
         {
             get
@@ -45,18 +52,22 @@ namespace Assets.Scripts.Util
 
         private TestSimulator() { }
 
+        /// <summary>
+        /// Primary access method which executes the test procedures of the current state. <see cref="StateManager"/>.
+        /// </summary>
+        /// <param name="gameState"></param>
         public static void initTestEnvironment(GameState gameState)
         {
             INSTANCE.runTest(gameState);
         }
 
-        //################################################################
-        /*---------------------------------------------------------------
-                                TEST-DATA/PROCEDURES
-         ---------------------------------------------------------------*/
         //Test Data
         private Texture2D[] classIcons;
 
+        /// <summary>
+        /// Adds specific test data to allow testing of specific game states.
+        /// </summary>
+        /// <param name="gameState"></param>
         private void runTest(GameState gameState)
         {
             if (!hasTestData)
@@ -74,7 +85,6 @@ namespace Assets.Scripts.Util
                     case GameState.BATTLE_STATE:
                         initClassData();
                         createTestPlayers();
-
                         break;
 
                     default:
@@ -85,9 +95,9 @@ namespace Assets.Scripts.Util
             }
         }
 
-        /***************************************************************
-        *  Creates a list of players for testing/debuggin purposes.
-        **************************************************************/
+        /// <summary>
+        ///  Creates a list of players for testing/debuggin purposes.
+        /// </summary>
         private void createTestPlayers()
         {
             //Multiple game states can run tests, we only need to make player party once
@@ -131,9 +141,9 @@ namespace Assets.Scripts.Util
             Game.players[0].isClientPlayer = true;
         }
 
-        /***************************************************************
-        *  Parses json file for class data and populates icon textures
-        **************************************************************/
+        /// <summary>
+        /// Parses json file for class data and populates icon textures
+        /// </summary>
         private void initClassData()
         {
             const string CLASS_DATA_FILE = "assets/resources/data/meta_data.json";

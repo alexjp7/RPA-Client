@@ -9,6 +9,7 @@ namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
     using UnityEngine.UI;
+
     public class Tooltip : MonoBehaviour
     {
         public static Tooltip instance;
@@ -22,10 +23,9 @@ namespace Assets.Scripts.UI.Common
         private Text tooltipText;
         private RectTransform tooltipTransform;
 
-        /***************************************************************
-        * Called on Scene initialization - assigns local variables
-          to components in the unity object hierachy.
-        **************************************************************/
+        /// <summary>
+        ///  Called on Scene initialization - assigns local variables to components in the unity object hierachy.
+        /// </summary>
         private void Awake()
         {
             instance = this;
@@ -34,12 +34,12 @@ namespace Assets.Scripts.UI.Common
             gameObject.SetActive(false);
         }
 
-        /***************************************************************
-        * Updates the rect transform based on the mouse position.
-        * provides a local offset to stop mouse-hover jitter caused
-          by tooltip overlapping the ability skill icon region and 
-          cancling the tooltip display.
-        **************************************************************/
+        /// <summary>
+        /// Updates the rect transform based on the mouse position. 
+        /// </summary>
+        /// <remarks>
+        /// provides a local offset to stop mouse-hover jitter caused by tooltip overlapping the ability skill icon region and cancling the tooltip display.
+        /// </remarks>
         private void Update()
         {
             Vector2 localPoint;
@@ -49,10 +49,10 @@ namespace Assets.Scripts.UI.Common
             transform.localPosition = localPoint;
         }
 
-        /***************************************************************
-        * Sets the tooltip text to passed in string value.
-        @parm - tooltipString: the text wanting to be displayed in tooltip.
-        **************************************************************/
+        /// <summary>
+        /// Sets the tooltip text to passed in string value.
+        /// </summary>
+        /// <param name="tooltipString">the text wanting to be displayed in tooltip.</param>
         private void showTooltip(string tooltipString)
         {
             gameObject.SetActive(true);
@@ -63,19 +63,21 @@ namespace Assets.Scripts.UI.Common
             tooltipText.text = tooltipString;
         }
 
-        /***************************************************************
-        * Sets the active state of the tooltip to false, forcing it
-          to be invisible to the user.
-        **************************************************************/
+        /// <summary>
+        ///  Sets the active state of the tooltip to false, forcing it to be invisible to the user.
+        /// </summary>
         private void hideTooltip()
         {
             gameObject.SetActive(false);
         }
 
-        /***************************************************************
-        * public interface method for showing the tooltip.
-        @parm - tooltipString: the text wanting to be displayed in tooltip.
-        **************************************************************/
+        /// <summary>
+        ///  public interface method for showing the tooltip.
+        /// </summary>
+        /// <param name="tooltipString">the text wanting to be displayed in tooltip.</param>
+        /// <param name="_xOffset">default value of 50</param>
+        /// <param name="_yOffset">default value of 50</param>
+        /// <param name="_transparency">default value of 255</param>
         public static void show(string tooltipString, float _xOffset = 50, float _yOffset = 50, float _transparency = 255)
         {
             xOffSet = _xOffset;
@@ -85,9 +87,9 @@ namespace Assets.Scripts.UI.Common
             instance.showTooltip(tooltipString);
         }
 
-        /***************************************************************
-        * public interface method for hiding the tooltip.
-        **************************************************************/
+        /// <summary>
+        /// public interface method for hiding the tooltip.
+        /// </summary>
         public static void hide()
         {
             instance.hideTooltip();

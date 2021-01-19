@@ -1,4 +1,5 @@
 ﻿
+
 namespace Assets.Scripts.Entities.Containers
 {
     using log4net;
@@ -11,7 +12,6 @@ namespace Assets.Scripts.Entities.Containers
 
     using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.Entities.Components;
-    using Assets.Scripts.Entities.Players;
     using Assets.Scripts.UI.Common;
 
 
@@ -29,29 +29,6 @@ namespace Assets.Scripts.Entities.Containers
             {
                 return this.get(index);
             }
-        }
-
-        public static List<AbilityButton> buttons = new List<AbilityButton>();
-
-        /// <summary>
-        /// Marks an ability as selected/clicked on.
-        /// </summary>
-        /// <param name="selected">The ability slot that was selected</param>
-        public static void setSelected(int selected)
-        {
-            Debug.Log(selected);
-
-            if (lastSelected == -1)
-            {
-                lastSelected = selected;
-            }
-            else if (lastSelected != selected)
-            {
-                buttons[lastSelected].setSelected(false);
-                lastSelected = selected;
-            }
-
-            buttons[selected].setSelected(true);
         }
 
         /// <summary>
@@ -149,8 +126,6 @@ namespace Assets.Scripts.Entities.Containers
         {
             abilities.ForEach(ability => ability.updateCooldown());
         }
-
-
 
         public List<Ability> getAll()
         {
@@ -255,6 +230,5 @@ namespace Assets.Scripts.Entities.Containers
                     .conditionStrength()
                     .build();
         }
-
     }
 }

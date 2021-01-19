@@ -7,6 +7,5 @@ namespace Assets.Scripts.UI.Common
     class TabComponent : MonoBehaviour
     {
         public string tabName { get; protected set; }
-
     }
 }

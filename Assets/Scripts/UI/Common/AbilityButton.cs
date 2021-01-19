@@ -10,13 +10,27 @@ namespace Assets.Scripts.UI.Common
     using Assets.Scripts.GameStates;
     using Assets.Scripts.RPA_Game;
     using Assets.Scripts.Util;
+    using log4net;
+    using Assets.Scripts.UI.Combat;
 
+    /// <summary>
+    /// UI component for individual Ability Buttons.  Ability buttons provide the visual elements of an <see cref="Ability"/>.
+    /// Abilitybuttons are loaded into the combat UI as apart of the <see cref="CombatPanel"/>.
+    /// </summary>
     public class AbilityButton : MonoBehaviour
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(AbilityButton));
+
+        /// <summary>
+        /// Letter codees for alphabetic keystrokes used for keybinding.
+        /// </summary>
         public static readonly KeyCode[] keyCodes = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T};
 
-        public static int lastSelected = -1;
+        /// <summary>
+        /// Index of the selected ability
+        /// </summary>
         public static int selectedAbilityIndex { get; set; }
+        
         public int buttonCount;
 
         private static int keyIndex = 0;
@@ -145,7 +159,7 @@ namespace Assets.Scripts.UI.Common
             if (!turnController.isClientPlayerTurn) return;
             if (Game.clientSidePlayer.playerClass.abilities[abilitySelection].isOnCooldown) return;
 
-            Abilities.setSelected(abilitySelection);
+            AbilityButtons.setSelected(abilitySelection);
 
             //Reset TargetsS
             turnController.resetTargets();
@@ -186,6 +200,10 @@ namespace Assets.Scripts.UI.Common
             }
         }
 
+        /// <summary>
+        /// Adds selection ring around the selected ability.
+        /// </summary>
+        /// <param name="isSelected"></param>
         public void setSelected(bool isSelected)
         {
             if (isSelected)

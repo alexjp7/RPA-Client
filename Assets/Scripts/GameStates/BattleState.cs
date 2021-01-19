@@ -46,6 +46,8 @@ namespace Assets.Scripts.GameStates
         [SerializeField] private GameObject combatPanelLayout;
         [SerializeField] private GameObject combatPanelButtons;
 
+        private CombatPanel combatPanel;
+
         private static readonly ILog log = LogManager.GetLogger(typeof(BattleState));
 
         //Client Player Alias
@@ -194,8 +196,11 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void initPlayerUI()
         {
-            CombatPanel combatPanel = CombatPanel.create(combatPanelLayout.GetComponent<RectTransform>());
-            TabbedPanelControl.create(combatPanel, combatPanelButtons.GetComponent<RectTransform>());
+            if (combatPanel == null)
+            {
+                combatPanel = CombatPanel.create(combatPanelLayout.GetComponent<RectTransform>());
+                TabbedPanelControl.create(combatPanel, combatPanelButtons.GetComponent<RectTransform>());
+            }
         }
 
         /*---------------------------------------------------------------
@@ -408,7 +413,7 @@ namespace Assets.Scripts.GameStates
             bool isPlayerTurn = turnController.isClientPlayerTurn;
 
             Ability ability = clientPlayer.playerClass.abilities[abilityIndex];
-            AbilityButton abilityButton = Abilities.buttons[abilityIndex];
+            AbilityButton abilityButton = AbilityButtons.buttons[abilityIndex];
             Color color = abilityButton.button.GetComponent<Image>().color;
             Text cooldownText = abilityButton.cooldownText;
             string cooldownValue = "";
@@ -511,7 +516,7 @@ namespace Assets.Scripts.GameStates
                 // Next turn can be taken
                 if (turnController.hasNextTurn)
                 {
-                  //  updateUI();
+                    updateUI();
                 }
             }
         }
@@ -533,7 +538,7 @@ namespace Assets.Scripts.GameStates
                 panelHeading = "Defeat";
             }
 
-            turnController.hasCombatEnded = true;
+            turnController.hasCombatEnded = false;
             turnController.hasCombat = false;
 
             TimerCallBack callBack = startCombat;

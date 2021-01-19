@@ -7,6 +7,9 @@
 
     using Assets.Scripts.Util;
 
+    /// <summary>
+    /// Log appender for console output.
+    /// </summary>
     public class UnityDebugAppender : AppenderSkeleton
     {
         protected override void Append(LoggingEvent loggingEvent)

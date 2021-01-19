@@ -5,8 +5,14 @@
 
     using Assets.Scripts.Util;
 
+    /// <summary>
+    /// Callback function to be called when timedpanel countdown expires.
+    /// </summary>
     public delegate void TimerCallBack();
 
+    /// <summary>
+    /// Panel component which intrinsically destroys itself after the set time. After timeout, a callback can be optionally executed.
+    /// </summary>
     public class TimedPanel : MonoBehaviour
     {
         private TimerCallBack callBack;
@@ -16,6 +22,14 @@
 
         public float countdownFrom { get; private set; }
 
+        /// <summary>
+        /// Instantiates a gameobject to have the timedpanel prefab.
+        /// </summary>
+        /// <param name="countdownFrom">value in seconds to countdown from, after which an optional callback can be invoked.</param>
+        /// <param name="callBack">The callback method to execute prior to destrucntion</param>
+        /// <param name="heading">Text value for panel heading to dispkay</param>
+        /// <param name="description">Text value for the panel's description to display</param>
+        /// <returns></returns>
         public static TimedPanel create(float countdownFrom, TimerCallBack callBack, string heading, string description)
         {
             Transform panelTransform = Instantiate(GameAssets.INSTANCE.timedPanelPrefab, Vector2.zero, Quaternion.identity);
@@ -31,6 +45,7 @@
             paneldescription = transform.Find("text_description").GetComponent<Text>();
         }
 
+        ///
         private void setData(float countdownFrom, TimerCallBack callBack, string heading, string description = "")
         {
             this.countdownFrom = countdownFrom;
@@ -40,7 +55,9 @@
             panelHeading.text = heading;
             paneldescription.text = description;
         }
-
+        /// <summary>
+        /// Incremently decreases the value of <see cref="countdownFrom"/> until it reaches 0. After the timedpanel is destroyed.
+        /// </summary>
         public void Update()
         {
             countdownFrom -= Time.deltaTime;
@@ -48,7 +65,7 @@
 
             if (countdownFrom < 0)
             {
-                callBack();
+                callBack?.Invoke();
                 Destroy(gameObject);
             }
         }

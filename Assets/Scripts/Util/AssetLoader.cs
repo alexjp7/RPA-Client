@@ -16,6 +16,10 @@ namespace Assets.Scripts.Util
         private static bool isInitialLoad = true;
         private static GameState activeState;
 
+        /// <summary>
+        /// Loads assets relevant for a particular game state.
+        /// </summary>
+        /// <param name="gameState"> Gamestate that is currently in-play for the client-side player.</param>
         public static void loadStaticAssets(GameState gameState)
         {
             if (gameState == activeState) return;
@@ -43,10 +47,9 @@ namespace Assets.Scripts.Util
             }
         }
 
-        /***************************************************************
-        * Removes unused assets from the sprite map as the game
-          state changes
-        **************************************************************/
+        /// <summary>
+        /// Removes unused assets from the sprite map as the game state changes 
+        /// </summary>
         private static void dumpPreviousResources()
         {
             List<string> assetsRemoving = new List<string>();
@@ -65,9 +68,9 @@ namespace Assets.Scripts.Util
             }
         }
 
-        /***************************************************************
-        * Loads general assets used over multiple states
-        **************************************************************/
+        /// <summary>
+        /// Loads general assets used over multiple states
+        /// </summary>
         private static void loadGeneralAssets()
         {
             if (isInitialLoad)
@@ -84,9 +87,9 @@ namespace Assets.Scripts.Util
             }
         }
 
-        /***************************************************************
-        * Loads character creation assets
-        **************************************************************/
+        /// <summary>
+        /// Loads character creation assets 
+        /// </summary>
         private static void loadCharacterCreationAssets()
         {
             Sprite[] classIcons = Resources.LoadAll<Sprite>("textures/icon_textures/class_icons");
@@ -101,9 +104,9 @@ namespace Assets.Scripts.Util
             }
         }
 
-        /***************************************************************
-        * Loads battle state assets
-        **************************************************************/
+        /// <summary>
+        /// Loads battle state assets
+        /// </summary>
         private static void loadBattleStateAssets()
         {
             Sprite[] statusEffectIcons = Resources.LoadAll<Sprite>("textures/icon_textures/status_effects");
@@ -118,13 +121,13 @@ namespace Assets.Scripts.Util
             }
         }
 
-
-        /***************************************************************
-        @param - key: The asset to be loaded/returned
-        @paran - path: the location on disk where that asset is
-
-        @return - The sprite model for the key passed in.
-        **************************************************************/
+        /// <summary>
+        /// Returns the sprite from <see cref="spriteMap>">SpriteMap</see>. If the sprite doesn't exist in the map this function will attempt to load it from disk.
+        /// </summary>
+        /// <param name="key">The asset to be loaded/returned</param>
+        /// <param name="path">the location on disk where that asset is on disk</param>
+        /// <param name="isStateSpecific"></param>
+        /// <returns>The sprite model for the key passed in.</returns>
         public static Sprite getSprite(string key, string path = "", bool isStateSpecific = false)
         {
             string stateIdentifiedKey = isStateSpecific ? activeState.ToString() + key: key;
@@ -142,12 +145,10 @@ namespace Assets.Scripts.Util
             return spriteMap[stateIdentifiedKey];
         }
 
-        /***************************************************************
-         @param - key: The asset to be loaded/returned
-         @paran - path: the location on disk where that asset is
-
-        @return - The sprite model for the key passed in.
-        **************************************************************/
+        /// <summary>
+        /// Destroys the asset, removing it from memory.
+        /// </summary>
+        /// <param name="key">The asset to be loaded/returned</param>
         public static void destroyAsset(string key)
         {
             if (spriteMap.ContainsKey(key)) spriteMap.Remove(key);

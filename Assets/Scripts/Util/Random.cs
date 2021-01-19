@@ -1,5 +1,8 @@
 ﻿namespace Assets.Scripts.Util
 {
+    /// <summary>
+    /// Utility class for wrapping <see cref="System.Random"/>
+    /// </summary>
     class Random
     {
         public static System.Random rand = new System.Random();

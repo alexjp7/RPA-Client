@@ -9,6 +9,9 @@ namespace Assets.Scripts.Util
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Acts a global scriptable object that stores refernces to prefabs.
+    /// </summary>
     public class GameAssets: MonoBehaviour
     {
         private static GameAssets _instance;

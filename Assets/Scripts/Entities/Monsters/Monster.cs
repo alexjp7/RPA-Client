@@ -50,19 +50,27 @@ namespace Assets.Scripts.Entities.Monsters
     }
     public abstract class Monster : Combatant
     {
-        //Used to send to other clients to communicate targeting information
+        /// <summary>
+        /// Used to send to other clients to communicate targeting information
+        /// </summary>
         public static int monsterCount = 0;
 
         /***************************************************************
-        * During construction, all monsters names and abilities
-          are initialised, first through setting the name to the randonly
-          selected prefix (for novelty sake), and then the subclass
-          concatenates the remaining monster name. 
            
-            e.g.  Monster.name = "Homeless"; //Prefix
-                  Monster.FuzzBall.name += " FuzzBall"; //Sub-class name
-                  name = "Homeless FuzzBall"; 
+            e.g.  
         **************************************************************/
+        /// <summary>
+        /// During construction, all monsters names and abilities are initialised, 
+        /// first through setting the name to the randonly selected prefix (for novelty sake), 
+        /// and then the subclass concatenates the remaining monster name.
+        /// <example>
+        /// <code>
+        ///     Monster.name = "Homeless"; //Prefix 
+        ///     Monster.FuzzBall.name += " FuzzBall"; //Sub-class name
+        ///     name = "Homeless FuzzBall"; 
+        /// </code>
+        /// </example>
+        /// </summary>
         public Monster()
         {
             id = monsterCount++;
@@ -72,36 +80,26 @@ namespace Assets.Scripts.Entities.Monsters
             type = CombatantType.MONSTER;
         }
 
-        /***************************************************************
-        * the setID() member function allows for a defered setting 
-          of the Monster's ID until the sub-class constructor
-          is called.
-        
-        * Based on the monsterId pased in, the health properties are
-          set by the logic within the consturctor of this monster's
-          damageable instance.
 
-        @param - monsterId: The sub-classes monster type. 
-        **************************************************************/
+        /// <summary>
+        /// allows for a defered setting  of the Monster's ID until the sub-class constructor is called.
+        /// Based on the monsterId pased in, the health properties are set by the logic within the consturctor of this monster's damageable instance.
+        /// </summary>
+        /// <param name="typenName">The sub-classes monster type. </param>
         protected void setSpriteData(string typenName)
         {
             setSpritePath(typenName);
             assetData.name = typenName;
         }
 
-        /***************************************************************
-        * Provides a comical/novel naming prefix for all monsters to
-          include before their name.
-        
-        * The name prefixx possibilities are privded in a static array
-          which is then randomly indexed into to give a random assortment
-          of monster prefixes.
-
-        @return - a name prefix for monsters.
-        **************************************************************/
+        /// <summary>
+        ///  Provides a comical/novel naming prefix for all monsters to include before their name.
+        /// The name prefixx possibilities are privded in a static array which is then randomly indexed into to give a random assortment of monster prefixes.
+        /// </summary>
+        /// <returns> a name prefix for monsters.</returns>
         private string getNamePrefix()
         {
-            string[] namePrefixes = 
+            string[] namePrefixes =
             {
                 "Homeless",
                 "Self-Employed",
@@ -110,7 +108,7 @@ namespace Assets.Scripts.Entities.Monsters
                 "Clueless",
                 "Silly",
                 "Self-Deprecating",
-                "Disorganised", 
+                "Disorganised",
                 "Self-Indulged",
                 "Clumsy",
                 "Contaminated",
@@ -120,9 +118,14 @@ namespace Assets.Scripts.Entities.Monsters
             return namePrefixes[Util.Random.getInt(namePrefixes.Length)];
         }
 
-
-
-        public virtual List<Combatant> getTargets(out Ability abilityUsed, in List<Combatant> monsterParty,  List<Combatant> playerParty)
+        /// <summary>
+        /// Asses targeting options and ability choice for a monster
+        /// </summary>
+        /// <param name="abilityUsed"> The output ability that was selected from monster turn.</param>
+        /// <param name="monsterParty">The current list of monsters that are in a running combat instance</param>
+        /// <param name="playerParty">The current list of players that are in a running combat instance</param>
+        /// <returns>The list of enemy/aly targets which have been selected as apart of a monster turn</returns>
+        public virtual List<Combatant> getTargets(out Ability abilityUsed, in List<Combatant> monsterParty, List<Combatant> playerParty)
         {
             List<Combatant> targets = new List<Combatant>();
             abilityUsed = selectAbility(monsterParty, playerParty, ref targets);
@@ -130,6 +133,10 @@ namespace Assets.Scripts.Entities.Monsters
             return targets;
         }
 
+        /// <summary>
+        /// Selects the ability based on personality, and targeting prefences for a monster
+        /// </summary>
+        /// <returns>An ability to be used by monster</returns>
         private Ability selectAbility(List<Combatant> monsterParty, List<Combatant> playerParty, ref List<Combatant> targets)
         {
             /*AVAILABLE METHODS FOR COMBATABLES*/
@@ -141,12 +148,12 @@ namespace Assets.Scripts.Entities.Monsters
             float healthPercent = playerParty[0].getHealthPercent();
 
             //To See what conditions a combatant has - Map status effect id -> condition object
-            Dictionary<int, Condition> playerConditions = playerParty[0].conditions; 
+            Dictionary<int, Condition> playerConditions = playerParty[0].conditions;
             Dictionary<int, Condition> monsterConditions = monsterParty[0].conditions;
 
             //INSERT ABILITY SELECTION LOGIC HERE
-        
-            Ability abilityUsed = abilities[1].isOnCooldown ? abilities[0]: abilities[1];
+
+            Ability abilityUsed = abilities[1].isOnCooldown ? abilities[0] : abilities[1];
 
             //Ability Processing
             //MetaType = Damage, Healing, Effect
@@ -156,12 +163,14 @@ namespace Assets.Scripts.Entities.Monsters
             switch (abilityType)
             {
                 //Target will always be self
-                case AbilityTypes.SELF_HEAL: case AbilityTypes.SELF_BUFF:
+                case AbilityTypes.SELF_HEAL:
+                case AbilityTypes.SELF_BUFF:
                     targets.Add(this);
                     break;
 
                 //INSERT TARGETING LOGIC HERE
-                case AbilityTypes.SINGLE_DAMAGE: case AbilityTypes.SINGLE_DEBUFF:
+                case AbilityTypes.SINGLE_DAMAGE:
+                case AbilityTypes.SINGLE_DEBUFF:
 
                     //Test - First alive enemy player
                     foreach (var player in playerParty)
@@ -176,8 +185,9 @@ namespace Assets.Scripts.Entities.Monsters
                     break;
 
                 //INSERT TARGETING LOGIC HERE
-                case AbilityTypes.SINGLE_HEAL: case AbilityTypes.SINGLE_BUFF:
-                    
+                case AbilityTypes.SINGLE_HEAL:
+                case AbilityTypes.SINGLE_BUFF:
+
                     //Test - First alive allied monster
                     foreach (var monster in monsterParty)
                     {
@@ -191,7 +201,8 @@ namespace Assets.Scripts.Entities.Monsters
                     break;
 
                 //Target Will alaways be allies
-                case AbilityTypes.MULTI_HEAL: case AbilityTypes.MULTI_BUFF:
+                case AbilityTypes.MULTI_HEAL:
+                case AbilityTypes.MULTI_BUFF:
 
                     foreach (var monster in monsterParty)
                         if (monster.isAlive()) targets.Add(monster);
@@ -199,7 +210,8 @@ namespace Assets.Scripts.Entities.Monsters
                     break;
 
                 //Target Will alaways be enemies
-                case AbilityTypes.MULTI_DAMAGE: case AbilityTypes.MULTI_DEBUFF:
+                case AbilityTypes.MULTI_DAMAGE:
+                case AbilityTypes.MULTI_DEBUFF:
 
                     foreach (var player in playerParty)
                         if (player.isAlive()) targets.Add(player);

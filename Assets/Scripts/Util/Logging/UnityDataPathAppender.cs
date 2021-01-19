@@ -7,6 +7,10 @@ namespace Assets.Scripts.Util.Logging
     using log4net;
     using log4net.Appender;
     using log4net.Core;
+
+    /// <summary>
+    /// Log appender for writing to external log files.
+    /// </summary>
     public class UnityDataPathAppender : AppenderSkeleton
     {
         private static readonly string STATE_ID = "STATE_ID";

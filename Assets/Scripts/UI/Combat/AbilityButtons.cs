@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.UI.Combat
+﻿
+namespace Assets.Scripts.UI.Combat
 {
     using Assets.Scripts.UI.Common;
     using log4net;
@@ -18,8 +19,14 @@
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(AbilityButtons));
 
-        public List<AbilityButton> buttons;
+        public static List<AbilityButton> buttons;
+
         public Abilities playerAbilities;
+
+        /// <summary>
+        /// The abilitiy that was last clicked on, used for toggling UI indicators.
+        /// </summary>
+        private static int lastSelected = -1;
 
         public static AbilityButtons create(in Abilities abilities)
         {
@@ -84,6 +91,25 @@
             {
                 log.Error(e.Message);
             }
+        }
+
+        /// <summary>
+        /// Marks an ability as selected/clicked on.
+        /// </summary>
+        /// <param name="selected">The ability slot that was selected</param>
+        public static void setSelected(int selected)
+        {
+            if (lastSelected == -1)
+            {
+                lastSelected = selected;
+            }
+            else if (lastSelected != selected)
+            {
+                buttons[lastSelected].setSelected(false);
+                lastSelected = selected;
+            }
+
+            buttons[selected].setSelected(true);
         }
     }
 }
