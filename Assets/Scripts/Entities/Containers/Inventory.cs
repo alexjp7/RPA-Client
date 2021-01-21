@@ -8,8 +8,10 @@ namespace Assets.Scripts.Entities.Containers
     using UnityEngine;
 
     using Assets.Scripts.Entities.Items;
+    using Assets.Scripts.Entities.Components;
+    using System.Collections;
 
-    class Inventory
+    class Inventory : IEnumerable<Item>
     {
         public static readonly int INVENTORY_CAPACITY = 5;
         private static readonly ILog log = LogManager.GetLogger(typeof(Inventory));
@@ -25,22 +27,27 @@ namespace Assets.Scripts.Entities.Containers
             }
         }
 
-
-        public Item get(int i)
-        {
-            if (i >= items.Count())
-            {
-                ArgumentOutOfRangeException exception = new ArgumentOutOfRangeException($"Index [{i}] exceeds container [Inventory] size of [{items.Count}]");
-                log.Error(exception.Message);
-                throw exception;
-            }
-            return items[i];
-        }
-
-
         public Inventory()
         {
             items = new List<Item>();
+            items.Add(ItemMap.INSTANCE[0]);
+        }
+
+        public int Count
+        {
+            get
+            {
+                return items.Count;
+            }
+        }
+
+        public Item get(int i)
+        {
+            if (i < 0 || i >= items.Count())
+            {
+                return null;
+            }
+            return items[i];
         }
 
         /// <summary>
@@ -66,27 +73,62 @@ namespace Assets.Scripts.Entities.Containers
         }
 
         /// <summary>
+        /// Removes item from invetory
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
+        public bool remove(int i)
+        {
+            if (i < 0 || i >= items.Count)
+            {
+                return false;
+            }
+
+            items[i] = null;
+
+            return true;
+        }
+
+        /// <summary>
         /// Checks to see if item is <see cref="Useable"/>, then executes its <c>use()</c> method.
         /// </summary>
         /// <param name="i"> The element of inventory that will be used</param>
+        /// <param name="isConsumeable">is set if used item is consumeable</param>
         /// <returns>
         /// <list type="bullet"> 
         /// <item> true - The item was useable and its use fucntion was executed</item>
         /// <item> false - The item is not useable</item>
         /// </list>
         /// </returns>
-        public bool use(int i)
+        public bool use(int i, Combatant target, out bool isConsumeable)
         {
             Useable item = get(i) as Useable;
-            if (item != null)
+            isConsumeable = false;
+            if (item == null)
             {
                 return false;
             }
 
-            item.use();
+            item.use(target);
 
+            item = get(i) as Consumable;
+            if (item != null)
+            {
+                remove(i);
+                isConsumeable = true;
+            }
 
             return true;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return items.GetEnumerator();
+        }
+
+        IEnumerator<Item> IEnumerable<Item>.GetEnumerator()
+        {
+            return (IEnumerator<Item>)GetEnumerator();
         }
     }
 }
