@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------
-                       COMBATABLE
+                       combatant
  ---------------------------------------------------------------*/
 /***************************************************************
 *  The Combatant type contains fields relating to combat
    including; turn order, health properties (Damageable), abilities
    and the base logic for applying damage, healing and status 
-   effects to these types of objects. The combatable base
+   effects to these types of objects. The combatant base
    provides a abstract type to allow for generic handling
    of both player and monster types.
 **************************************************************/
@@ -51,11 +51,11 @@ namespace Assets.Scripts.Entities.Components
         public Dictionary<int, Condition> conditions { get; set; }
 
         /// <summary>
-        /// Accessing this member will instantiate a combatables
+        /// Accessing this member will instantiate a combatants
         /// combat sprite if it is <c>null</c>.
         /// </summary>
         /// <returns>
-        /// Returns the combat sprite for a combatable.
+        /// Returns the combat sprite for a combatant.
         /// </returns>
         public CombatSprite combatSprite
         {
@@ -79,7 +79,7 @@ namespace Assets.Scripts.Entities.Components
         /// <returns>
         /// <list type="bullet">
         /// <item>
-        /// true - the combatable has an impairing effect on their status bar, which prevents them from taking their turn.
+        /// true - the combatant has an impairing effect on their status bar, which prevents them from taking their turn.
         /// </item>
         /// <item>
         /// false - the combatant is <b>not</b> currently affected by an imparing effect and can perform their turn as normal.
@@ -113,7 +113,7 @@ namespace Assets.Scripts.Entities.Components
 
         /// <summary>
         /// <para>
-        /// Sets the path to load/retrieve the asset of this combatable.
+        /// Sets the path to load/retrieve the asset of this combatant.
         /// </para>
         /// Sprite asset path's are donated by the monster's name appended onto the base asset directory location
         /// </summary>
@@ -181,9 +181,10 @@ namespace Assets.Scripts.Entities.Components
         /// <summary>
         /// Provides the base logic for applying a hp recovery/healing effect to a combatant.
         /// </summary>
+        /// <remarks>This is for applying variable healing to the target.</remarks>
         /// <param name="minValue">The lower bound of the healing being applied that is used to calculate the actual amount healed. </param>
         /// <param name="maxValue">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
-        /// <returns></returns>
+        /// <returns>The amount healed</returns>
         public virtual int applyHealing(int minValue, int maxValue)
         {
             float damageHealed = Util.Random.getInt(minValue, maxValue);
@@ -191,10 +192,24 @@ namespace Assets.Scripts.Entities.Components
             healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
             return (int)damageHealed;
         }
-
+        /// <summary>
+        /// Provides the base logic for applying a hp recovery/healing effect to a combatant. 
+        /// </summary>
+        /// <remarks>
+        /// This provides a flat healing value to the target
+        /// </remarks>
+        /// <param name="minValue">The lower bound of the healing being applied that is used to calculate the actual amount healed. </param>
+        /// <param name="maxValue">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
+        /// <returns>The amount healed</returns>
+        public virtual int applyHealing(int value)
+        {
+            healthProperties.currentHealth += value;
+            healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+            return (int)value;
+        }
         /// <summary>
         /// <para>
-        /// Applies the status effect to this combatable.
+        /// Applies the status effect to this combatant.
         /// </para>
         /// See the <see cref="Assets.Scripts.Entities.Combat.EffectProcessor"/> class for effect processing logic.
         /// </summary>
@@ -204,6 +219,15 @@ namespace Assets.Scripts.Entities.Components
         public virtual void applyEffect(int statusEffect, int potency, int turnsApplied)
         {
             EffectProcessor.getInstance().applyEffect(this, statusEffect, potency, turnsApplied);
+        }
+
+        /// <summary>
+        /// Applies the status effect to this combatant
+        /// </summary>
+        /// <param name="condition"></param>
+        public virtual void applyEffect(in Condition condition)
+        {
+            applyEffect(condition.effectId, condition.potency, condition.turnsRemaining);
         }
 
         /// <summary>
@@ -246,7 +270,7 @@ namespace Assets.Scripts.Entities.Components
         /// <summary>
         /// Provides the combatants Max HP.
         /// </summary>
-        /// <returns>The value of the Combatables <b>MAX</b> health.</returns>
+        /// <returns>The value of the combatants <b>MAX</b> health.</returns>
         public float getMaxHp()
         {
             return healthProperties.maxHealth;

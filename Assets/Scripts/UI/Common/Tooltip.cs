@@ -1,4 +1,5 @@
-﻿/*---------------------------------------------------------------
+﻿
+/*---------------------------------------------------------------
                         TOOLTIP
  ---------------------------------------------------------------*/
 /***************************************************************
@@ -75,10 +76,10 @@ namespace Assets.Scripts.UI.Common
         ///  public interface method for showing the tooltip.
         /// </summary>
         /// <param name="tooltipString">the text wanting to be displayed in tooltip.</param>
-        /// <param name="_xOffset">default value of 50</param>
-        /// <param name="_yOffset">default value of 50</param>
+        /// <param name="_xOffset">default value of 120</param>
+        /// <param name="_yOffset">default value of 100</param>
         /// <param name="_transparency">default value of 255</param>
-        public static void show(string tooltipString, float _xOffset = 50, float _yOffset = 50, float _transparency = 255)
+        public static void show(string tooltipString, float _xOffset = 150, float _yOffset = 100, float _transparency = 255)
         {
             xOffSet = _xOffset;
             yOffset = _yOffset;
