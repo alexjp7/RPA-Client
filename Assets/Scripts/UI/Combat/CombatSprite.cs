@@ -37,7 +37,7 @@ namespace Assets.Scripts.UI.Combat
 
         public BuffBar buffBar { get; private set; }
 
-        private static TurnController turnController => StateManager.battleState.turnController;
+        private static CombatController combatController => StateManager.battleState.combatController;
 
         /***************************************************************
         * instantiates and returns the a CombatSpriute instance.
@@ -144,7 +144,7 @@ namespace Assets.Scripts.UI.Combat
         **************************************************************/
         public void onSpriteEnter(in Combatant combatant)
         {
-            if (!turnController.isClientPlayerTurn) return;
+            if (!combatController.isClientPlayerTurn) return;
             //Check ability selected
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
@@ -153,7 +153,7 @@ namespace Assets.Scripts.UI.Combat
             if (abilitySelected.targetingType == TargetingType.AUTO) return;
 
 
-            turnController.targets.Clear();
+            combatController.targets.Clear();
 
             //Party Member hovered over
             if (!combatant.combatSprite.isMonster)
@@ -161,8 +161,8 @@ namespace Assets.Scripts.UI.Combat
                 if (abilitySelected.targetingType != TargetingType.ENEMY)
                 {
                     combatant.combatSprite.sprite.color = Color.green;
-                    turnController.hasValidTarget = true;
-                    turnController.targets.Add(combatant);
+                    combatController.hasValidTarget = true;
+                    combatController.targets.Add(combatant);
                 }
 
             }//Enemy sprite hovered over
@@ -171,8 +171,8 @@ namespace Assets.Scripts.UI.Combat
                 if (abilitySelected.targetingType != TargetingType.ALLIED)
                 {
                     combatant.combatSprite.sprite.color = Color.red;
-                    turnController.hasValidTarget = true;
-                    turnController.targets.Add(combatant);
+                    combatController.hasValidTarget = true;
+                    combatController.targets.Add(combatant);
                 }
 
             }
@@ -190,17 +190,17 @@ namespace Assets.Scripts.UI.Combat
         **************************************************************/
         public void onSpriteExit(in Combatant combatant)
         {
-            if (!turnController.isClientPlayerTurn) return;
+            if (!combatController.isClientPlayerTurn) return;
             //Check ability selected
             int abilityIndex = AbilityButton.selectedAbilityIndex;
             if (abilityIndex == -1) return;
             //Check if targeting type applies to manual target selection
-            if (TargetingType.AUTO == turnController.clientAdventurer.abilities[abilityIndex].targetingType)
+            if (TargetingType.AUTO == combatController.clientAdventurer.abilities[abilityIndex].targetingType)
                 return;
 
-            Ability abilitySelected = turnController.clientAdventurer.abilities[abilityIndex];
-            turnController.targets.Clear();
-            turnController.hasValidTarget = false;
+            Ability abilitySelected = combatController.clientAdventurer.abilities[abilityIndex];
+            combatController.targets.Clear();
+            combatController.hasValidTarget = false;
 
             //Party Member hovered over
             if (!combatant.combatSprite.isMonster)
@@ -231,7 +231,7 @@ namespace Assets.Scripts.UI.Combat
         **************************************************************/
         public void onSpriteClicked(in Combatant combatant)
         {
-            if (!turnController.isClientPlayerTurn)
+            if (!combatController.isClientPlayerTurn)
             {
                 return;
             }
@@ -240,7 +240,7 @@ namespace Assets.Scripts.UI.Combat
                 return;
             }
 
-            Ability abilityUsed = turnController.clientAdventurer.abilities[AbilityButton.selectedAbilityIndex];
+            Ability abilityUsed = combatController.clientAdventurer.abilities[AbilityButton.selectedAbilityIndex];
             //If A monster is hoeverd over with an ally target ability 
             if (isMonster && abilityUsed.targetingType == TargetingType.ALLIED)
             {
@@ -254,17 +254,17 @@ namespace Assets.Scripts.UI.Combat
             }
 
             //Auto target abilities automatically allow for valid targets
-            if (!turnController.hasValidTarget)
+            if (!combatController.hasValidTarget)
             {
                 if (abilityUsed.targetingType != TargetingType.AUTO)
                     return;
             }
 
             //Set to allow server/client distribution of what ability was used
-            turnController.lastAbilityUsed = abilityUsed;
+            combatController.lastAbilityUsed = abilityUsed;
 
             //Process Ability application to target/s
-            foreach (var target in turnController.targets)
+            foreach (var target in combatController.targets)
             {
                 foreach (int abilityType in abilityUsed.typeIds)
                 {
@@ -273,27 +273,27 @@ namespace Assets.Scripts.UI.Combat
                     {
                         if (metaType == MetaType.DAMAGE)
                         {
-                            StateManager.battleState.attackTarget(target, turnController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                            combatController.attackTarget(target, combatController.clientAdventurer, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
                     else
                     {
                         if (metaType == MetaType.HEALING)
                         {
-                            StateManager.battleState.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                            combatController.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
 
                     if (metaType == MetaType.EFFECT)
                     {
-                        StateManager.battleState.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
-                        StateManager.battleState.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
+                        combatController.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
+                        combatController.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                     }
                 }
             }
 
             //Update Cooldown / Targets 
-            abilityUsed.setLastTurnUsed(turnController.turnCount); //Flagging whether cooldown
+            abilityUsed.setLastTurnUsed(combatController.turnCount); //Flagging whether cooldown
             abilityUsed.cooldownTracker++;
             StateManager.battleState.setCooldownUI(AbilityButton.selectedAbilityIndex);
             onSpriteExit(in combatant);
@@ -305,15 +305,15 @@ namespace Assets.Scripts.UI.Combat
                 {
                     Message.send(new BattleMessage(BattleInstruction.TURN_ACTION));
                     Message.send(new BattleMessage(BattleInstruction.TURN_PROGRESSED));
-                    turnController.resetTargets();
-                    turnController.takeTurn();
+                    combatController.resetTargets();
+                    combatController.takeTurn();
                 });
 
             }
             else
             {
-                turnController.resetTargets();
-                turnController.takeTurn();
+                combatController.resetTargets();
+                combatController.takeTurn();
             }
             //Perform turn progression client side
 

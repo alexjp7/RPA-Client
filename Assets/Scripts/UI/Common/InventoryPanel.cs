@@ -1,5 +1,4 @@
-﻿
-namespace Assets.Scripts.UI.Common
+﻿namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
     using Assets.Scripts.Entities.Containers;

@@ -1,4 +1,5 @@
 ﻿
+
 /*---------------------------------------------------------------
                             BATTLE-STATE
  ---------------------------------------------------------------*/
@@ -53,7 +54,7 @@ namespace Assets.Scripts.GameStates
         //Client Player Alias
         private Player clientPlayer { get => Game.clientSidePlayer; }
         //Combat Controllers
-        public TurnController turnController { get; private set; }
+        public CombatController combatController { get; private set; }
 
         void Awake()
         {
@@ -65,7 +66,7 @@ namespace Assets.Scripts.GameStates
         private async void startCombat()
         {
             await initCombat(); // Sends/Requests combat data to other clients     
-            turnController.startCombat();
+            combatController.startCombat();
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void initControllers()
         {
-            turnController = new TurnController();
+            combatController = new CombatController();
         }
 
         /// <summary>
@@ -99,17 +100,17 @@ namespace Assets.Scripts.GameStates
         {
             if (Game.isSinglePlayer)
             {
-                turnController.resetCombat();
-                turnController.generateTurnOrder();
-                turnController.initMonsterParty(4);
+                combatController.resetCombat();
+                combatController.generateTurnOrder();
+                combatController.initMonsterParty(4);
                 initBattleField(); // UI initialisation
             }
             else //Handle Multiplayer session communication
             {
                 if (clientPlayer.isPartyLeader)
                 {
-                    turnController.generateTurnOrder();
-                    turnController.initMonsterParty(4);
+                    combatController.generateTurnOrder();
+                    combatController.initMonsterParty(4);
                     await Task.Run(() => Message.send(new BattleMessage(BattleInstruction.COMBAT_INIT)));
                     initBattleField();
                 }
@@ -130,8 +131,8 @@ namespace Assets.Scripts.GameStates
             //Wait for party leader to send combat oder/monster party data
             BattleMessage message = await Task.Run(() => awaitCombatInit());
 
-            turnController.generateTurnOrder(message.turnOrder);
-            turnController.initMonsterParty(message.monsters);
+            combatController.generateTurnOrder(message.turnOrder);
+            combatController.initMonsterParty(message.monsters);
         }
 
         /// <summary>
@@ -180,12 +181,12 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void generateCombatantSprites()
         {
-            foreach (Monster monster in turnController.monsterParty.asList())
+            foreach (Monster monster in combatController.monsterParty.asList())
             {
                 monster.combatSprite.transform.SetParent(monster_horizontalLayout.transform);
             }
 
-            foreach (Adventurer player in turnController.playerParty.asList())
+            foreach (Adventurer player in combatController.playerParty.asList())
             {
                 player.combatSprite.transform.SetParent(player_horizontalLayout.transform);
             }
@@ -204,155 +205,6 @@ namespace Assets.Scripts.GameStates
         }
 
         /*---------------------------------------------------------------
-                        BATTLE-STATE CONTROL FLOWS
-         ---------------------------------------------------------------*/
-        /// <summary>
-        /// Client side processing of any status-effects(buffs/debuffs) that require exeucting at the start of a turn
-        /// </summary>
-        /// <param name="combatant"> The combatant whos turn it is.</param>
-        public void applyBeforeEffects(in Combatant combatant)
-        {
-            //Select All the precondition effects
-            List<Condition> preConditions = new List<Condition>();
-
-            foreach (var condition in combatant.conditions)
-            {
-                if (EffectProcessor.PreConditionEffects.Contains((StatusEffect)condition.Key))
-                {
-                    preConditions.Add(condition.Value);
-                }
-            }
-
-            //Apply Effect to target - Only works for Damage over time effects (bleedd/poison)
-            foreach (var condition in preConditions)
-            {
-                attackTarget(combatant, condition.potency * condition.stacks, EffectProcessor.getEffectLabel(condition.effectId, 0));
-            }
-        }
-
-        /// <summary>
-        /// Client side processing of any special-case scenarios when applying certian status effects
-        /// </summary>
-        /// <param name="ability">The ability which was used on a turn.</param>
-        public void applyAfterEffect(ref Ability ability)
-        {
-            switch ((StatusEffect)ability.statusEffect)
-            {
-                case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
-                    ability.cooldownTracker -= ability.abilityStrength.max;
-                    break;
-            }
-        }
-
-
-        //DURING TURN
-        /// <summary>
-        /// <para>
-        /// Performs a damaging action on a target; updates new hp value to the HP bar fill-amount and text value.
-        /// </para>
-        /// Additionaly, if the damage applied to a target causes their hp  to fall below 0, the combat sprite is destroyed.
-        /// </summary>
-        /// <param name="target">The combatant of which the ability is applied too.</param>
-        /// <param name="caster">The combatant which used the ability on the target.</param>
-        /// <param name="minDamage">The lower bound of the damage being applied that is used to calculate the actual amount dealt.</param>
-        /// <param name="maxDamage">The upper bound of the damage being applied that is used to calculate the actual amount dealt.</param>
-        public void attackTarget(in Combatant target, in Combatant caster, int minDamage, int maxDamage)
-        {
-            int damageDealt = target.applyDamage(minDamage, maxDamage);
-
-            log.Debug($"<b><color=red>[ATTACK]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" attacks {target.id}:\"{target.name}\" with \"{turnController.lastAbilityUsed.name}\" for <color=red><b>{damageDealt}</b></color>");
-
-            //Reflect damage is applies
-            if (target.conditions.ContainsKey((int)StatusEffect.REFLECT_DAMAGE))
-            {
-                float damage = (float)damageDealt * ((float)target.conditions[(int)StatusEffect.REFLECT_DAMAGE].potency / 100);
-                attackTarget(caster, (int)damage);
-            }
-
-            if (caster.conditions.ContainsKey((int)StatusEffect.POISON_WEAPON))
-            {
-                affectTarget(target, (int)StatusEffect.POISON, 6, 3);
-            }
-
-
-            if (!target.isAlive())
-            {
-                Destroy(target.combatSprite.gameObject);
-            }
-            else
-            {
-                //Remove Sleep if exists
-                if (target.conditions.ContainsKey((int)StatusEffect.SLEEP))
-                {
-                    target.conditions.Remove((int)StatusEffect.SLEEP);
-                }
-
-                target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
-                target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-            }
-
-            FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
-        }
-
-
-        /// <summary>
-        /// Allows for precalculated damage to be done to a target in special combat conditions.
-        /// </summary>
-        /// <param name="target">The combatant of which the ability is applied too.</param>
-        /// <param name="damage">The amount of damage dealt to the target</param>
-        /// <param name="prefix">The text prefix that will be displayed alongside the damage number</param>
-        public void attackTarget(in Combatant target, int damage, string prefix = "")
-        {
-            int damageDealt = target.applyDamage(damage);
-
-            log.Debug($"<b><color=red>[ATTACK]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" attacks {target.id}:\"{target.name}\"  for <color=red><b>{damageDealt}</b></color>");
-
-            if (!target.isAlive())
-            {
-                Destroy(target.combatSprite.gameObject);
-            }
-            else
-            {
-                target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
-                target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-            }
-
-            FloatingPopup.create(target.combatSprite.transform.position, $"{prefix}  {damageDealt.ToString()}", Color.red);
-        }
-
-        /// <summary>
-        /// Applies a combat status-effect to a target and displays text to user to indicate the abilitiy's effects.
-        /// </summary>
-        /// <param name="target">The combatant of which the ability is applied too</param>
-        /// <param name="statusEffect">ID for an ability status effect. <see cref="Assets.Scripts.Entities.Combat.EffectProcessor">EffectProcessor</see></param>
-        /// <param name="potency">The strength or duration if applicable of the status effect</param>
-        /// <param name="turnsApplied"></param>
-        public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
-        {
-            String conditionLabel = EffectProcessor.getEffectLabel(statusEffect, potency);
-            log.Debug($"<b><color=blue>[CONDITION]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" affects {target.id}:\"{target.name}\" with <color=blue><b>{conditionLabel}</b></color>");
-
-            target.applyEffect(statusEffect, potency, turnsApplied);
-            FloatingPopup.create(target.combatSprite.transform.position, conditionLabel, Color.blue);
-        }
-
-
-        /// <summary>
-        /// Performs a healing action on a target; updates new hp value to the HP bar fill-amount and text value.
-        /// </summary>
-        /// <param name="target">The combatant of which the ability is applied too</param>
-        /// <param name="minHealing">The lower bound of the healing being applied that is used to calculate the actual amount healed.</param>
-        /// <param name="maxHealing">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
-        public void healTarget(in Combatant target, int minHealing, int maxHealing)
-        {
-            int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
-            log.Debug($"<b><color=green>[HEAL]</color></b> - {turnController.currentCombatant.id}:\"{turnController.currentCombatant.name}\" heals {target.id}:\"{target.name}\" with \"{turnController.lastAbilityUsed.name}\" for <color=green><b>{healingAmount}</b></color>");
-            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
-            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
-            FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), new Color(0, 100, 0));
-        }
-
-        /*---------------------------------------------------------------
                            UI-CALLBACKS 
          ---------------------------------------------------------------*/
         /// <summary>
@@ -360,10 +212,10 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         public void updateTurnUI()
         {
-            Combatant currentCombatant = turnController.currentCombatant;
-            Combatant nextCombatant = turnController.nextCombatant;
+            Combatant currentCombatant = combatController.currentCombatant;
+            Combatant nextCombatant = combatController.nextCombatant;
 
-            TurnChevron.updateTurnChevrons(currentCombatant.combatSprite.transform, nextCombatant.combatSprite.transform, turnController.isPlayerTurn);
+            TurnChevron.updateTurnChevrons(currentCombatant.combatSprite.transform, nextCombatant.combatSprite.transform, combatController.isPlayerTurn);
             currentTurnDisplayName.text = currentCombatant.name;
         }
 
@@ -372,7 +224,7 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         public void updateConditionUI()
         {
-            Combatant currentCombatant = turnController.currentCombatant;
+            Combatant currentCombatant = combatController.currentCombatant;
             List<int> removedConditions = currentCombatant.updateConditionDurations();
             if (removedConditions.Count > 0)
             {
@@ -382,12 +234,12 @@ namespace Assets.Scripts.GameStates
                 }
             }
 
-            foreach (var players in turnController.playerParty.asList().FindAll(player => player.isAlive()))
+            foreach (var players in combatController.playerParty.asList().FindAll(player => player.isAlive()))
             {
                 players.combatSprite.updateConditions();
             }
 
-            foreach (var monsters in turnController.monsterParty.asList().FindAll(monster => monster.isAlive()))
+            foreach (var monsters in combatController.monsterParty.asList().FindAll(monster => monster.isAlive()))
             {
                 monsters.combatSprite.updateConditions();
             }
@@ -410,7 +262,7 @@ namespace Assets.Scripts.GameStates
         /// <param name="abilityIndex">The index of the ability that was used on a combatant's turn.</param>
         public void setCooldownUI(int abilityIndex)
         {
-            bool isPlayerTurn = turnController.isClientPlayerTurn;
+            bool isPlayerTurn = combatController.isClientPlayerTurn;
 
             Ability ability = clientPlayer.playerClass.abilities[abilityIndex];
             AbilityButton abilityButton = AbilityButtons.buttons[abilityIndex];
@@ -459,7 +311,7 @@ namespace Assets.Scripts.GameStates
         /// </remarks>
         public void skipTurn()
         {
-            turnController.takeTurn();
+            combatController.takeTurn();
         }
 
 
@@ -468,22 +320,46 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void updateUI()
         {
+            updateSpriteUI();
             updateTurnUI();
             updateCooldownUI();
 
-            if (turnController.turnCount > 1)
+            if (combatController.turnCount > 1)
             {
                 updateConditionUI();
             }
 
-            turnController.hasNextTurn = false;
+            combatController.hasNextTurn = false;
 
-            if (turnController.currentCombatant.isImpaired)
+            if (combatController.currentCombatant.isImpaired)
             {
-                FloatingPopup.create(turnController.currentCombatant.combatSprite.transform.position, "Turn skipped", Color.black);
-                turnController.takeTurn();
+                FloatingPopup.create(combatController.currentCombatant.combatSprite.transform.position, "Turn skipped", Color.black);
+                combatController.takeTurn();
 
             }
+        }
+
+        /// <summary>
+        /// Destroys any combatants who have been defeated
+        /// </summary>
+        private void updateSpriteUI()
+        {
+            foreach (var player in combatController.playerParty.defeated)
+            {
+                if (player.combatSprite != null)
+                {
+                    Destroy(player.combatSprite.gameObject);
+                }
+            }
+
+            foreach (var monster in combatController.monsterParty.defeated)
+            {
+                if (monster.combatSprite != null)
+                {
+                    Destroy(monster.combatSprite.gameObject);
+                }
+            }
+
         }
 
         /// <summary>
@@ -501,20 +377,20 @@ namespace Assets.Scripts.GameStates
             }
 
             // No combat round has started
-            if (!turnController.hasCombat)
+            if (!combatController.hasCombat)
             {
                 return;
             }
 
             //Combat is over
-            if (turnController.hasCombatEnded)
+            if (combatController.hasCombatEnded)
             {
                 processEndOfCombat();
             }
             else
             {
                 // Next turn can be taken
-                if (turnController.hasNextTurn)
+                if (combatController.hasNextTurn)
                 {
                     updateUI();
                 }
@@ -529,7 +405,7 @@ namespace Assets.Scripts.GameStates
             string panelHeading = "";
             string panelDescription = "Game will reset in:";
 
-            if (turnController.hasPlayerTeamWon)
+            if (combatController.hasPlayerTeamWon)
             {
                 panelHeading = "Victory";
             }
@@ -538,8 +414,8 @@ namespace Assets.Scripts.GameStates
                 panelHeading = "Defeat";
             }
 
-            turnController.hasCombatEnded = false;
-            turnController.hasCombat = false;
+            combatController.hasCombatEnded = false;
+            combatController.hasCombat = false;
 
             TimerCallBack callBack = startCombat;
 
@@ -561,7 +437,7 @@ namespace Assets.Scripts.GameStates
             switch ((BattleInstruction)message.instructionType)
             {
                 case BattleInstruction.TURN_PROGRESSED:
-                    turnController.takeTurn();
+                    combatController.takeTurn();
                     break;
                 case BattleInstruction.TURN_ACTION:
                     processTurnAction(ref message);
@@ -576,19 +452,18 @@ namespace Assets.Scripts.GameStates
         private void processTurnAction(ref BattleMessage message)
         {
             //Apply ability on player turn
-            if (turnController.isPlayerTurn)
+            if (combatController.isPlayerTurn)
             {
                 //Buff/heal ally
                 if (message.abilityTargeting == TargetingType.ALLIED)
                 {
-                    foreach (var target in turnController.playerParty.asList())
+                    foreach (var target in combatController.playerParty)
                     {
                         if (target.isAlive())
                         {
                             if (message.targets.ContainsKey(target.id))
                             {
                                 Combatant allyPlayer = Game.getPlayerById(target.id).playerClass;
-
                             }
                         }
                     }
@@ -600,10 +475,10 @@ namespace Assets.Scripts.GameStates
                     FloatingPopup.create(caster.combatSprite.transform.position, message.abilityName, Color.black);
                     foreach (var target in message.targets)
                     {
-                        Combatant enemyMonster = turnController.monsterParty.asList()[target.Key];
+                        Combatant enemyMonster = combatController.monsterParty.asList()[target.Key];
                         //Calculate damage taken as this clients value for the mosnter's hp - the new value
                         int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
-                        attackTarget(enemyMonster, damageDealt);
+                        combatController.attackTarget(enemyMonster, damageDealt);
                     }
                 }
                 else if (message.abilityTargeting == TargetingType.AUTO)
@@ -614,10 +489,10 @@ namespace Assets.Scripts.GameStates
 
                     foreach (var target in message.targets)
                     {
-                        Combatant enemyMonster = turnController.monsterParty.asList()[target.Key];
+                        Combatant enemyMonster = combatController.monsterParty.asList()[target.Key];
                         //Calculate damage taken as this clients value for the mosnter's hp - the new value
                         int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
-                        attackTarget(enemyMonster, damageDealt);
+                        combatController.attackTarget(enemyMonster, damageDealt);
                     }
                 }
             }//Apply ability on monster turn

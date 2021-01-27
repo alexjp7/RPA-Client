@@ -5,11 +5,12 @@
     using System.Linq;
 
     using Assets.Scripts.Entities.Components;
+    using System.Collections;
 
     /// <summary>
     /// Base class for combat party container types.
     /// </summary>
-    public class CombatParty
+    public class CombatParty : IEnumerable<Combatant>
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(CombatParty));
 
@@ -18,6 +19,7 @@
         /// </summary>
         public Combatant currentCombatant { get; private set; }
 
+        public List<Combatant> defeated { get; private set; }
 
         /// <summary>
         /// Used for turn order cycling
@@ -30,12 +32,13 @@
         /// <param name="combatants">List of combatants which should be sorted into turn order.</param>
         public CombatParty(in List<Combatant> combatants)
         {
+            this.defeated = new List<Combatant>();
             this.combatQueue = new Queue<Combatant>(combatants);
         }
 
         public List<Combatant> asList()
         {
-            return combatQueue.AsEnumerable().ToList(); 
+            return combatQueue.AsEnumerable().ToList();
         }
 
         /// <summary>
@@ -71,6 +74,7 @@
 
         private void removeDead()
         {
+            defeated.AddRange(combatQueue.Where(combatant => !combatant.isAlive()));
             combatQueue = new Queue<Combatant>(combatQueue.Where(combatant => combatant.isAlive()));
         }
 
@@ -104,6 +108,16 @@
             }
 
             combatQueue = new Queue<Combatant>(combatants);
+        }
+
+        public IEnumerator<Combatant> GetEnumerator()
+        {
+            return asList().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (IEnumerator<Combatant>)GetEnumerator();
         }
     }
 }

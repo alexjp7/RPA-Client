@@ -19,9 +19,9 @@ namespace Assets.Scripts.GameStates
     using Assets.Scripts.UI.Common;
     using Assets.Scripts.Combat;
 
-    public class TurnController
+    public class CombatController
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(TurnController));
+        private static readonly ILog log = LogManager.GetLogger(typeof(CombatController));
 
         /// <summary>
         /// Tracks the turn count of a combat encounter. This value is incremented every time a new turn begins.
@@ -280,7 +280,7 @@ namespace Assets.Scripts.GameStates
                     log.Debug($"Current Turn: {currentCombatant.id}:\"{currentCombatant.name}\"");
 
                     currentCombatant.updateAbilityCooldowns();
-                    StateManager.battleState.applyBeforeEffects(currentCombatant);
+                    applyBeforeEffects(currentCombatant);
 
                     //Check for turn imparing status effects
                     if (currentCombatant.isImpaired)
@@ -325,16 +325,16 @@ namespace Assets.Scripts.GameStates
                 {
                     if (metaType == MetaType.DAMAGE)
                     {
-                        StateManager.battleState.attackTarget(target, currentMonster, ability.abilityStrength.min, ability.abilityStrength.max);
+                        attackTarget(target, currentMonster, ability.abilityStrength.min, ability.abilityStrength.max);
 
                     }
                     else if (metaType == MetaType.EFFECT)
                     {
-                        StateManager.battleState.affectTarget(target, ability.statusEffect, ability.conditionStrength.potency, ability.conditionStrength.turnsApplied);
+                        affectTarget(target, ability.statusEffect, ability.conditionStrength.potency, ability.conditionStrength.turnsApplied);
                     }
                     else if (metaType == MetaType.HEALING)
                     {
-                        StateManager.battleState.healTarget(target, ability.abilityStrength.min, ability.abilityStrength.max);
+                        healTarget(target, ability.abilityStrength.min, ability.abilityStrength.max);
                     }
                 }
 
@@ -347,6 +347,146 @@ namespace Assets.Scripts.GameStates
 
             ability.setLastTurnUsed(turnCount);
             currentMonster.updateAbilityCooldowns();
+        }
+
+
+        /*---------------------------------------------------------------
+                        Turn Actions
+        ---------------------------------------------------------------*/
+        /// <summary>
+        /// Client side processing of any status-effects(buffs/debuffs) that require exeucting at the start of a turn
+        /// </summary>
+        /// <param name="combatant"> The combatant whos turn it is.</param>
+        public void applyBeforeEffects(in Combatant combatant)
+        {
+            //Select All the precondition effects
+            List<Condition> preConditions = new List<Condition>();
+
+            foreach (var condition in combatant.conditions)
+            {
+                if (EffectProcessor.PreConditionEffects.Contains((StatusEffect)condition.Key))
+                {
+                    preConditions.Add(condition.Value);
+                }
+            }
+
+            //Apply Effect to target - Only works for Damage over time effects (bleedd/poison)
+            foreach (var condition in preConditions)
+            {
+                attackTarget(combatant, condition.potency * condition.stacks, EffectProcessor.getEffectLabel(condition.effectId, 0));
+            }
+        }
+
+        /// <summary>
+        /// Client side processing of any special-case scenarios when applying certian status effects
+        /// </summary>
+        /// <param name="ability">The ability which was used on a turn.</param>
+        public void applyAfterEffect(ref Ability ability)
+        {
+            switch ((StatusEffect)ability.statusEffect)
+            {
+                case StatusEffect.COOLDOWN_CHANGE:  //The ability that casts a cooldown reduction, should not have the CDR applied.
+                    ability.cooldownTracker -= ability.abilityStrength.max;
+                    break;
+            }
+        }
+
+
+        /// <summary>
+        /// <para>
+        /// Performs a damaging action on a target; updates new hp value to the HP bar fill-amount and text value.
+        /// </para>
+        /// Additionaly, if the damage applied to a target causes their hp  to fall below 0, the combat sprite is destroyed.
+        /// </summary>
+        /// <param name="target">The combatant of which the ability is applied too.</param>
+        /// <param name="caster">The combatant which used the ability on the target.</param>
+        /// <param name="minDamage">The lower bound of the damage being applied that is used to calculate the actual amount dealt.</param>
+        /// <param name="maxDamage">The upper bound of the damage being applied that is used to calculate the actual amount dealt.</param>
+        public void attackTarget(in Combatant target, in Combatant caster, int minDamage, int maxDamage)
+        {
+            int damageDealt = target.applyDamage(minDamage, maxDamage);
+
+            log.Debug($"<b><color=red>[ATTACK]</color></b> - {currentCombatant.id}:\"{currentCombatant.name}\" attacks {target.id}:\"{target.name}\" with \"{lastAbilityUsed.name}\" for <color=red><b>{damageDealt}</b></color>");
+
+            //Reflect damage is applies
+            if (target.conditions.ContainsKey((int)StatusEffect.REFLECT_DAMAGE))
+            {
+                float damage = (float)damageDealt * ((float)target.conditions[(int)StatusEffect.REFLECT_DAMAGE].potency / 100);
+                attackTarget(caster, (int)damage);
+            }
+
+            if (caster.conditions.ContainsKey((int)StatusEffect.POISON_WEAPON))
+            {
+                affectTarget(target, (int)StatusEffect.POISON, 6, 3);
+            }
+
+
+            if (target.isAlive())
+            {
+                //Remove Sleep if exists
+                if (target.conditions.ContainsKey((int)StatusEffect.SLEEP))
+                {
+                    target.conditions.Remove((int)StatusEffect.SLEEP);
+                }
+
+                target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+                target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+            }
+
+            FloatingPopup.create(target.combatSprite.transform.position, damageDealt.ToString(), Color.red);
+        }
+
+        /// <summary>
+        /// Allows for precalculated damage to be done to a target in special combat conditions.
+        /// </summary>
+        /// <param name="target">The combatant of which the ability is applied too.</param>
+        /// <param name="damage">The amount of damage dealt to the target</param>
+        /// <param name="prefix">The text prefix that will be displayed alongside the damage number</param>
+        public void attackTarget(in Combatant target, int damage, string prefix = "")
+        {
+            int damageDealt = target.applyDamage(damage);
+
+            log.Debug($"<b><color=red>[ATTACK]</color></b> - {currentCombatant.id}:\"{currentCombatant.name}\" attacks {target.id}:\"{target.name}\"  for <color=red><b>{damageDealt}</b></color>");
+
+            if (target.isAlive())
+            {
+                target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+                target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+            }
+
+            FloatingPopup.create(target.combatSprite.transform.position, $"{prefix}  {damageDealt.ToString()}", Color.red);
+        }
+
+        /// <summary>
+        /// Applies a combat status-effect to a target and displays text to user to indicate the abilitiy's effects.
+        /// </summary>
+        /// <param name="target">The combatant of which the ability is applied too</param>
+        /// <param name="statusEffect">ID for an ability status effect. <see cref="Assets.Scripts.Entities.Combat.EffectProcessor">EffectProcessor</see></param>
+        /// <param name="potency">The strength or duration if applicable of the status effect</param>
+        /// <param name="turnsApplied"></param>
+        public void affectTarget(Combatant target, int statusEffect, int potency, int turnsApplied)
+        {
+            String conditionLabel = EffectProcessor.getEffectLabel(statusEffect, potency);
+            log.Debug($"<b><color=#87CEEB>[CONDITION]</color></b> - {currentCombatant.id}:\"{currentCombatant.name}\" affects {target.id}:\"{target.name}\" with <color=#87CEEB><b>{conditionLabel}</b></color>");
+
+            target.applyEffect(statusEffect, potency, turnsApplied);
+            FloatingPopup.create(target.combatSprite.transform.position, conditionLabel, Color.blue);
+        }
+
+
+        /// <summary>
+        /// Performs a healing action on a target; updates new hp value to the HP bar fill-amount and text value.
+        /// </summary>
+        /// <param name="target">The combatant of which the ability is applied too</param>
+        /// <param name="minHealing">The lower bound of the healing being applied that is used to calculate the actual amount healed.</param>
+        /// <param name="maxHealing">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
+        public void healTarget(in Combatant target, int minHealing, int maxHealing)
+        {
+            int healingAmount = target.applyHealing((int)minHealing, (int)maxHealing);
+            log.Debug($"<b><color=green>[HEAL]</color></b> - {currentCombatant.id}:\"{currentCombatant.name}\" heals {target.id}:\"{target.name}\" with \"{lastAbilityUsed.name}\" for <color=green><b>{healingAmount}</b></color>");
+            target.combatSprite.healthBar.fillAmount = target.getHealthPercent();
+            target.combatSprite.currentHealthValue.text = ((int)target.getCurrentHp()).ToString();
+            FloatingPopup.create(target.combatSprite.transform.position, healingAmount.ToString(), new Color(0, 100, 0));
         }
 
         /// <summary>
@@ -371,6 +511,5 @@ namespace Assets.Scripts.GameStates
                 monster.combatSprite.sprite.color = Color.white;
             });
         }
-
     }
 }

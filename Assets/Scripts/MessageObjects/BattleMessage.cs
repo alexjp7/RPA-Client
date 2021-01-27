@@ -37,7 +37,7 @@ namespace Assets.Scripts.RPA_Messages
         public List<int> abilityTypes { get; private  set; }
         public string abilityName { get; private set;}
 
-        private static TurnController turnController => StateManager.battleState.turnController;
+        private static CombatController turnController => StateManager.battleState.combatController;
 
         /*---------------------------------------------------------------
                             SERIALIZATION

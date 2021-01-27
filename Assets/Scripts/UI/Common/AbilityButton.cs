@@ -47,7 +47,7 @@ namespace Assets.Scripts.UI.Common
         public Image icon { get; set; }
         private Ability abilityRef;
 
-        private static TurnController turnController => StateManager.battleState.turnController;
+        private static CombatController turnController => StateManager.battleState.combatController;
 
         /// <summary>
         ///  Instantiates and returns the an AbilityButton instance.
