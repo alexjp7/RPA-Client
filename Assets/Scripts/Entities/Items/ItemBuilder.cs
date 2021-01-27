@@ -35,8 +35,8 @@
         public ItemBuilder json(JSONNode jsonNode)
         {
             this.jsonNode = jsonNode;
-            isUseable = jsonNode["isUseable"].AsBool;
-            isConsumeable = jsonNode["isConsumeable"].AsBool;
+            isUseable = jsonNode["is_useable"].AsBool;
+            isConsumeable = jsonNode["is_consumeable"].AsBool;
 
             return this;
         }
@@ -107,7 +107,7 @@
             item.description = _description;
             item.iconSprite = new Renderable(_name, Item.ICON_PATH+"/"+ _name);
             item.buyValue = _buyValue;
-            item.selValue = _sellValue;
+            item.sellValue = _sellValue;
 
             item.build(this);
 

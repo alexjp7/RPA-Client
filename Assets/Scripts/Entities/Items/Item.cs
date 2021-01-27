@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Entities.Items
 {
-    class Item
+    public class Item
     {
         /// <summary>
         /// Path on disk where item data is
@@ -19,7 +19,7 @@ namespace Assets.Scripts.Entities.Items
         public Renderable iconSprite;
         public string name { get; set; }
         public int buyValue { get; set; }
-        public int selValue { get; set; }
+        public int sellValue { get; set; }
         public string description { get; set; }
 
         /// <summary>
@@ -46,8 +46,11 @@ namespace Assets.Scripts.Entities.Items
             {
                 return new Consumable();
             }
-            else if(isUseable)
+            else if(isUseable) 
             {
+                //To-Do: come up with distinciton between equipable and useable items. 
+                //At the moment equipable items are the standard use-case for non-consumable, 
+                //yet useable items in the game this far.
                 return new Equipable();
             }
             else // Likely to be quest items for now.

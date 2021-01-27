@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.Entities.Items
+﻿
+namespace Assets.Scripts.Entities.Items
 {
     using System.Collections.Generic;
     using System.IO;
@@ -12,7 +13,7 @@
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(ItemMap));
 
-        public Dictionary<int, Item> items;
+        public Dictionary<string, Item> items;
 
         /// <summary>
         /// Singleton accessor
@@ -34,18 +35,18 @@
         /// </summary>
         private static ItemMap _instance;
 
-        public Item this[int itemId]
+        public Item this[string key]
         {
             get
             {
-                return items[itemId];
+                return items[key];
 
             }
         }
 
         public ItemMap()
         {
-            items = new Dictionary<int, Item>();
+            items = new Dictionary<string, Item>();
             loadItems();
         }
 
@@ -72,7 +73,7 @@
         }
 
         /// <summary>
-        /// Refernces <see cref="ItemBuilder"/> to construct each item from the passed in JSON.
+        /// References <see cref="ItemBuilder"/> to construct each item from the passed in JSON.
         /// </summary>
         /// <param name="json">JSON collection of items.</param>
         private void buildItems(JSONNode json)
@@ -89,7 +90,7 @@
                             .condition()
                             .build();
 
-                items.Add(item.id,item);
+                items.Add(item.name,item);
             }
         }
     }

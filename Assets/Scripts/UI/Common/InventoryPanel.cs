@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.UI.Common
+﻿
+namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
     using Assets.Scripts.Entities.Containers;
@@ -34,8 +35,6 @@
         {
             this.tabName = "Inventory";
             this.inventory = inventory;
-            inventory = new Inventory();
-
 
             HorizontalLayoutGroup layoutGroup = gameObject.AddComponent<HorizontalLayoutGroup>();
             layoutGroup.childAlignment = TextAnchor.MiddleCenter;
@@ -85,24 +84,24 @@
 
             EventTrigger.Entry mouseEnterEvent;
             EventTrigger.Entry mouseExitEvent;
-            EventTrigger.Entry mouseClickeEvent;
+            EventTrigger.Entry mouseClickedEvent;
 
             //Initialize Party Sprite Events
             mouseEnterEvent = new EventTrigger.Entry();
             mouseExitEvent = new EventTrigger.Entry();
-            mouseClickeEvent = new EventTrigger.Entry();
+            mouseClickedEvent = new EventTrigger.Entry();
 
             mouseEnterEvent.eventID = EventTriggerType.PointerEnter;
             mouseExitEvent.eventID = EventTriggerType.PointerExit;
-            mouseClickeEvent.eventID = EventTriggerType.PointerClick;
+            mouseClickedEvent.eventID = EventTriggerType.PointerClick;
 
             mouseEnterEvent.callback.AddListener(evt => onInventorySlothoverEnter(j));
             mouseExitEvent.callback.AddListener(evt => onInventorySlothoverExit());
-            mouseClickeEvent.callback.AddListener(evt => onSlotClicked(j));
+            mouseClickedEvent.callback.AddListener(evt => onSlotClicked(j));
 
             inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
             inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+            inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseClickedEvent);
         }
 
         /// <summary>

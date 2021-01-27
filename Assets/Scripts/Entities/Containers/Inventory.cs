@@ -11,7 +11,7 @@ namespace Assets.Scripts.Entities.Containers
     using Assets.Scripts.Entities.Components;
     using System.Collections;
 
-    class Inventory : IEnumerable<Item>
+    public class Inventory : IEnumerable<Item>
     {
         public static readonly int INVENTORY_CAPACITY = 5;
         private static readonly ILog log = LogManager.GetLogger(typeof(Inventory));
@@ -30,7 +30,7 @@ namespace Assets.Scripts.Entities.Containers
         public Inventory()
         {
             items = new List<Item>();
-            items.Add(ItemMap.INSTANCE[0]);
+            items.Add(ItemMap.INSTANCE["Basic Health Potion"]);
         }
 
         public int Count
