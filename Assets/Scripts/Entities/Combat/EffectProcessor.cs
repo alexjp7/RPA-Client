@@ -23,7 +23,8 @@ namespace Assets.Scripts.Entities.Combat
         DAMAGE_TAKEN_UP = 2, DAMAGE_TAKEN_DOWN = 3,
         BLEED = 5,
         POISON = 6, POISON_WEAPON = 7,
-        SLEEP = 8
+        SLEEP = 8,
+        HEALTH_RESTORE = 9
     }
 
 
@@ -85,6 +86,10 @@ namespace Assets.Scripts.Entities.Combat
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
                     if (target.conditions.ContainsKey(effectId)) target.conditions[effectId].extendEffect(turnsApplied);
                     else target.conditions.Add(effectId, new Condition(effectId, potency, turnsApplied));
+                    break;
+
+                case StatusEffect.HEALTH_RESTORE:
+                    target.applyHealing(potency);
                     break;
 
                 /******IMPAIRING-EFFECTS*******/

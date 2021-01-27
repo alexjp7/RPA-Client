@@ -51,6 +51,8 @@ namespace Assets.Scripts.Entities.Players
 
         public int inventorySize = Inventory.INVENTORY_CAPACITY;
 
+        public Inventory inventory { get; set; }
+
         public Adventurer playerClass { get; set; }
 
         //Check if all players is ready

@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.UI.Common
+﻿
+namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
     using Assets.Scripts.Entities.Containers;
@@ -10,7 +11,14 @@
     class InventoryPanel : TabComponent
     {
         private Inventory inventory;
+        private static readonly string ITEM_IMAGE = "image_item";
 
+        /// <summary>
+        /// Static instantiation method for creating an InventoryPanel
+        /// </summary>
+        /// <param name="inventory">The player's inventory that will be rendered</param>
+        /// <param name="parent">Parent Transform to be rendered</param>
+        /// <returns></returns>
         public static InventoryPanel create(in Inventory inventory, RectTransform parent)
         {
             GameObject gameObject = new GameObject("inventory");
@@ -20,6 +28,9 @@
             return inventoryPanel;
         }
 
+        /// <summary>
+        /// Initializes data of the inventory panel
+        /// </summary>
         private void setData(Inventory inventory, RectTransform parent)
         {
             this.tabName = "Inventory";
@@ -35,60 +46,95 @@
             {
                 Transform inventorySlotTransform = Instantiate(GameAssets.INSTANCE.inventorySlotPrefab, Vector2.zero, Quaternion.identity);
                 inventorySlotTransform.SetParent(gameObject.transform);
-                setEventHandlers(inventorySlotTransform);
+
+
+                setEventHandlers(inventorySlotTransform, i);
+            }
+
+            drawInventory();
+
+        }
+
+        /// <summary>
+        /// Draws inventory based on current state of inventory slots.
+        /// </summary>
+        private void drawInventory()
+        {
+            for (int i = 0; i < inventory.Count; i++)
+            {
+                Transform slot = transform.GetChild(i);
+                Image icon = slot.Find(ITEM_IMAGE).GetComponent<Image>();
+
+                if (inventory[i] != null)
+                {
+                    icon.sprite = inventory?[i]?.iconSprite?.sprite;
+                }
+                else
+                {
+                    icon.gameObject.SetActive(false);
+                }
             }
         }
 
-        private void setEventHandlers(Transform inventorySlotTransform)
+        private void setEventHandlers(Transform inventorySlotTransform, int i)
         {
+            // Create local capture of variable to ensure callback methods are set with appropriate index.
+            int j = i;
             inventorySlotTransform.gameObject.AddComponent<EventTrigger>();
 
             EventTrigger.Entry mouseEnterEvent;
             EventTrigger.Entry mouseExitEvent;
-            //EventTrigger.Entry mouseClickeEvent;
+            EventTrigger.Entry mouseClickedEvent;
 
             //Initialize Party Sprite Events
             mouseEnterEvent = new EventTrigger.Entry();
             mouseExitEvent = new EventTrigger.Entry();
-           // mouseClickeEvent = new EventTrigger.Entry();
+            mouseClickedEvent = new EventTrigger.Entry();
 
             mouseEnterEvent.eventID = EventTriggerType.PointerEnter;
             mouseExitEvent.eventID = EventTriggerType.PointerExit;
-            //mouseClickeEvent.eventID = EventTriggerType.PointerClick;
+            mouseClickedEvent.eventID = EventTriggerType.PointerClick;
 
-            mouseEnterEvent.callback.AddListener(evt => onAbilityHoverEnter());
-            mouseExitEvent.callback.AddListener(evt => onAbilityHoverExit());
-            //     mouseClickeEvent.callback.AddListener(evt => onSpriteClicked(combatantRef));
+            mouseEnterEvent.callback.AddListener(evt => onInventorySlothoverEnter(j));
+            mouseExitEvent.callback.AddListener(evt => onInventorySlothoverExit());
+            mouseClickedEvent.callback.AddListener(evt => onSlotClicked(j));
 
             inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseEnterEvent);
             inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseExitEvent);
-            //gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
+            inventorySlotTransform.GetComponent<EventTrigger>().triggers.Add(mouseClickedEvent);
         }
 
-        public void onAbilityHoverEnter()
+        /// <summary>
+        /// Shows the item tooltip.
+        /// </summary>
+        /// <param name="slotIndex"></param>
+        public void onInventorySlothoverEnter(int slotIndex)
         {
-            Tooltip.show("Empty");
+            Tooltip.show(slotIndex >= inventory.Count || string.IsNullOrEmpty(inventory[slotIndex]?.description) ? "Empty" : inventory[slotIndex]?.description);
         }
 
         /// <summary>
         /// Event handler for hiding the inventory slot tooltips upon mouse exit.
         /// </summary>
-        public void onAbilityHoverExit()
+        public void onInventorySlothoverExit()
         {
             Tooltip.hide();
         }
 
-
         /// <summary>
-        /// Generates UI components for each item in an Adventurer's inventory.
+        /// Executes slots use effect if it has one.
         /// </summary>
-        /// <param name="inventoryPanel">The UI container for inventory items.</param>
-        public static void generateInventoryUI(in Transform inventoryPanel)
+        /// <param name="slotIndex">Item slot selected</param>
+        private void onSlotClicked(int slotIndex)
         {
-            int childs = inventoryPanel.childCount;
-            for (var i = childs - 1; i >= 0; i--)
+            if (slotIndex < -1 || slotIndex >= inventory.Count) return;
+
+            bool isConsumeable;
+            inventory.use(slotIndex, Game.clientSidePlayer.playerClass, out isConsumeable);
+
+            if (isConsumeable)
             {
-                GameObject.Destroy(inventoryPanel.GetChild(i).gameObject);
+                drawInventory();
             }
         }
     }
