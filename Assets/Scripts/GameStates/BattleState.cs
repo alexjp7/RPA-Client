@@ -402,6 +402,8 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void processEndOfCombat()
         {
+            updateSpriteUI();
+
             string panelHeading = "";
             string panelDescription = "Game will reset in:";
 
@@ -478,7 +480,7 @@ namespace Assets.Scripts.GameStates
                         Combatant enemyMonster = combatController.monsterParty.asList()[target.Key];
                         //Calculate damage taken as this clients value for the mosnter's hp - the new value
                         int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
-                        combatController.attackTarget(enemyMonster, damageDealt);
+                        enemyMonster.applyDamage(damageDealt);
                     }
                 }
                 else if (message.abilityTargeting == TargetingType.AUTO)
@@ -492,7 +494,7 @@ namespace Assets.Scripts.GameStates
                         Combatant enemyMonster = combatController.monsterParty.asList()[target.Key];
                         //Calculate damage taken as this clients value for the mosnter's hp - the new value
                         int damageDealt = (int)enemyMonster.healthProperties.currentHealth - (int)target.Value;
-                        combatController.attackTarget(enemyMonster, damageDealt);
+                        enemyMonster.applyDamage(damageDealt);
                     }
                 }
             }//Apply ability on monster turn

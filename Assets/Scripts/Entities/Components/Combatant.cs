@@ -20,6 +20,9 @@ namespace Assets.Scripts.Entities.Components
     using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.Entities.Containers;
     using Assets.Scripts.UI.Combat;
+    using UnityEngine;
+    using Assets.Scripts.Combat;
+    using log4net;
 
     /// <summary>
     /// Combatant types used to be able
@@ -33,6 +36,8 @@ namespace Assets.Scripts.Entities.Components
 
     public abstract class Combatant
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Combatant));
+
         /// <summary>
         /// The root location of sprite textures, relative from the /Assets/Data directory 
         /// </summary>
@@ -130,12 +135,24 @@ namespace Assets.Scripts.Entities.Components
         /// <param name="minDamage">The lower bound of the damage being applied that is used to calculate the actual amount dealt.</param>
         /// <param name="maxDamage">The upper bound of the damage being applied that is used to calculate the actual amount dealt.</param>
         /// <returns>The actual damage dealt.</returns>
-        public virtual int applyDamage(int minDamage, int maxDamage)
+        public virtual int damage(int minDamage, int maxDamage)
         {
             float damageDealt = Util.Random.getInt(minDamage, maxDamage);
-            float totalDamageModifier = 0;
-            float damageAmped = 0;
-            float damageAbsorbed = 0;
+            damageDealt = calculateDamageAfterModifiers(damageDealt);
+
+            applyDamage((int)damageDealt);
+
+            return (int)damageDealt;
+        }
+
+        /// <summary>
+        /// Applies any damage modifiers (increase/decrease damage taken) to the caclulcated damage amount. 
+        /// </summary>
+        /// <param name="damageDealt"></param>
+        /// <returns></returns>
+        private float calculateDamageAfterModifiers(float damageDealt)
+        {
+            float damageAmped = 0, damageAbsorbed = 0, totalDamageModifier;
 
             if (conditions.Count > 0)
             {
@@ -149,7 +166,6 @@ namespace Assets.Scripts.Entities.Components
                     damageAbsorbed = conditions[(int)StatusEffect.DAMAGE_TAKEN_DOWN].potency;
                 }
             }
-
             totalDamageModifier = damageAmped + damageAbsorbed;
 
             //Apply Damage Modifiers
@@ -162,9 +178,7 @@ namespace Assets.Scripts.Entities.Components
                 damageDealt = damageDealt * (1 + Math.Abs(totalDamageModifier) / 100);
             }
 
-            healthProperties.currentHealth -= damageDealt;
-
-            return (int)damageDealt;
+            return damageDealt;
         }
 
 
@@ -175,7 +189,9 @@ namespace Assets.Scripts.Entities.Components
         /// <returns>The actaul damage dealt</returns>
         public virtual int applyDamage(int damage)
         {
-            healthProperties.currentHealth -= damage;
+            updateHealth(-damage);
+            FloatingPopup.create(combatSprite.transform.position, damage.ToString(), Color.red);
+
             return (int)damage;
         }
 
@@ -186,13 +202,13 @@ namespace Assets.Scripts.Entities.Components
         /// <param name="minValue">The lower bound of the healing being applied that is used to calculate the actual amount healed. </param>
         /// <param name="maxValue">The upper bound of the healing being applied that is used to calculate the actual amount healed.</param>
         /// <returns>The amount healed</returns>
-        public virtual int applyHealing(int minValue, int maxValue)
+        public virtual int heal(int minValue, int maxValue)
         {
             float damageHealed = Util.Random.getInt(minValue, maxValue);
-            healthProperties.currentHealth += damageHealed;
-            healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+            applyHealing((int)damageHealed);
             return (int)damageHealed;
         }
+
         /// <summary>
         /// Provides the base logic for applying a hp recovery/healing effect to a combatant. 
         /// </summary>
@@ -204,10 +220,14 @@ namespace Assets.Scripts.Entities.Components
         /// <returns>The amount healed</returns>
         public virtual int applyHealing(int value)
         {
-            healthProperties.currentHealth += value;
-            healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+            updateHealth(value);
+
+            FloatingPopup.create(combatSprite.transform.position, value.ToString(), new Color(0, 100, 0));
+            log.Debug($"<b><color=green>[HEAL]</color></b> -{id}:\"{name}\" is healed for <color=green><b>{value}</b></color>");
+
             return (int)value;
         }
+
         /// <summary>
         /// <para>
         /// Applies the status effect to this combatant.
@@ -220,6 +240,10 @@ namespace Assets.Scripts.Entities.Components
         public virtual void applyEffect(int statusEffect, int potency, int turnsApplied)
         {
             EffectProcessor.getInstance().applyEffect(this, statusEffect, potency, turnsApplied);
+            string conditionLabel = EffectProcessor.getEffectLabel(statusEffect, potency);
+            FloatingPopup.create(combatSprite.transform.position, conditionLabel, Color.blue);
+
+            log.Debug($"<b><color=#87CEEB>[CONDITION]</color></b> -{id}:\"{name}\" has been affected with <color=#87CEEB><b>{conditionLabel}</b></color>");
         }
 
         /// <summary>
@@ -266,6 +290,19 @@ namespace Assets.Scripts.Entities.Components
             removedConditions.ForEach(condition => conditions.Remove(condition));
 
             return removedConditions;
+        }
+
+        /// <summary>
+        /// Updates the health amount and health bar UI
+        /// </summary>
+        /// <param name="value"></param>
+        private void updateHealth(int value)
+        {
+            healthProperties.currentHealth += value;
+            healthProperties.currentHealth = Math.Min(healthProperties.currentHealth, healthProperties.maxHealth);
+
+            combatSprite.healthBar.fillAmount = getHealthPercent();
+            combatSprite.currentHealthValue.text = ((int)getCurrentHp()).ToString();
         }
 
         /// <summary>
@@ -318,8 +355,18 @@ namespace Assets.Scripts.Entities.Components
         /// </summary>
         public void reset()
         {
-            healthProperties.currentHealth = healthProperties.maxHealth;
+            updateHealth((int)getMaxHp());
             resetAbilityCooldowns();
+            removeConditions();
+        }
+
+        /// <summary>
+        /// Clears the conditions from a combatant and removes conditions from buffbar.
+        /// </summary>
+        public void removeConditions()
+        {
+            conditions.Clear();
+            combatSprite.updateConditions();
         }
 
         public JSONObject toJson()

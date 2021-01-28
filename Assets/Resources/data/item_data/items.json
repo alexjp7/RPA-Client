@@ -6,8 +6,8 @@
             "description":"Drink to restore 10HP.",
             "is_useable":true,
             "is_consumeable":true,
-            "use_effect": 0,
-            "effect_potency":[10],
+            "use_effect": 9,
+            "effect_potency":10,
             "turns_applied":0,
             "coin_value": [
                 10,

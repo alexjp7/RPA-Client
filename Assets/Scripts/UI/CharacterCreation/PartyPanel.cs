@@ -6,6 +6,9 @@
     using Assets.Scripts.Util;
     using Assets.Scripts.Entities.Players;
 
+    /// <summary>
+    /// UI component for creating party members, to display their class, ready status and player name in the character creation lobby.
+    /// </summary>
     public class PartyPanel : MonoBehaviour
     {
         private Text playerName { get; set; }
@@ -63,7 +66,6 @@
             readyCheck = gameObject.transform.Find("ready_check").GetComponent<Image>();
         }
 
-        // Update is called once per frame
         void Update()
         {
 

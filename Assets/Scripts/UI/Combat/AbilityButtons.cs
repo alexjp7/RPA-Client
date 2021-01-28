@@ -1,5 +1,4 @@
-﻿
-namespace Assets.Scripts.UI.Combat
+﻿namespace Assets.Scripts.UI.Combat
 {
     using Assets.Scripts.UI.Common;
     using log4net;

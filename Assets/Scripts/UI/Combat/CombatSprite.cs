@@ -1,13 +1,4 @@
-﻿/*---------------------------------------------------------------
-                        COMBAT-SPRITE
- ---------------------------------------------------------------*/
-/***************************************************************
-* Combat Sprite contains all the UI components relevant
-  for displaying player and monster sprites, hp and nameplates.
-
- * This script is attached to the CombaSprite prefab.
-**************************************************************/
-namespace Assets.Scripts.UI.Combat
+﻿namespace Assets.Scripts.UI.Combat
 {
     using System.Threading.Tasks;
     using UnityEngine;
@@ -22,7 +13,10 @@ namespace Assets.Scripts.UI.Combat
     using Assets.Scripts.UI.Common;
     using Assets.Scripts.Util;
 
-
+    /// <summary>
+    /// Combat Sprite contains all the UI components relevant for displaying player and monster sprites, hp and nameplates.
+    /// This script is attached to the CombaSprite.
+    /// </summary>
     public class CombatSprite : MonoBehaviour
     {
         public int popupCount { get; set; } // Have independant tracking of text-popups to make it more readable
@@ -39,15 +33,11 @@ namespace Assets.Scripts.UI.Combat
 
         private static CombatController combatController => StateManager.battleState.combatController;
 
-        /***************************************************************
-        * instantiates and returns the a CombatSpriute instance.
-        
-        @param - position: Set to Vector2.zero.
-        @param - combatant: The monster or player that is to be displayed
-
-        @return - A combat sprite reflecting that of the passed in
-        combatant.
-        **************************************************************/
+        /// <summary>
+        /// Instantiates and returns the a CombatSpriute instance.
+        /// </summary>
+        /// <param name="combatant">The monster or player that is to be displayed</param>
+        /// <returns>A combat sprite reflecting that of the passed in combatant.</returns>
         public static CombatSprite create(in Combatant combatant)
         {
             Transform spriteTransform = Instantiate(GameAssets.INSTANCE.combatSpritePrefab, Vector2.zero, Quaternion.identity);
@@ -56,7 +46,9 @@ namespace Assets.Scripts.UI.Combat
             return cbSprite;
         }
 
-        //Initialize Components
+        /// <summary>
+        /// Initialize Components
+        /// </summary>
         void Awake()
         {
             displayName = gameObject.transform.Find("text_player_name").GetComponent<Text>();
@@ -69,11 +61,10 @@ namespace Assets.Scripts.UI.Combat
         }
 
 
-        /***************************************************************
-        * Sets the values of each GameObject that makes up the CombatSprite.
-        
-        @param - combatant: The monster or player that is to be displayed
-        **************************************************************/
+        /// <summary>
+        /// Sets the values of each GameObject that makes up the CombatSprite.
+        /// </summary>
+        /// <param name="combatant">The monster or player that is to be displayed</param>
         private void setData(in Combatant combatant)
         {
             popupCount = 0;
@@ -88,14 +79,9 @@ namespace Assets.Scripts.UI.Combat
             else if (combatant.type == CombatantType.MONSTER) isMonster = true;
         }
 
-
-        /***************************************************************
-        * Creates the event handlers for hovering and click events
-          for the player party and monster party sprites.
-
-        @param - combatant: The monster or player that the events
-        are being initialised for.
-        **************************************************************/
+        /// <summary>
+        /// Creates the event handlers for hovering and click events for the player party and monster party sprites.
+        /// </summary>
         private void setEventHandlers()
         {
             EventTrigger.Entry mouseEnterEvent;
@@ -120,28 +106,19 @@ namespace Assets.Scripts.UI.Combat
             gameObject.GetComponent<EventTrigger>().triggers.Add(mouseClickeEvent);
         }
 
-        /***************************************************************
-                            CONDITION-BAR HANDLERS
-        **************************************************************/
+        /// <summary>
+        /// Updates the buffbar based on the current state of a combatants condition list.
+        /// </summary>
         public void updateConditions()
         {
             buffBar.updateConditions(combatantRef.conditions);
         }
 
-        /***************************************************************
-                            SPRITE HANDLERS
-        ***************************************************************
-        * Event handler for defered targeting types (single-target 
-          abiltiies).
-
-        * Includes the logic for ensuring the ability type's targeting
-          type has the desired effect on displaying/highlighting
-          the target selection.
-
-        @param - spriteIndex: a value between 0-players.count() OR
-        0-monsterParty.count() which represents the sprite that was 
-        hovered over. 
-        **************************************************************/
+        /// <summary>
+        /// Event handler for defered targeting types (single-target abiltiies).
+        /// Includes the logic for ensuring the ability type's targeting type has the desired effect on displaying/highlighting the target selection.
+        /// </summary>
+        /// <param name="combatant">The combatant that is being hovered over</param>
         public void onSpriteEnter(in Combatant combatant)
         {
             if (!combatController.isClientPlayerTurn) return;
@@ -178,16 +155,11 @@ namespace Assets.Scripts.UI.Combat
             }
         }
 
-        /***************************************************************
-        * Provides the opposite functionality to onSpriteEnter(),
-          while having selected a defered targeting type the mouse exit
-          event will set the sprite tint back to the sprite's 
-          original color.
-
-        @param - spriteIndex: a value between 0-players.count() OR
-        0-monsterParty.count() which represents the sprite that was 
-        hovered over. 
-        **************************************************************/
+        /// <summary>
+        /// Provides the opposite functionality to onSpriteEnter(),while having selected
+        /// a defered targeting type the mouse exit event will set the sprite tint back to the sprite's  original color.
+        /// </summary>
+        /// <param name="combatant">The combatant that is being moved away from</param>
         public void onSpriteExit(in Combatant combatant)
         {
             if (!combatController.isClientPlayerTurn) return;
@@ -219,16 +191,10 @@ namespace Assets.Scripts.UI.Combat
             }
         }
 
-        /***************************************************************
-        * Event handler for when a sprite is clicked after selecting
-          a valid target with valid ability.
-
-        * Applies the abilities effects to the target. 
-
-          @param - spriteIndex: a value between 0-players.count() OR
-          0-monsterParty.count() which represents the sprite that was 
-          hovered over. 
-        **************************************************************/
+        /// <summary>
+        /// Event handler for when a sprite is clicked after selecting a valid target with valid ability. Applies the abilities effects to the target. 
+        /// </summary>
+        /// <param name="combatant">The combatant that has been selected through mouse click</param>
         public void onSpriteClicked(in Combatant combatant)
         {
             if (!combatController.isClientPlayerTurn)
@@ -280,13 +246,13 @@ namespace Assets.Scripts.UI.Combat
                     {
                         if (metaType == MetaType.HEALING)
                         {
-                            combatController.healTarget(target, abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
+                            target.heal(abilityUsed.abilityStrength.min, abilityUsed.abilityStrength.max);
                         }
                     }
 
                     if (metaType == MetaType.EFFECT)
                     {
-                        combatController.affectTarget(target, abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
+                        target.applyEffect(abilityUsed.statusEffect, abilityUsed.conditionStrength.potency, abilityUsed.conditionStrength.turnsApplied);
                         combatController.applyAfterEffect(ref abilityUsed); //For client side caster of special case abilities
                     }
                 }

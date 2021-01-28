@@ -3,7 +3,7 @@
  ---------------------------------------------------------------*/
 /***************************************************************
 * UI Component for containerizing and displaying ability tooltip
-  information on mouse-hover.
+information on mouse-hover.
 **************************************************************/
 namespace Assets.Scripts.Util
 {

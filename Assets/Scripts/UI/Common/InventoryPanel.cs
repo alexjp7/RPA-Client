@@ -1,11 +1,15 @@
-﻿namespace Assets.Scripts.UI.Common
+﻿
+namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
-    using Assets.Scripts.Entities.Containers;
+    using UnityEngine.EventSystems;
     using UnityEngine.UI;
     using Assets.Scripts.RPA_Game;
     using Assets.Scripts.Util;
-    using UnityEngine.EventSystems;
+    using Assets.Scripts.GameStates;
+    using Assets.Scripts.Entities.Containers;
+    using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Entities.Items;
 
     class InventoryPanel : TabComponent
     {
@@ -51,7 +55,6 @@
             }
 
             drawInventory();
-
         }
 
         /// <summary>

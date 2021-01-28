@@ -224,6 +224,10 @@ namespace Assets.Scripts.Entities.Combat
                 case StatusEffect.SLEEP:
                     value = $"sleep";
                     break;
+
+                case StatusEffect.HEALTH_RESTORE:
+                    value = $"Health Restored";
+                    break;
             }
 
             return value;
@@ -251,6 +255,10 @@ namespace Assets.Scripts.Entities.Combat
 
                 case StatusEffect.DAMAGE_TAKEN_DOWN:
                     value = "- incoming DMG";
+                    break;
+
+                case StatusEffect.HEALTH_RESTORE:
+                    value = $"Health Restored";
                     break;
             }
 

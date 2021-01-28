@@ -3,9 +3,13 @@
     using System;
     using Assets.Scripts.Entities.Combat;
     using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.GameStates;
+    using Assets.Scripts.Util;
 
     class Consumable : Item, Useable
     {
+        private static CombatController combatController => StateManager.battleState.combatController;
+
         /// <summary>
         /// Condition applied upon use of a consumable item.
         /// </summary>
@@ -16,7 +20,7 @@
         /// </summary>
         public void use(Combatant target)
         {
-            target.applyEffect(condition);
+            target.applyEffect(condition.effectId,condition.potency,condition.turnsRemaining);
         }
 
         /// <summary>

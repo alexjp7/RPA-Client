@@ -1,16 +1,11 @@
-﻿
-/*---------------------------------------------------------------
-                        TOOLTIP
- ---------------------------------------------------------------*/
-/***************************************************************
-* UI Component for containerizing and displaying generic tooltip
-  information.
-**************************************************************/
-namespace Assets.Scripts.UI.Common
+﻿namespace Assets.Scripts.UI.Common
 {
     using UnityEngine;
     using UnityEngine.UI;
 
+    /// <summary>
+    /// UI Component for containerizing and displaying generic tooltip information.
+    /// </summary>
     public class Tooltip : MonoBehaviour
     {
         public static Tooltip instance;
