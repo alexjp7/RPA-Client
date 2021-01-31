@@ -172,7 +172,7 @@ namespace Assets.Scripts.UI.Common
                 case AbilityTypes.SELF_HEAL:
                 case AbilityTypes.SELF_BUFF:
                     turnController.targets.Add(Game.clientSidePlayer.playerClass);
-                    Game.clientSidePlayer.playerClass.combatSprite.sprite.color = Color.green;
+                    Game.clientSidePlayer.playerClass.combatSprite.setColor(Color.green);
                     break;
 
                 //Multi Target 
@@ -182,7 +182,7 @@ namespace Assets.Scripts.UI.Common
                     .FindAll(monster => monster.isAlive())
                     .ForEach(monster =>
                     {
-                        monster.combatSprite.sprite.color = Color.red;
+                        monster.combatSprite.setColor(Color.red);
                         turnController.targets.Add(monster);
                     });
                     break;
@@ -193,7 +193,7 @@ namespace Assets.Scripts.UI.Common
                     .FindAll(player => player.isAlive())
                     .ForEach(player =>
                     {
-                        player.combatSprite.sprite.color = Color.green;
+                        player.combatSprite.setColor(Color.green);
                         turnController.targets.Add(player);
                     });
                     break;

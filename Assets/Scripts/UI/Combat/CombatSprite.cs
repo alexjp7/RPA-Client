@@ -12,6 +12,7 @@
     using Assets.Scripts.RPA_Messages;
     using Assets.Scripts.UI.Common;
     using Assets.Scripts.Util;
+    using System;
 
     /// <summary>
     /// Combat Sprite contains all the UI components relevant for displaying player and monster sprites, hp and nameplates.
@@ -22,7 +23,11 @@
         public int popupCount { get; set; } // Have independant tracking of text-popups to make it more readable
         public static bool hasValidTarget;
         public Combatant combatantRef;
-        public SpriteRenderer sprite { get; private set; }
+
+
+        public CharacterRig characterRig { get; private set; }
+
+        public Transform sprite { get; private set; }
         public Text displayName { get; private set; }
         public Text maxHealthValue { get; private set; }
         public Text currentHealthValue { get; private set; }
@@ -52,12 +57,12 @@
         void Awake()
         {
             displayName = gameObject.transform.Find("text_player_name").GetComponent<Text>();
-            sprite = gameObject.transform.Find("sprite_player").GetComponent<SpriteRenderer>();
             healthBar = gameObject.transform.Find("image_hp_bar").GetComponent<Image>();
             maxHealthValue = gameObject.transform.Find("text_max_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
             currentHealthValue = gameObject.transform.Find("text_current_health").GetComponent<Text>();
             buffBar = gameObject.transform.Find("buff_bar").GetComponent<BuffBar>();
+            sprite = gameObject.transform.Find("sprite");
         }
 
 
@@ -69,8 +74,13 @@
         {
             popupCount = 0;
             combatantRef = combatant;
+            if (combatantRef.type == CombatantType.PLAYER)
+            {
+                characterRig = CharacterRig.create(combatantRef.GetType().Name, combatantRef.type == CombatantType.PLAYER);
+                characterRig.transform.SetParent(sprite);
+            }
+
             displayName.text = combatant.name;
-            sprite.sprite = combatant.assetData.sprite;
             currentHealthValue.text = ((int)combatant.healthProperties.currentHealth).ToString();
             maxHealthValue.text = "/" + (int)combatant.healthProperties.maxHealth;
             setEventHandlers();
@@ -137,7 +147,7 @@
             {
                 if (abilitySelected.targetingType != TargetingType.ENEMY)
                 {
-                    combatant.combatSprite.sprite.color = Color.green;
+                    combatant.combatSprite.setColor(Color.green);
                     combatController.hasValidTarget = true;
                     combatController.targets.Add(combatant);
                 }
@@ -147,7 +157,7 @@
             {
                 if (abilitySelected.targetingType != TargetingType.ALLIED)
                 {
-                    combatant.combatSprite.sprite.color = Color.red;
+                    combatant.combatSprite.setColor(Color.red);
                     combatController.hasValidTarget = true;
                     combatController.targets.Add(combatant);
                 }
@@ -179,14 +189,14 @@
             {
                 if (TargetingType.ENEMY != abilitySelected.targetingType)
                 {
-                    combatant.combatSprite.sprite.color = Color.white;
+                    combatant.combatSprite.setColor(Color.white);
                 }
             }//Enemy sprite hovered over
             else
             {
                 if (TargetingType.ALLIED != abilitySelected.targetingType)
                 {
-                    combatant.combatSprite.sprite.color = Color.white;
+                    combatant.combatSprite.setColor(Color.white);
                 }
             }
         }
@@ -281,18 +291,19 @@
                 combatController.resetTargets();
                 combatController.takeTurn();
             }
-            //Perform turn progression client side
-
         }
 
         void Update()
         {
-            Vector2 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            bool doesContain = sprite.bounds.Contains(position);
-            if (doesContain)
+            if (characterRig.contains(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
             {
                 onSpriteEnter(combatantRef);
             }
+        }
+
+        public void setColor(Color color)
+        {
+            characterRig.setColor(color);
         }
     }
 

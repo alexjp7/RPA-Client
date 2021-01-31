@@ -1,4 +1,5 @@
-﻿/*---------------------------------------------------------------
+﻿
+/*---------------------------------------------------------------
                        GAME-ASSETS
  ---------------------------------------------------------------*/
 /***************************************************************
@@ -40,6 +41,7 @@ namespace Assets.Scripts.Util
         public Transform abilityButtonPrefab;
         public Transform buffBarPrefab;
         public Transform genericButtonPrefab;
+        public Transform characterRigPrefab;
         //Charactear creation
         public Transform playerPanelPrefab;
     }

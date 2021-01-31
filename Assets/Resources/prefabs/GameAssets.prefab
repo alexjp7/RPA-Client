@@ -59,5 +59,7 @@ MonoBehaviour:
     type: 3}
   genericButtonPrefab: {fileID: 1247408354848256749, guid: 2968b498c6a4f0b4c87e176c3aaf7d53,
     type: 3}
+  characterRigPrefab: {fileID: 8963577718956290838, guid: a03f8e58282ce7140928d39a18af2a7f,
+    type: 3}
   playerPanelPrefab: {fileID: 3433355326149984283, guid: 87ba1ea3cb96f714d9ada7f5e593ad06,
     type: 3}

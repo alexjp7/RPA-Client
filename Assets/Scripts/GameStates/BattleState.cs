@@ -1,27 +1,10 @@
 ﻿
-
-/*---------------------------------------------------------------
-                            BATTLE-STATE
- ---------------------------------------------------------------*/
-/***************************************************************
-* The Battle state includes the UI handlers and event callbacks
-  relating to the combat encounters for RPA.
-
-  The initialisation of this state includes the generation of
-  the monster party, turn order player UI and turn-base logic,
-  while defering combat changes to the related monster and 
-  party instances. 
-**************************************************************/
-
 #pragma warning disable 1234
 namespace Assets.Scripts.GameStates
 {
-    #region IMPORTS
-    using System;
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
-    using System.Linq;
     using log4net;
     using System.Threading.Tasks;
 
@@ -33,11 +16,14 @@ namespace Assets.Scripts.GameStates
     using Assets.Scripts.UI.Common;
     using Assets.Scripts.RPA_Game;
     using Assets.Scripts.RPA_Messages;
-    using Assets.Scripts.Entities.Containers;
     using Assets.Scripts.Combat;
     using Assets.Scripts.UI.Combat;
-    #endregion IMPORTS
 
+    /// <summary>
+    /// Anchoring game object which contains the main event loop for battle/combat encounters. 
+    /// The BattleState monobehaviour is responsible for providing a top-level object in the scene hierachy
+    /// to manage and control other UI elements within combat encounters.
+    /// </summary>
     public class BattleState : MonoBehaviour
     {
         [SerializeField] private GameObject player_horizontalLayout;
@@ -102,7 +88,7 @@ namespace Assets.Scripts.GameStates
             {
                 combatController.resetCombat();
                 combatController.generateTurnOrder();
-                combatController.initMonsterParty(4);
+                combatController.initMonsterParty(1);
                 initBattleField(); // UI initialisation
             }
             else //Handle Multiplayer session communication
@@ -173,7 +159,6 @@ namespace Assets.Scripts.GameStates
             AssetLoader.loadStaticAssets(GameState.BATTLE_STATE);
             generateCombatantSprites();
             initPlayerUI();
-
         }
 
         /// <summary>
@@ -181,12 +166,12 @@ namespace Assets.Scripts.GameStates
         /// </summary>
         private void generateCombatantSprites()
         {
-            foreach (Monster monster in combatController.monsterParty.asList())
+            foreach (Monster monster in combatController.monsterParty)
             {
                 monster.combatSprite.transform.SetParent(monster_horizontalLayout.transform);
             }
 
-            foreach (Adventurer player in combatController.playerParty.asList())
+            foreach (Adventurer player in combatController.playerParty)
             {
                 player.combatSprite.transform.SetParent(player_horizontalLayout.transform);
             }
@@ -451,6 +436,10 @@ namespace Assets.Scripts.GameStates
             }
         }
 
+        /// <summary>
+        /// Transforms incoming server message into the actions made by another player within the game
+        /// </summary>
+        /// <param name="message"></param>
         private void processTurnAction(ref BattleMessage message)
         {
             //Apply ability on player turn

@@ -441,14 +441,14 @@ namespace Assets.Scripts.GameStates
             .FindAll(player => player.isAlive())
             .ForEach(player =>
             {
-                player.combatSprite.sprite.color = Color.white;
+                player.combatSprite.setColor(Color.white);
             });
 
             monsterParty.asList()
             .FindAll(monster => monster.isAlive())
             .ForEach(monster =>
             {
-                monster.combatSprite.sprite.color = Color.white;
+                monster.combatSprite.setColor(Color.white);
             });
         }
     }
