@@ -24,6 +24,8 @@
 namespace Assets.Scripts.Entities.Players
 {
     using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Util;
+
     class Cleric : Adventurer
     {
         public static Renderable staticAssets { get; set; }
@@ -31,6 +33,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Cleric(string name, int id) : base(name, id)
         {
+            characterRigRef = GameAssets.INSTANCE.clericRig;
             this.setCommonData(PlayerClasses.CLERIC);
         }
     }

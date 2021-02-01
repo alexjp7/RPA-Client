@@ -34,6 +34,9 @@ namespace Assets.Scripts.Util
         public Transform timedPanelPrefab;
         public Transform inventorySlotPrefab;
 
+        //Charactear creation
+        public Transform playerPanelPrefab;
+
         //BattleState
         public Transform damagePopupPrefab;
         public Transform turnChevronPrefab;
@@ -41,8 +44,11 @@ namespace Assets.Scripts.Util
         public Transform abilityButtonPrefab;
         public Transform buffBarPrefab;
         public Transform genericButtonPrefab;
-        public Transform characterRigPrefab;
-        //Charactear creation
-        public Transform playerPanelPrefab;
+
+        // Character Rigs
+        public Transform warriorRig;
+        public Transform clericRig;
+
+
     }
 }

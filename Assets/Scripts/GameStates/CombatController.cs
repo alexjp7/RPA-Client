@@ -1,6 +1,4 @@
-﻿
-
-namespace Assets.Scripts.GameStates
+﻿namespace Assets.Scripts.GameStates
 {
     using System;
     using System.Collections.Generic;

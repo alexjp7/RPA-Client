@@ -24,6 +24,7 @@
 namespace Assets.Scripts.Entities.Players
 {
     using Assets.Scripts.Entities.Components;
+    using Assets.Scripts.Util;
 
     public class Warrior : Adventurer
     {
@@ -32,6 +33,7 @@ namespace Assets.Scripts.Entities.Players
 
         public Warrior(string name, int id) : base (name, id)
         {
+            characterRigRef = GameAssets.INSTANCE.warriorRig;
             this.setCommonData(PlayerClasses.WARRIOR);
         }
     }

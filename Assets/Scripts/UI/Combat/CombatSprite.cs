@@ -76,7 +76,7 @@
             combatantRef = combatant;
             if (combatantRef.type == CombatantType.PLAYER)
             {
-                characterRig = CharacterRig.create(combatantRef.GetType().Name, combatantRef.type == CombatantType.PLAYER);
+                characterRig = HumaniodRig.create(combatantRef);
                 characterRig.transform.SetParent(sprite);
             }
 
@@ -295,10 +295,10 @@
 
         void Update()
         {
-            if (characterRig.contains(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+/*            if (characterRig.contains(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
             {
                 onSpriteEnter(combatantRef);
-            }
+            }*/
         }
 
         public void setColor(Color color)

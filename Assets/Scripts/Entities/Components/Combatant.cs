@@ -56,6 +56,8 @@ namespace Assets.Scripts.Entities.Components
 
         public Dictionary<int, Condition> conditions { get; set; }
 
+        public Transform characterRigRef { get; protected set; }
+
         /// <summary>
         /// Accessing this member will instantiate a combatants
         /// combat sprite if it is <c>null</c>.
