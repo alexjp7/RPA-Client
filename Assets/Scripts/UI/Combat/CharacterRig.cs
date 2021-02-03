@@ -1,4 +1,6 @@
-﻿namespace Assets.Scripts.UI.Combat
+﻿using System.Linq;
+
+namespace Assets.Scripts.UI.Combat
 {
     using UnityEngine;
     using System.Collections.Generic;
@@ -6,13 +8,30 @@
     using Assets.Scripts.Util;
     using Assets.Scripts.Entities.Components;
     using System;
+    using log4net;
+    using Assets.Scripts.Entities.Players;
+
+    /// <summary>
+    /// string suffixes of each body part, used for sprite lookup.
+    /// </summary>
+    public readonly struct BodyPart
+    {
+        public const string BODY = "body";
+        public const string HEAD = "head";
+        public const string LEFT_ARM = "left_arm";
+        public const string RIGHT_ARM = "right_arm";
+        public const string LEFT_LEG = "left_leg";
+        public const string RIGHT_LEG = "right_leg";
+    }
 
     /// <summary>
     /// Provides the base functionality of multi-component sprites (i.e. those with body parts).
     /// </summary>
     public abstract class CharacterRig : MonoBehaviour
     {
-        protected static readonly string PARTS_SUFFIX = "parts";
+        private static readonly ILog log = LogManager.GetLogger(typeof(CharacterRig));
+
+        protected static readonly string PARTS_SUFFIX = ".parts";
 
         protected static readonly string BASE_RIG_PATH = "textures/sprite_textures/";
         protected static readonly string PLAYER_PATH = BASE_RIG_PATH + "player_textures/";
@@ -23,10 +42,6 @@
         /// </summary>
         public Dictionary<string, SpriteRenderer> parts { get; protected set; }
 
-        /// <summary>
-        /// Used to suffix asset loading, whereby each part will begin with the class name of the character being loaded.
-        /// </summary>
-        protected string characterClassName;
 
         /// <summary>
         /// Parent object used to animate within local space.
@@ -40,18 +55,20 @@
         /// <param name="combatantClassName"></param>
         /// <param name="isPlayer"></param>
         /// <returns></returns>
-        public static CharacterRig create(Combatant character)
+        public static CharacterRig create(Combatant character) 
         {
-            bool isPlayer = character.type == CombatantType.PLAYER;
-            CharacterRig rig = null;
-
-            Transform spriteTransform = Instantiate(character.characterRigRef, Vector2.zero, Quaternion.identity);
-            if (isPlayer)
+            if(character.characterRigRef is null)
             {
-                 rig = spriteTransform.GetComponent<HumaniodRig>();
+                ArgumentException ex = new ArgumentException($"Rigging prefab not defined for {character.GetType().Name}.");
+                log.Error(ex.Message,ex);
+                throw ex;
             }
 
-            rig.setData(character.GetType().Name, isPlayer);
+            Transform spriteTransform = Instantiate(character.characterRigRef, Vector2.zero, Quaternion.identity);
+            CharacterRig rig = RiggingFactory.getRig(character, spriteTransform);
+
+            rig.setData(character.GetType().Name, character is Adventurer);
+
             return rig;
         }
 
@@ -60,7 +77,7 @@
             parts = new Dictionary<string, SpriteRenderer>();
         }
 
-        protected virtual void Awake()
+        protected void Awake()
         {
             parent = gameObject.transform.Find("parent");
         }
@@ -73,24 +90,21 @@
         /// </remarks>
         protected virtual void setData(string className, bool isPlayer)
         {
-            string spriteMapPath = null;
-            characterClassName = className;
-
-            if (isPlayer)
+            if (this is SimpleRig)
             {
-                spriteMapPath = $"{PLAYER_PATH}{characterClassName + PARTS_SUFFIX}";
+                parts[BodyPart.BODY].sprite = AssetLoader.getSprite(className);
             }
             else
             {
-                spriteMapPath = $"{MONSTER_PATH}{characterClassName + PARTS_SUFFIX}";
-            }
+                string spriteMapPath = isPlayer ? $"{PLAYER_PATH}{className + PARTS_SUFFIX}" : $"{MONSTER_PATH}{className + PARTS_SUFFIX}";
+                AssetLoader.batchLoadAssets(spriteMapPath); //Must occur before loading individual sprites
 
-            //Must occur before loading individual sprites
-            AssetLoader.batchLoadAssets(spriteMapPath);
-
-            foreach (var part in parts)
-            {
-                part.Value.sprite = AssetLoader.getSprite($"{characterClassName}.{part.Key}");
+                // In some cases the prefab will have the sprite components already set 
+                // if the prefab does not have the sprites set, we will programmatically  set them 
+                foreach (var part in parts.Where(part => part.Value.sprite is null))
+                {
+                    part.Value.sprite = AssetLoader.getSprite($"{className}.{part.Key}");
+                }
             }
         }
 

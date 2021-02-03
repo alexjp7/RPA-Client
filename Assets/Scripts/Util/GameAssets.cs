@@ -48,6 +48,7 @@ namespace Assets.Scripts.Util
         // Character Rigs
         public Transform warriorRig;
         public Transform clericRig;
+        public Transform simpleRig;
 
 
     }

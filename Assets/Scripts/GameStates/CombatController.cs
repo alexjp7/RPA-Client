@@ -143,8 +143,6 @@
                 System.Random rand = new System.Random();
                 Game.players = Game.players.OrderBy(player => rand.Next()).ToList();
                 playerParty = new CombatParty(Game.players.Select(player => player.playerClass as Combatant).ToList());
-
-
             }
             else
             {

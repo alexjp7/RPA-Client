@@ -74,11 +74,8 @@
         {
             popupCount = 0;
             combatantRef = combatant;
-            if (combatantRef.type == CombatantType.PLAYER)
-            {
-                characterRig = HumaniodRig.create(combatantRef);
-                characterRig.transform.SetParent(sprite);
-            }
+            characterRig = CharacterRig.create(combatantRef);
+            characterRig.transform.SetParent(sprite);
 
             displayName.text = combatant.name;
             currentHealthValue.text = ((int)combatant.healthProperties.currentHealth).ToString();
@@ -295,10 +292,10 @@
 
         void Update()
         {
-/*            if (characterRig.contains(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
-            {
-                onSpriteEnter(combatantRef);
-            }*/
+            /*            if (characterRig.contains(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+                        {
+                            onSpriteEnter(combatantRef);
+                        }*/
         }
 
         public void setColor(Color color)

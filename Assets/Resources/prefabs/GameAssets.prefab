@@ -61,9 +61,9 @@ MonoBehaviour:
     type: 3}
   genericButtonPrefab: {fileID: 1247408354848256749, guid: 2968b498c6a4f0b4c87e176c3aaf7d53,
     type: 3}
-  characterRigPrefab: {fileID: 8963577718956290838, guid: a03f8e58282ce7140928d39a18af2a7f,
-    type: 3}
   warriorRig: {fileID: 8963577718956290838, guid: a03f8e58282ce7140928d39a18af2a7f,
     type: 3}
   clericRig: {fileID: 6263398022856226315, guid: db88ede5728bec14082639fbf1d00a8f,
+    type: 3}
+  simpleRig: {fileID: 1419007148313805209, guid: ad6088ab7fae0c745b4878ce61c84203,
     type: 3}

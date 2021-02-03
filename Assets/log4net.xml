@@ -7,7 +7,7 @@
     </appender>
     <appender name="UnityDataPathAppender" type="Assets.Scripts.Util.Logging.UnityDataPathAppender">
         <layout type="log4net.Layout.PatternLayout, log4net">
-            <conversionPattern value="[%-5p] %date{dd MMM yyyy HH:mm:ss,fff} %c{1}:%L - %m%n"/>
+            <conversionPattern value="[%-5p] %date{dd MMM yyyy HH:mm:ss,fff} %c{1}:%L [%property{STATE_ID}] - %m%n"/>
         </layout>
     </appender>
     <root>
@@ -15,4 +15,4 @@
         <appender-ref ref="UnityDebugAppender"/>
         <appender-ref ref="UnityDataPathAppender"/>
     </root>
-</log4net>
+</log4net>  

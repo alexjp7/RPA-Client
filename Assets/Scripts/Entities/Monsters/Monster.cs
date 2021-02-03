@@ -21,6 +21,7 @@ namespace Assets.Scripts.Entities.Monsters
     using System.Collections.Generic;
     using Assets.Scripts.Entities.Components;
     using Assets.Scripts.Entities.Combat;
+    using Assets.Scripts.Util;
 
     /***************************************************************
     * The intention of the MonsterTypes enum is to provide generic
@@ -88,6 +89,8 @@ namespace Assets.Scripts.Entities.Monsters
         /// <param name="typenName">The sub-classes monster type. </param>
         protected void setSpriteData(string typenName)
         {
+            //TODO: Move this out of Monster level 
+            characterRigRef = GameAssets.INSTANCE.simpleRig;
             setSpritePath(typenName);
             assetData.name = typenName;
         }

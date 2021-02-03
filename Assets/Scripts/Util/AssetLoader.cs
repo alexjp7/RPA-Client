@@ -1,4 +1,5 @@
 ﻿
+
 /*---------------------------------------------------------------
                     ASSET-LOADER
  ---------------------------------------------------------------*/
@@ -79,6 +80,13 @@ namespace Assets.Scripts.Util
         /// <param name="keyPrefix">An identifer to group assets by. Useful to perform group loads/dumps of prefixed assets.</param>
         public static void batchLoadAssets(string path, string keyPrefix = "")
         {
+            log.Debug($"Batch-Loading: from '{path}'");
+
+            if(isDuplicateLoad(path))
+            {
+                log.Info($"Loading cancelled, sprites have already been processed.");
+            }
+
             Sprite[] spirtesLoaded = Resources.LoadAll<Sprite>(path);
 
             foreach (Sprite asset in spirtesLoaded)
@@ -94,6 +102,32 @@ namespace Assets.Scripts.Util
             }
         }
 
+        /// <summary>
+        /// Checks to see if batch loaded assets have already been loaded.
+        /// </summary>
+        /// <param name="path">An asset data path that is a candidate for batch loading</param>
+        private static bool isDuplicateLoad(string path)
+        {
+            string[] tokens = path.Split('/');
+            if (tokens.Length > 1)
+            {
+                string lastToken = tokens[tokens.Length - 1];
+                if (lastToken.EndsWith("parts"))
+                {
+                    foreach (var spriteName in spriteMap.Keys)
+                    {
+                        string entityName = lastToken.Split('.')[0];
+                        if (spriteName.StartsWith($"{entityName}."))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }      
+        
         /// <summary>
         /// Removes unused assets from the sprite map as the game state changes 
         /// </summary>

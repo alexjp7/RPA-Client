@@ -1,32 +1,23 @@
 ﻿using Assets.Scripts.Util;
+using log4net;
 using UnityEngine;
 
 namespace Assets.Scripts.UI.Combat
 {
-    /// <summary>
-    /// string suffixes of each body part, used for sprite lookup.
-    /// </summary>
-    public readonly struct BodyPart
-    {
-        public const string BODY = "body";
-        public const string HEAD = "head";
-        public const string LEFT_ARM = "left_arm";
-        public const string RIGHT_ARM = "right_arm";
-        public const string LEFT_LEG = "left_leg";
-        public const string RIGHT_LEG = "right_leg";
-    }
-
     /// <summary>
     /// Body components for a combatant's skeleton. 
     /// Contains the individual body parts that is rigged up into a humaniod character model.
     /// </summary>
     public class HumaniodRig : CharacterRig
     {
+
         /// <summary>
         /// Creates object hierachy  
         /// </summary>
-        protected override void Awake()
+        private void Awake()
         {
+            base.Awake();
+
             SpriteRenderer body = parent.transform.Find(BodyPart.BODY).GetComponent<SpriteRenderer>();
             SpriteRenderer head = body.transform.Find(BodyPart.HEAD).GetComponent<SpriteRenderer>();
             SpriteRenderer leftArm = body.transform.Find(BodyPart.LEFT_ARM).GetComponent<SpriteRenderer>();
